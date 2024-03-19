@@ -15,7 +15,7 @@ const StyledCousinInput = styled.input`
     line-height: 20px;
     color: #2d2f38;
 
-    &::XXX {
+    &:: {
         font-weight: 600;
         font-size: 16px;
         line-height: 20px;
