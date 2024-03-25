@@ -17,14 +17,15 @@ const Community = styled.div`
 `
 
 const Bank = styled.div`
+	
     width: 0;
     height: 100%;
     border-radius: 5px;
     background-color: #6aade1;
     animation: ${chance} 2s infinite alternate;
 
-    &:hover {
-        animation-play-state: paused;
+    &:hover { 
+	    animation-play-state:  paused;
     }
 `
 
