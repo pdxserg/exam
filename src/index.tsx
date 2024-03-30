@@ -27,7 +27,7 @@ const brotherAnimation = keyframes`
 
 const StyledBossBox = styled.div`
   height: 200px;
-  width: 500px;
+  width: 300px;
   border: 1px solid;
   padding: 20px;
 `
