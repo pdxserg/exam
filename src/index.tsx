@@ -1,12 +1,23 @@
-type UserPropsType = {
-	name: string
-	description: string
+type UserWalletType = {
+	title: string
+	amount: number
 }
-export const User: React.FC<UserPropsType> = (props) => {
-	return <div>
-		<h1>Имя: {props.name}</h1>
-		//<div>Описание: {ххх}</div>
-	</div>
+type UserWalletPropsType = {
+	wallet: UserWalletType
 }
 
-//Что нужно написать вместо ххх, что бы код работал?
+export const UserWallet: React.FC<UserWalletPropsType> = (props) => {
+	return <div>title: {props.wallet.title}, amount: {props.wallet.amount}</div>
+}
+
+export const UserMoney = () => {
+	const wallets = [
+		{title: 'bitcoin', amount: 1},
+		{title: '$', amount: 100}
+	]
+
+	return <div>
+		<UserWallet wallet={xxx} />
+		<UserWallet wallet={yyy} />
+	</div>
+}
