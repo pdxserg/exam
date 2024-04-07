@@ -1,18 +1,34 @@
-type PagePropsType = {
-	age: number
-	name: string
-	avatarUrl: string
+import ReactDOM from 'react-dom'
+
+export const YoutubeVideoBlock = () => {
+	return <div>
+		<VideoHeader />
+		<VideoContent />
+		<VideoStatistics />
+	</div>
 }
-const Page: React.FC<PagePropsType> = (props) => {
-	return <User a={xxx} n={yyy} />
+export const VideoHeader = () => {
+	return <div>
+		😀 Заголовок видео
+	</div>
 }
-type UserPropsType = {
-	a: number
-	n: string
+export const VideoContent = () => {
+	return <div>
+		📼 Контент видео
+	</div>
 }
-export const User: React.FC<UserPropsType> = (props) => {
-	return <div>name: {props.n}, age: {props.a}</div>
+export const VideoStatistics = () => {
+	return <div>
+		📊 Статистика лайков
+	</div>
 }
 
-// Что нужно написать вместо xxx и yyy?
-// Ответ дайте через пробел, например: blabla onClick(props)
+ReactDOM.render(<div>ххх</div>,
+	document.getElementById('root')
+);
+
+//Что нужно написать вместо ххх, чтобы на экране увидеть:
+//😀 Заголовок видео
+//📼 Контент видео
+//📊 Статистика лайков
+// ❗ Ответ дать минимально возможным объёмом кода 
