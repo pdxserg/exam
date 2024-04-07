@@ -1,23 +1,27 @@
-type UserWalletType = {
+type NewsType = {
 	title: string
-	amount: number
+	author: string
 }
-type UserWalletPropsType = {
-	wallet: UserWalletType
+type ArticleType = {
+	title: string
+	date: string
+	text: string
 }
-
-export const UserWallet: React.FC<UserWalletPropsType> = (props) => {
-	return <div>title: {props.wallet.title}, amount: {props.wallet.amount}</div>
+type PagePropsType = {
+	news: NewsType[]
+	mainArticle: ArticleType
 }
-
-export const UserMoney = () => {
-	const wallets = [
-		{title: 'bitcoin', amount: 1},
-		{title: '$', amount: 100}
-	]
-
+export const Page: React.FC<PagePropsType> = (props) => {
 	return <div>
-		<UserWallet wallet={xxx} />
-		<UserWallet wallet={yyy} />
+		<article>
+			<h1>Название: {props.XXX.title}</h1>
+			<div>{props.XXX.date}</div>
+			<div>{props.XXX.text}</div>
+		</article>
+		<aside>Articles:
+			<ul>
+				{props.YYY.map(n => <li>{n.title}, {n.author}</li>)}
+			</ul>
+		</aside>
 	</div>
 }
