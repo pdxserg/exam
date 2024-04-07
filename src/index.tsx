@@ -1,32 +1,12 @@
-import ReactDOM from 'react-dom'
-
-const Son = (props: any) => {
+type UserPropsType = {
+	name: string
+	description: string
+}
+export const User: React.FC<UserPropsType> = (props) => {
 	return <div>
-		I am son. My name is {props.name}
+		<h1>Имя: {props.name}</h1>
+		//<div>Описание: {ххх}</div>
 	</div>
 }
 
-
-const Father = (props: any) => {
-	return <div>
-		I am father. My name is {props.name}
-		<Son name={props.sonName} />
-	</div>
-}
-
-const Granny = (props: any) => {
-	return <div>
-		I am granny. My name is {props.name}
-		<Father name={props.fatherName} sonName={props.sonName} />
-	</div>
-}
-
-export const App = () => {
-	return <div>
-		<Granny name={'Бабуля'} name={'Батя'} name={'Сын'}/>
-	</div>
-}
-
-ReactDOM.render(<App/>,
-	document.getElementById('root')
-)
+//Что нужно написать вместо ххх, что бы код работал?
