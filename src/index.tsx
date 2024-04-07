@@ -1,34 +1,15 @@
-import ReactDOM from 'react-dom'
-
-export const YoutubeVideoBlock = () => {
-	return <div>
-		<VideoHeader />
-		<VideoContent />
-		<VideoStatistics />
-	</div>
-}
-export const VideoHeader = () => {
-	return <div>
-		😀 Заголовок видео
-	</div>
-}
-export const VideoContent = () => {
-	return <div>
-		📼 Контент видео
-	</div>
-}
-export const VideoStatistics = () => {
-	return <div>
-		📊 Статистика лайков
-	</div>
+type PropsType = {
+	city: string        // 'minsk'
+	country: string     // 'belarus'
+	coords?: string     // '53.917501,27.604851'
 }
 
-ReactDOM.render(<div>ххх</div>,
-	document.getElementById('root')
-);
+export const Wrapper1 = () => {
+	return <PropsComponent1 city='minsk'/>
+}
 
-//Что нужно написать вместо ххх, чтобы на экране увидеть:
-//😀 Заголовок видео
-//📼 Контент видео
-//📊 Статистика лайков
-// ❗ Ответ дать минимально возможным объёмом кода 
+export const PropsComponent1: React.FC<PropsType> = (props) => {
+	return <div>hello</div>
+}
+
+// Что МИНИМАЛЬНО ДОСТАТОЧНО нужно дописать в строке 8 (cтрока с ошибкой), чтобы не было ошибки
