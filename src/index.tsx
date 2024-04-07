@@ -1,27 +1,18 @@
-type NewsType = {
-	title: string
-	author: string
-}
-type ArticleType = {
-	title: string
-	date: string
-	text: string
-}
 type PagePropsType = {
-	news: NewsType[]
-	mainArticle: ArticleType
+	age: number
+	name: string
+	avatarUrl: string
 }
-export const Page: React.FC<PagePropsType> = (props) => {
-	return <div>
-		<article>
-			<h1>Название: {props.XXX.title}</h1>
-			<div>{props.XXX.date}</div>
-			<div>{props.XXX.text}</div>
-		</article>
-		<aside>Articles:
-			<ul>
-				{props.YYY.map(n => <li>{n.title}, {n.author}</li>)}
-			</ul>
-		</aside>
-	</div>
+const Page: React.FC<PagePropsType> = (props) => {
+	return <User a={xxx} n={yyy} />
 }
+type UserPropsType = {
+	a: number
+	n: string
+}
+export const User: React.FC<UserPropsType> = (props) => {
+	return <div>name: {props.n}, age: {props.a}</div>
+}
+
+// Что нужно написать вместо xxx и yyy?
+// Ответ дайте через пробел, например: blabla onClick(props)
