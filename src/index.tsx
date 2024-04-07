@@ -1,15 +1,39 @@
-type PropsType = {
-	city: string        // 'minsk'
-	country: string     // 'belarus'
-	coords?: string     // '53.917501,27.604851'
+import ReactDOM from 'react-dom'
+
+export const VideoHeader = (props: {videoName: string}) => {
+	return <div>
+		😀 {props.videoName}
+	</div>
+}
+export const VideoContent = (props: {videoContent: string}) => {
+	return <div>
+		📼 <a href={props.videoContent}>{props.videoContent}</a>
+	</div>
+}
+export const VideoDescription = (props: {videoDescription: string}) => {
+	return <div>
+		📑 {props.videoDescription}
+	</div>
 }
 
-export const Wrapper1 = () => {
-	return <PropsComponent1 city='minsk'/>
+export const YoutubeVideo = (props: any) => {
+	return <div>
+		<VideoHeader xxx />
+		<VideoContent yyy />
+		<VideoDescription zzz />
+	</div>
 }
 
-export const PropsComponent1: React.FC<PropsType> = (props) => {
-	return <div>hello</div>
+export const App = () => {
+	const video = {
+		title: 'Samurai way',
+		link: 'https://www.youtube.com/watch?v=gb7gMluAeao&list=PLcvhF2Wqh7DNVy1OCUpG3i5lyxyBWhGZ8',
+		description: 'Best free react-course'
+	}
+
+	return <YoutubeVideo video={video} />
 }
 
-// Что МИНИМАЛЬНО ДОСТАТОЧНО нужно дописать в строке 8 (cтрока с ошибкой), чтобы не было ошибки
+ReactDOM.render(<App />,
+	document.getElementById('root')
+);
