@@ -28,7 +28,7 @@ function UsersList() {
 		{id: 4, userName: "John", age: 23},
 	]
 
-	const [usersList, setUsersList] = useState<Array<UserType>>()
+	const [usersList, setUsersList] = useState<Array<UserType>>([])
 	return (
 		<main>
 			<h5>User list:</h5>
