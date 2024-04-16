@@ -1,39 +1,16 @@
-import ReactDOM from 'react-dom'
+import React, {useState} from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
 
-export const VideoHeader = (props: {videoName: string}) => {
-	return <div>
-		😀 {props.videoName}
-	</div>
-}
-export const VideoContent = (props: {videoContent: string}) => {
-	return <div>
-		📼 <a href={props.videoContent}>{props.videoContent}</a>
-	</div>
-}
-export const VideoDescription = (props: {videoDescription: string}) => {
-	return <div>
-		📑 {props.videoDescription}
-	</div>
+function UsersList() {
+	const [users, setUsers] = useState<Array<string>>(["Bob", "Alex", "Ann"])
+	return (
+		<p>Тут будет список пользователей</p>
+	)
 }
 
-export const YoutubeVideo = (props: any) => {
-	return <div>
-		<VideoHeader title={'Samurai way'} />
-		<VideoContent link='https://www.youtube.com/watch?v=gb7gMluAeao&list=PLcvhF2Wqh7DNVy1OCUpG3i5lyxyBWhGZ8'/>
-		<VideoDescription description = {props.videoDescription} />
-	</div>
-}
-
-export const App = () => {
-	const video = {
-		title: 'Samurai way',
-		link: 'https://www.youtube.com/watch?v=gb7gMluAeao&list=PLcvhF2Wqh7DNVy1OCUpG3i5lyxyBWhGZ8',
-		description: 'Best free react-course'
-	}
-
-	return <YoutubeVideo video={video} />
-}
-
-ReactDOM.render(<App />,
-	document.getElementById('root')
+ReactDOM.render(
+	<UsersList/>, document.getElementById('root')
 );
+// Что вернёт выражение: typeof setUsers?
+
