@@ -4,13 +4,19 @@ import './index.css';
 
 function UsersList() {
 	const [users, setUsers] = useState<Array<string>>(["Bob", "Alex", "Ann"])
+	const getUser = (user: string) => <li>{user}</li>
+
 	return (
-		<p>Тут будет список пользователей</p>
+		<main>
+			<h4>User list:</h4>
+			<ul>
+				{users.map(getUser)}
+			</ul>
+		</main>
 	)
 }
 
 ReactDOM.render(
 	<UsersList/>, document.getElementById('root')
 );
-// Что вернёт выражение: typeof setUsers?
-
+// Что вернёт выражение: typeof getUser?
