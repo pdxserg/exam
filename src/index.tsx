@@ -6,12 +6,16 @@ function UsersList() {
 	const [users, setUsers] = useState<Array<string>>(["Bob", "Alex", "Ann"])
 
 	return (
-		<p>Тут будет список пользователей!</p>
+		<main>
+			<h4>User list:</h4>
+			<ul>
+				{ users.ХХХ(user => <li>{user}</li> )}
+			</ul>
+		</main>
 	)
 }
 
 ReactDOM.render(
-	<UsersList />, document.getElementById('root')
+	<UsersList/>, document.getElementById('root')
 );
-
-// Что вернёт выражение: typeof useState?
+// Что надо вставить вместо ХХХ, чтобы код заработал?
