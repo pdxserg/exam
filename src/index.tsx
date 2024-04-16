@@ -4,20 +4,14 @@ import './index.css';
 
 function UsersList() {
 	const [users, setUsers] = useState<Array<string>>(["Bob", "Alex", "Ann"])
-	const getUser = (user: string) => <li>{user}</li>
-	const usersList = users.map(getUser)
 
 	return (
-		<main>
-			<h4>User list:</h4>
-			<ul>
-				{usersList}
-			</ul>
-		</main>
+		<p>Тут будет список пользователей!</p>
 	)
 }
 
 ReactDOM.render(
-	<UsersList/>, document.getElementById('root')
+	<UsersList />, document.getElementById('root')
 );
-// Что вернёт выражение: Array.isArray(usersList)?
+
+// Что вернёт выражение: typeof useState?
