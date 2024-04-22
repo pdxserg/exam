@@ -3,8 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 function UsersList() {
-	const results = useState<Array<string>>(["Bob", "Alex", "Ann"])
-
+	const results = useState<any>(["Bob", "Alex", "Ann"])
 	const users = results[0]
 	const setUsers = results[1]
 
@@ -17,4 +16,4 @@ ReactDOM.render(
 	<UsersList/>, document.getElementById('root')
 );
 
-// Чему равно results.length?
+// Какой тип правильнее указать вместо "any" при типизации стэйта?
