@@ -8,9 +8,16 @@ type UserType = {
 	age: number
 }
 
-function User(props: UserType) {
+type UserPropsType = UserType & {
+	deleteUser: (id: any) => void
+}
+
+function User(props: UserPropsType) {
 	return (
-		<li>User {props.name}: {props.age} y.o.</li>
+		<li>
+			<button onClick={()=>props.deleteUser(props.id)}>x</button>
+			User {props.name}: {props.age} y.o.
+		</li>
 	)
 }
 
@@ -22,14 +29,18 @@ function UsersList() {
 		{id: 4, name: "John", age: 30},
 	]
 	const [users, setUsers] = useState<Array<UserType>>(data)
-	// Необходимо отрендерить список ользователей старше 25 лет:
-	const getOlderThen25Users = (u: UserType) => u.age > 25
-	const olderThen25Users = users.filter(getOlderThen25Users)
+	const deleteUser = (userID: number) => {
+		setUsers(users.filter(u => u.id !== userID))
+	}
 	return (
 		<main>
-			<h4>User list:</h4>
+			<h4>Users list:</h4>
 			<ul>
-				{ olderThen25Users.map(u => <User key={u.id} {...u}/>)}
+				{users.map(u => <User
+					key={u.id}
+					{...u}
+					deleteUser={deleteUser}
+				/>)}
 			</ul>
 		</main>
 	)
@@ -38,4 +49,5 @@ function UsersList() {
 ReactDOM.render(
 	<UsersList/>, document.getElementById('root')
 );
-// Что вернёт выражение: Array.isArray(olderThen25Users)
+// В типе UserPropsType у функции deleteUser в параметрах указан тип "any".
+// Какой тип было бы указать правильнее?
