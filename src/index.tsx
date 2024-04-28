@@ -1,22 +1,38 @@
-import React, {useState, MouseEvent, ChangeEvent} from 'react';
+import React, {useState, MouseEvent} from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-function User() {
-	const [userName, setUserName] = useState<string>("")
-	// const onChangeHandler = (e: xxx )=> setUserName(e.currentTarget.value)
+function AuthForm() {
+	const onClickHandler = (e: MouseEvent<HTMLButtonElement>) => {
+		// xxx
+		alert()
+	}
 	return (
-		<div>
-			<p>{userName}</p>
-			<input
-				// onChange={onChangeHandler}
-			/>
-		</div>
+		<form>
+			<div>
+				<label style={{padding: "10px 0"}}>
+					Name:
+					<input type={"email"} name={"email"}/>
+				</label>
+			</div>
+			<div>
+				<label style={{padding: "10px 0"}}>
+					Password:
+					<input type={"password"} name={"password"}/>
+				</label>
+			</div>
+			<button
+				onClick={onClickHandler}
+				type={"submit"}>
+				Log in
+			</button>
+		</form>
 	)
 }
 
 ReactDOM.render(
-	<User/>, document.getElementById('root')
+	<AuthForm/>, document.getElementById('root')
 );
-// Что надо написать вместо ххх, чтобы правильно типизировать
-// параметр функции?
+// Что надо написать вместо ххх, чтобы данные из формы
+// не отправлялись на сервер и страница не перезагружалась
+// при клике по кнопке?
