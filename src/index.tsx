@@ -1,34 +1,19 @@
-import React, {useState, MouseEvent, ChangeEvent} from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-
-function Notes() {
-	const [newNote, setNewNote] = useState<string>("")
-	const [notes, setNotes] = useState<Array<string>>([])
-	const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement> )=>
-		setNewNote(e.currentTarget.value)
-	const addNote = () => {
-		setNotes([newNote, ...notes])
-		setNewNote("")
-	}
-	return (
-		<div>
-            <textarea
-	            value={newNote}
-	            onChange={onChangeHandler}
-	            // xxx = {addNote}
-            />
-			<h4>Notes:</h4>
-			<div>
-				{notes.map((n,i )=> <p key={i}>{n}</p>)}
-			</div>
-		</div>
-	)
+const baseball = {
+	name: "Bob"
 }
 
+const bit = baseball
 
-ReactDOM.render(
-	<Notes/>, document.getElementById('root')
-);
-// Что надо написать вместо ххх,
-// чтобы при потере инпутом фокуса добавлялась заметка?
+const case = {}
+
+const client = {
+	name: "Bob"
+}
+
+if (XXX === bit) {
+	console.log("Yo!!!")
+} else {
+	console.log("Hey!!!")
+}
+
+/*Какие переменные можно использовать вместо XXX, что бы в консоль вывелась строка "Hey"!!!"? Если их несколько, напишите через пробел.*/
