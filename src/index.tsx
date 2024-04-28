@@ -9,13 +9,13 @@ type UserType = {
 }
 
 type UserPropsType = UserType & {
-	deleteUser: (id: any) => void
+	deleteUser: (id: number) => void
 }
 
 function User(props: UserPropsType) {
 	return (
 		<li>
-			<button onClick={()=>props.deleteUser(props.id)}>x</button>
+			{/*<button onClick={() => props.deleteUser(xxx)}>x</button>*/}
 			User {props.name}: {props.age} y.o.
 		</li>
 	)
@@ -30,11 +30,12 @@ function UsersList() {
 	]
 	const [users, setUsers] = useState<Array<UserType>>(data)
 	const deleteUser = (userID: number) => {
-		setUsers(users.filter(u => u.id !== userID))
+		const filteredUsers = users.filter(u => u.id !== userID)
+		setUsers(filteredUsers)
 	}
 	return (
 		<main>
-			<h4>Users list:</h4>
+			<h4>User list:</h4>
 			<ul>
 				{users.map(u => <User
 					key={u.id}
@@ -49,5 +50,4 @@ function UsersList() {
 ReactDOM.render(
 	<UsersList/>, document.getElementById('root')
 );
-// В типе UserPropsType у функции deleteUser в параметрах указан тип "any".
-// Какой тип было бы указать правильнее?
+// Что надо написать вместо xxx, чтобы код работал?
