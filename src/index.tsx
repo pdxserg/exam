@@ -4,13 +4,19 @@ import './index.css';
 
 function User() {
 	const [userName, setUserName] = useState<string>("")
+	const [text, setText] = useState<string>("")
+	const onChangeHandler = (e: ChangeEvent<HTMLInputElement> )=> setUserName(e.currentTarget.value)
 	return (
 		<div>
-			<p>{userName}</p>
 			<input
-				// xxx
-				onChange={(e) => setUserName(e.currentTarget.value)}
+				value={userName}
+				onChange={onChangeHandler}
+				onBlur={()=> {
+					// xxx
+					setText(userName)
+				}}
 			/>
+			<p>{text}</p>
 		</div>
 	)
 }
@@ -18,4 +24,5 @@ function User() {
 ReactDOM.render(
 	<User/>, document.getElementById('root')
 );
-// Что надо написать вместо ххх, чтобы инпут был контролируемым?
+// Что надо написать вместо ххх,
+// чтобы после вывода текста в параграф содержимое формы ввода очищалось?
