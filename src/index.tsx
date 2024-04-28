@@ -2,37 +2,30 @@ import React, {useState, MouseEvent} from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-function AuthForm() {
-	const onClickHandler = (e: MouseEvent<HTMLButtonElement>) => {
+function Post() {
+	const onClickHandler = (e: MouseEvent<HTMLAnchorElement>) => {
 		// xxx
-		alert()
+		alert("Летим-бомбим!!!")
 	}
 	return (
-		<form>
-			<div>
-				<label style={{padding: "10px 0"}}>
-					Name:
-					<input type={"email"} name={"email"}/>
-				</label>
-			</div>
-			<div>
-				<label style={{padding: "10px 0"}}>
-					Password:
-					<input type={"password"} name={"password"}/>
-				</label>
-			</div>
-			<button
-				onClick={onClickHandler}
-				type={"submit"}>
-				Log in
-			</button>
-		</form>
+		<div>
+			<article>
+				<h4>Как дела, братан?</h4>
+				<p>
+					Вижу, что неплохо. Давай, трудись )))
+					Google ждёт тебя в цифровом рабстве!
+					Cтавь лайк и полетели!!!
+				</p>
+				<a href={"https://www.youtube.com/"}
+				   onClick={onClickHandler}
+				>В этом месте подробнее...</a>
+			</article>
+		</div>
 	)
 }
 
 ReactDOM.render(
-	<AuthForm/>, document.getElementById('root')
+	<Post/>, document.getElementById('root')
 );
-// Что надо написать вместо ххх, чтобы данные из формы
-// не отправлялись на сервер и страница не перезагружалась
-// при клике по кнопке?
+// Что надо написать вместо ххх, чтобы Вас не направило на страницу Youtube
+// при клике по ссылке?
