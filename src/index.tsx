@@ -12,8 +12,9 @@ function User() {
 				value={userName}
 				onChange={onChangeHandler}
 				onBlur={()=> {
-					// xxx
+					setUserName("")
 					setText(userName)
+
 				}}
 			/>
 			<p>{text}</p>
