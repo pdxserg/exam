@@ -1,23 +1,53 @@
-type UserWalletType = {
-	title: string
-	amount: number
-}
-type UserWalletPropsType = {
-	wallet: UserWalletType
+import React, {useState} from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+
+type UserType = {
+	id: number
+	name: string
+	age: number
 }
 
-export const UserWallet: React.FC<UserWalletPropsType> = (props) => {
-	return <div>title: {props.wallet.title}, amount: {props.wallet.amount}</div>
+type UserPropsType = UserType & {
+	deleteUser: (id: number) => void
 }
 
-export const UserMoney = () => {
-	const wallets = [
-		{title: 'bitcoin', amount: 1},
-		{title: '$', amount: 100}
+function User(props: UserPropsType) {
+	return (
+		<li>
+			{/*<button onClick={() => props.deleteUser(xxx)}>x</button>*/}
+			User {props.name}: {props.age} y.o.
+		</li>
+	)
+}
+
+function UsersList() {
+	const data: Array<UserType> = [
+		{id: 1, name: "Bob", age: 25},
+		{id: 2, name: "Alex", age: 28},
+		{id: 3, name: "Ann", age: 23},
+		{id: 4, name: "John", age: 30},
 	]
-
-	return <div>
-		<UserWallet wallet={xxx} />
-		<UserWallet wallet={yyy} />
-	</div>
+	const [users, setUsers] = useState<Array<UserType>>(data)
+	const deleteUser = (userID: number) => {
+		const filteredUsers = users.filter(u => u.id !== userID)
+		setUsers(filteredUsers)
+	}
+	return (
+		<main>
+			<h4>User list:</h4>
+			<ul>
+				{users.map(u => <User
+					key={u.id}
+					{...u}
+					deleteUser={deleteUser}
+				/>)}
+			</ul>
+		</main>
+	)
 }
+
+ReactDOM.render(
+	<UsersList/>, document.getElementById('root')
+);
+// Что надо написать вместо xxx, чтобы код работал?
