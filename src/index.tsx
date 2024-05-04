@@ -1,34 +1,31 @@
-import React, {useState, MouseEvent, ChangeEvent} from 'react';
+import React, {useState, MouseEvent} from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-function Notes() {
-	const [newNote, setNewNote] = useState<string>("")
-	const [notes, setNotes] = useState<Array<string>>([])
-	const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement> )=>
-		setNewNote(e.currentTarget.value)
-	const addNote = () => {
-		setNotes([newNote, ...notes])
-		setNewNote("")
+function Post() {
+	const onClickHandler = (e: MouseEvent<HTMLAnchorElement>) => {
+		// xxx
+		alert("Летим-бомбим!!!")
 	}
 	return (
 		<div>
-            <textarea
-	            value={newNote}
-	            onChange={onChangeHandler}
-	            // xxx = {addNote}
-            />
-			<h4>Notes:</h4>
-			<div>
-				{notes.map((n,i )=> <p key={i}>{n}</p>)}
-			</div>
+			<article>
+				<h4>Как дела, братан?</h4>
+				<p>
+					Вижу, что неплохо. Давай, трудись )))
+					Google ждёт тебя в цифровом рабстве!
+					Cтавь лайк и полетели!!!
+				</p>
+				<a href={"https://www.youtube.com/"}
+				   onClick={onClickHandler}
+				>В этом месте подробнее...</a>
+			</article>
 		</div>
 	)
 }
 
-
 ReactDOM.render(
-	<Notes/>, document.getElementById('root')
+	<Post/>, document.getElementById('root')
 );
-// Что надо написать вместо ххх,
-// чтобы при потере инпутом фокуса добавлялась заметка?
+// Что надо написать вместо ххх, чтобы Вас не направило на страницу Youtube
+// при клике по ссылке?
