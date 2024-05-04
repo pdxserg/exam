@@ -3,7 +3,11 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 function UsersList() {
-	const [users, setUsers] = useState<Array<string>>(["Bob", "Alex", "Ann"])
+	const results = useState<Array<string>>(["Bob", "Alex", "Ann"])
+
+	const users = results[0]
+	const setUsers = results[1]
+
 	return (
 		<p>Тут будет список пользователей</p>
 	)
@@ -12,5 +16,5 @@ function UsersList() {
 ReactDOM.render(
 	<UsersList/>, document.getElementById('root')
 );
-// Что вернёт выражение: typeof setUsers?
 
+// Чему равно results.length?
