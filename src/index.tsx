@@ -1,38 +1,19 @@
-import React, {useState, MouseEvent} from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-
-function AuthForm() {
-	const onClickHandler = (e: MouseEvent<HTMLButtonElement>) => {
-		// xxx
-		alert()
-	}
-	return (
-		<form>
-			<div>
-				<label style={{padding: "10px 0"}}>
-					Name:
-					<input type={"email"} name={"email"}/>
-				</label>
-			</div>
-			<div>
-				<label style={{padding: "10px 0"}}>
-					Password:
-					<input type={"password"} name={"password"}/>
-				</label>
-			</div>
-			<button
-				onClick={onClickHandler}
-				type={"submit"}>
-				Log in
-			</button>
-		</form>
-	)
+const cat = {
+	name: "Bob"
 }
 
-ReactDOM.render(
-	<AuthForm/>, document.getElementById('root')
-);
-// Что надо написать вместо ххх, чтобы данные из формы
-// не отправлялись на сервер и страница не перезагружалась
-// при клике по кнопке?
+const class = cat
+
+const bread = {}
+
+const air = {
+	name: "Bob"
+}
+
+if (XXX === class) {
+	console.log("Yo!!!")
+} else {
+	console.log("Hey!!!")
+}
+
+/*Какие переменные можно использовать вместо XXX, что бы в консоль вывелась строка "Hey"!!!"? Если их несколько, напишите через пробел.*/
