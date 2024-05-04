@@ -2,19 +2,39 @@ import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-function UsersList() {
-	const results = useState<Array<string>>(["Bob", "Alex", "Ann"])
+type UserType = {
+	id: number
+	name: string
+	age: number
+}
 
-	const users = results[0]
-	const setUsers = results[1]
-
+function User(props: UserType) {
 	return (
-		<p>Тут будет список пользователей</p>
+		<li>User {props.name}: {props.age} y.o.</li>
+	)
+}
+
+function UsersList() {
+	const data: Array<UserType> = [
+		{id: 1, name: "Bob", age: 25},
+		{id: 2, name: "Alex", age: 28},
+		{id: 3, name: "Ann", age: 23},
+		{id: 4, name: "John", age: 30},
+	]
+	const [users, setUsers] = useState<Array<UserType>>(data)
+	// Пользователи старше 25 лет:
+	// const olderThen25Users = users.xxx(u => u.age > 25)
+	return (
+		<main>
+			<h4>User list:</h4>
+			<ul>
+				{/*{ olderThen25Users.map(u => <User key={u.id} {...u}/>)}*/}
+			</ul>
+		</main>
 	)
 }
 
 ReactDOM.render(
 	<UsersList/>, document.getElementById('root')
 );
-
-// Чему равно results.length?
+// Что надо написать вместо xxx, чтобы код работал?
