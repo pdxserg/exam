@@ -1,21 +1,32 @@
-import React, {useState, MouseEvent, ChangeEvent} from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
+import ReactDOM from 'react-dom'
 
-function User() {
-	const [userName, setUserName] = useState<string>("")
-	return (
-		<div>
-			<p>{userName}</p>
-			<input
-				// xxx
-				onChange={(e) => setUserName(e.currentTarget.value)}
-			/>
-		</div>
-	)
+const Son = (props: any) => {
+	return <div>
+		I am son. My name is {props.name}
+	</div>
 }
 
-ReactDOM.render(
-	<User/>, document.getElementById('root')
-);
-// Что надо написать вместо ххх, чтобы инпут был контролируемым?
+
+const Father = (props: any) => {
+	return <div>
+		I am father. My name is {props.name}
+		<Son name={props.sonName} />
+	</div>
+}
+
+const Granny = (props: any) => {
+	return <div>
+		I am granny. My name is {props.name}
+		<Father name={props.fatherName} sonName={props.sonName} />
+	</div>
+}
+
+export const App = () => {
+	return <div>
+		<Granny XXX={'Бабуля'} YYY={'Батя'} ZZZ={'Сын'}/>
+	</div>
+}
+
+ReactDOM.render(<App/>,
+	document.getElementById('root')
+)
