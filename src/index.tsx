@@ -1,19 +1,22 @@
-const cat = {
-	name: "Bob"
+import React, {useState, MouseEvent, ChangeEvent} from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+
+function User() {
+	const [userName, setUserName] = useState<string>("")
+	// const onChangeHandler = (e: xxx )=> setUserName(e.currentTarget.value)
+	return (
+		<div>
+			<p>{userName}</p>
+			<input
+				// onChange={onChangeHandler}
+			/>
+		</div>
+	)
 }
 
-const class = cat
-
-const bread = {}
-
-const air = {
-	name: "Bob"
-}
-
-if (XXX === class) {
-	console.log("Yo!!!")
-} else {
-	console.log("Hey!!!")
-}
-
-/*Какие переменные можно использовать вместо XXX, что бы в консоль вывелась строка "Hey"!!!"? Если их несколько, напишите через пробел.*/
+ReactDOM.render(
+	<User/>, document.getElementById('root')
+);
+// Что надо написать вместо ххх, чтобы правильно типизировать
+// параметр функции?
