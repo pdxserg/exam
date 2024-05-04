@@ -2,28 +2,33 @@ import React, {useState, MouseEvent, ChangeEvent} from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-function User() {
-	const [userName, setUserName] = useState<string>("")
-	const [text, setText] = useState<string>("")
-	const onChangeHandler = (e: ChangeEvent<HTMLInputElement> )=> setUserName(e.currentTarget.value)
+function Notes() {
+	const [newNote, setNewNote] = useState<string>("")
+	const [notes, setNotes] = useState<Array<string>>([])
+	const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement> )=>
+		setNewNote(e.currentTarget.value)
+	const addNote = () => {
+		setNotes([newNote, ...notes])
+		setNewNote("")
+	}
 	return (
 		<div>
-			<input
-				value={userName}
-				onChange={onChangeHandler}
-				onBlur={()=> {
-					setUserName("")
-					setText(userName)
-
-				}}
-			/>
-			<p>{text}</p>
+            <textarea
+	            value={newNote}
+	            onChange={onChangeHandler}
+	            // xxx = {addNote}
+            />
+			<h4>Notes:</h4>
+			<div>
+				{notes.map((n,i )=> <p key={i}>{n}</p>)}
+			</div>
 		</div>
 	)
 }
 
+
 ReactDOM.render(
-	<User/>, document.getElementById('root')
+	<Notes/>, document.getElementById('root')
 );
 // Что надо написать вместо ххх,
-// чтобы после вывода текста в параграф содержимое формы ввода очищалось?
+// чтобы при потере инпутом фокуса добавлялась заметка?
