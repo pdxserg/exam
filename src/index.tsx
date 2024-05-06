@@ -1,40 +1,22 @@
-import React, { ChangeEvent, useState } from 'react'
-import ReactDOM from 'react-dom'
-import './index.css'
+import React, {useState, MouseEvent} from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
 
-const MIN_COMMENT_SIZE = 5
-
-function LongCommentChecker() {
-	const [comment, setComment] = useState<string>('')
-	const isCommentReady = comment.length > MIN_COMMENT_SIZE
-
-	const onClickSendComment = () => {
-		if (isCommentReady) {
-			setComment('')
-		}
-	}
-	const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
-		const newComment = e.currentTarget.value
-
-		setComment(newComment)
-	}
-
+function ColorButton() {
+	const [isColored, setIsColored] = useState<boolean>(false)
 	return (
-		<main>
-            <textarea
-	            placeholder={'Your comment must have more than 5 charters'}
-	            value={comment}
-	            onChange={onChangeHandler}
-            />
-			<div>
-				<button
-					disabled={XXX}
-					onClick={onClickSendComment}>
-					Send comment
-				</button>
-			</div>
-		</main>
+		<button
+			style={{ backgroundColor: `${ XXX === true ? "red": ""}`}}
+			onClick={()=>setIsColored(true)}
+		>
+			Меняю цвет по клику
+		</button>
 	)
 }
 
-ReactDOM.render(<LongCommentChecker/>, document.getElementById('root'))
+
+ReactDOM.render(
+	<ColorButton/>, document.getElementById('root')
+);
+
+// Что надо написать вместо XXX, чтобы при клике кнопка становилась красной?
