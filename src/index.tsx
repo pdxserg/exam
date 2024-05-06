@@ -1,27 +1,15 @@
-import React, {useState} from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-
-function UsersList() {
-	const [users, setUsers] = useState<Array<string>>(["Bob", "Alex", "Ann"])
-	const getUser = (user: string, i: number) => <li key={i}>{user}</li>
-
-	const usersList = (XXX === 0)
-		? <p>List is empty</p>
-		:  <ul>
-			{ users.map(getUser)}
-		</ul>
-
-	return (
-		<main>
-			<button onClick={()=>setUsers([])}>Clear list</button>
-			<h4>User list:</h4>
-			{usersList}
-		</main>
-	)
+const user = {
+	name: "Rita",
+	age: 30,
+	friends: ["Leo", "Max", "Rita"]
 }
 
-ReactDOM.render(
-	<UsersList/>, document.getElementById('root')
-);
-// Что надо вставить вместо XXX, чтобы код корректно работал  со списком пользователей?
+const updatedUser = {...user}
+
+updatedUser.friends.push("Dima")
+
+console.log(user.friends[3])
+
+/*Какое значение будет выведено в консоль?*/
+
+
