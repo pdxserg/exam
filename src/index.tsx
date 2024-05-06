@@ -1,25 +1,40 @@
-import React, {useState} from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
+import React, { ChangeEvent, useState } from 'react'
+import ReactDOM from 'react-dom'
+import './index.css'
 
-function PasswordChecker() {
-	const [password, setPassword] = useState<string>("")
+const MIN_COMMENT_SIZE = 5
+
+function LongCommentChecker() {
+	const [comment, setComment] = useState<string>('')
+	const isCommentReady = comment.length > MIN_COMMENT_SIZE
+
+	const onClickSendComment = () => {
+		if (isCommentReady) {
+			setComment('')
+		}
+	}
+	const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
+		const newComment = e.currentTarget.value
+
+		setComment(newComment)
+	}
+
 	return (
 		<main>
-			<p>Your password must have more than 8 charters!</p>
-			<input
-				placeholder={"Enter your password"}
-				value={password}
-				onChange={e => setPassword(e.currentTarget.value)}
-				type={"password"}
-			/>
-			{XXX < 9 && <p style={{color: "red"}}>The password is too short!</p>}
+            <textarea
+	            placeholder={'Your comment must have more than 5 charters'}
+	            value={comment}
+	            onChange={onChangeHandler}
+            />
+			<div>
+				<button
+					disabled={XXX}
+					onClick={onClickSendComment}>
+					Send comment
+				</button>
+			</div>
 		</main>
 	)
 }
 
-ReactDOM.render(
-	<PasswordChecker/>, document.getElementById('root')
-);
-
-// Что надо вставить вместо XXX, чтобы код работал нормально?
+ReactDOM.render(<LongCommentChecker/>, document.getElementById('root'))
