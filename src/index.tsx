@@ -1,10 +1,10 @@
 const student = {
-	name: "Nikita",
-	age: 27
+	name: "Valera",
+	age: 74
 }
 
-const copyStudent = {...student}
+const copyStudent = student
 
-student.name = "Nikita"
+student.age = 28
 
-/*Чему равно copyStudent.name после выполнения этого кода?*/
+/*Чему равно значение copyStudent.age после выполнения этого кода?*/
