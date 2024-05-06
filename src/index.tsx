@@ -1,17 +1,27 @@
-import React, {MouseEvent} from 'react';
+import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-function Button() {
-	const onClickHandler = (e: MouseEvent<HTMLButtonElement>) => {
-		// console.log((typeof e) === ххх)
-	}
-	return <button onClick={onClickHandler} >Click</button>
+function UsersList() {
+	const [users, setUsers] = useState<Array<string>>(["Bob", "Alex", "Ann"])
+	const getUser = (user: string, i: number) => <li key={i}>{user}</li>
+
+	const usersList = (XXX === 0)
+		? <p>List is empty</p>
+		:  <ul>
+			{ users.map(getUser)}
+		</ul>
+
+	return (
+		<main>
+			<button onClick={()=>setUsers([])}>Clear list</button>
+			<h4>User list:</h4>
+			{usersList}
+		</main>
+	)
 }
 
-
 ReactDOM.render(
-	<Button/>, document.getElementById('root')
+	<UsersList/>, document.getElementById('root')
 );
-
-// Что надо написать вместо ххх, чтобы в консоль вывело true?
+// Что надо вставить вместо XXX, чтобы код корректно работал  со списком пользователей?
