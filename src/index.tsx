@@ -1,10 +1,19 @@
 const student = {
-	name: "Valera",
-	age: 74
+	name: "Maria"
 }
 
-const copyStudent = student
+const newStudent = student
 
-student.age = 28
+const myFriend = {
+	...newStudent
+}
 
-/*Чему равно значение copyStudent.age после выполнения этого кода?*/
+const newUser = {
+	name: "Igor"
+}
+
+const myFriendName =  student.name !== myFriend.name
+	? newUser.name
+	: student.name
+
+/*Какое значение получит переменная "myFriendName"?*/
