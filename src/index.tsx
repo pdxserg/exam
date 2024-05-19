@@ -16,11 +16,11 @@ export const students: Array<StudentType> = [
 
 export const friends: FriendsType = {
 	1: ["Oliver", "Jack", "Oscar",],
-	2: ["Jack", "Lewis", "Thomas",],
+	2: ["Jack",  "Thomas",],
 	3: ["William", "Michael", "Lewis",],
 	4: ["Oscar", "James", "William",],
 }
-
+console.log(friends[3][1])
 //Дан список студентов и структура,
 //которая содержит список друзей каждого из студентов.
 //Id студента является ключом к массиву его друзей.
