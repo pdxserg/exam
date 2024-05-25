@@ -1,9 +1,20 @@
-const userName = (user = "") => {
-	let userName: any = "Nikita"
-	userName += user
-	return user;
+const customer = {
+	name: "Konstantin",
+	age: 14,
+	scores: [15.26, 12.09, 65.90]
 }
 
-const student = userName() || "Ivan"
+const [first, second, third = 37.95] = customer.scores
 
-/*Какое значение получит переменная student? */ 
+switch(third){
+	case 37.95:
+		console.log("Germany")
+		break;
+	case 12.09:
+		console.log("Algeria")
+		break;
+	default:
+		console.log("Mongolia");
+}
+/*Какую строку мы увидим в консоли?*/
+
