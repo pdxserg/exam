@@ -1,12 +1,9 @@
-const names = ["Igor", "Nikita", "Natali"]
+const getArray = (a, b, c) => {
+	return [c, b, a]
+}
 
-const nameNext = names
+const [cabinet, collection, airport]  = getArray(97, 73, 14)
 
-nameNext.length = 0
+console.log(cabinet)
 
-const result = names[0] ? 91 : 40
-
-/* Какое значение получит переменная result? */
-
-
-
+/*Какое число будет выведено в консоль?*/
