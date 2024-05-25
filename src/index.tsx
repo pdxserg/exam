@@ -1,20 +1,12 @@
-const customer = {
-	name: "Konstantin",
-	age: 14,
-	scores: [15.26, 12.09, 65.90]
+const consumer = {
+	name: "Katya",
+	age: 46,
+	scores: [23.37, 65.99, 65.81]
 }
 
-const [first, second, third = 37.95] = customer.scores
+const {name, age, scores} = consumer
 
-switch(third){
-	case 37.95:
-		console.log("Germany")
-		break;
-	case 12.09:
-		console.log("Algeria")
-		break;
-	default:
-		console.log("Mongolia");
-}
-/*Какую строку мы увидим в консоли?*/
+console.log(consumer.scores === scores && age)
 
+
+/*Какое значение мы увидим в консоли?*/
