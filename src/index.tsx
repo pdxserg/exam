@@ -1,3 +1,4 @@
+import {type} from "node:os";
 
 type ActionType = {
 	type: "SUM"|"SUB"|"MULT"|"DIV"|"EXP"
@@ -20,7 +21,7 @@ export const calculator = (state: number, action: ActionType): number => {
 			return state
 	}
 }
-const result = calculator(10, {XXX, payload: 0})
+const result = calculator(10, {type, payload: 0})
 if (!(result - 1)){
 	console.log("IT-INCUBATOR")
 }
