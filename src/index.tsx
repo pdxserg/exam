@@ -12,9 +12,13 @@ export const calculator = (state: number, action: ActionType): number => {
 			return state - action.payload
 		case "DIV":
 			return state / action.payload
+		case "MULT":
+			return state * action.payload
 		default:
 			return state
 	}
 }
 
-//Обработка какого action.type не предусмотрена в функции calculator?
+const result = calculator(10, {XXX, payload: 5})
+console.log(result)
+//Что надо написать вместо XXX, что бы переменная result содержала значение 5?
