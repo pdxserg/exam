@@ -1,27 +1,22 @@
-type StudentType = {
-	id: number
-	name: string
+import React, {useState, MouseEvent} from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+
+function ColorButton() {
+	const [isColored, setIsColored] = useState<boolean>(false)
+	return (
+		<button
+			style={{ backgroundColor: `${ XXX === true ? "red": ""}`}}
+			onClick={()=>setIsColored(true)}
+		>
+			Меняю цвет по клику
+		</button>
+	)
 }
 
-type FriendsType = {
-	[key: string]: Array<string>
-}
 
-export const students: Array<StudentType> = [
-	{id: 1, name: "Bob"},
-	{id: 2, name: "Alex"},
-	{id: 3, name: "Ann"},
-	{id: 4, name: "Charley"},
-]
+ReactDOM.render(
+	<ColorButton/>, document.getElementById('root')
+);
 
-export const friends: FriendsType = {
-	1: ["Oliver", "Jack", "Oscar",],
-	2: ["Jack", "Lewis", "Thomas",],
-	3: ["William", "Michael", "Lewis",],
-	4: ["Oscar", "James", "William",],
-}
-
-//Дан список студентов и структура,
-//которая содержит список друзей каждого из студентов.
-//Id студента является ключом к массиву его друзей.
-//Какое значение лежит тут:  friends[3][1]?
+// Что надо написать вместо XXX, чтобы при клике кнопка становилась красной?
