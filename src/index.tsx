@@ -1,28 +1,29 @@
-
-type ActionType = {
-	type: "SUM"|"SUB"|"MULT"|"DIV"|"EXP"
-	payload: number
+type StudentType = {
+	id: number
+	name: string
 }
 
-export const calculator = (state: number, action: ActionType): number => {
-	switch (action.type) {
-		case "SUM":
-			return state + action.payload
-		case "SUB":
-			return state - action.payload
-		case "DIV":
-			return state / action.payload
-		case "MULT":
-			return state * action.payload
-		case "EXP":
-			return state ** action.payload
-		default:
-			return state
-	}
-}
-const result = calculator(10, {XXX, payload: 0})
-if (!(result - 1)){
-	console.log("IT-INCUBATOR")
+type FriendsType = {
+	[key: string]: Array<String>
 }
 
-//Что надо написать вместо XXX чтобы в консоли появилась строка "IT-INCUBATOR"?
+export const students: Array<StudentType> = [
+	{id: 1, name: "Bob"},
+	{id: 2, name: "Alex"},
+	{id: 3, name: "Ann"},
+	{id: 4, name: "Charley"},
+]
+
+export const friends: FriendsType = {
+	1: ["Oliver", "Jack", "Oscar",],
+	2: ["Jack", "Lewis", "Thomas",],
+	3: ["William", "Michael", "Lewis",],
+	4: ["Oscar", "James", "William",],
+}
+
+//Дан список студентов и структура,
+//которая содержит список друзей каждого из студентов.
+//Id студента является ключом к массиву его друзей.
+//Какое значение лежит тут: friends[students[0].id][3]?
+
+
