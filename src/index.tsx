@@ -2,26 +2,24 @@ import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-function UsersList() {
-	const [users, setUsers] = useState<Array<string>>(["Bob", "Alex", "Ann"])
-	const getUser = (user: string, i: number) => <li key={i}>{user}</li>
-
-	const usersList = (XXX === 0)
-		? <p>List is empty</p>
-		:  <ul>
-			{ users.map(getUser)}
-		</ul>
-
+function PasswordChecker() {
+	const [password, setPassword] = useState<string>("")
 	return (
 		<main>
-			<button onClick={()=>setUsers([])}>Clear list</button>
-			<h4>User list:</h4>
-			{usersList}
+			<p>Your password must have more than 8 charters!</p>
+			<input
+				placeholder={"Enter your password"}
+				value={password}
+				onChange={e => setPassword(e.currentTarget.value)}
+				type={"password"}
+			/>
+			{XXX < 9 && <p style={{color: "red"}}>The password is too short!</p>}
 		</main>
 	)
 }
 
 ReactDOM.render(
-	<UsersList/>, document.getElementById('root')
+	<PasswordChecker/>, document.getElementById('root')
 );
-// Что надо вставить вместо XXX, чтобы код корректно работал  со списком пользователей?
+
+// Что надо вставить вместо XXX, чтобы код работал нормально?
