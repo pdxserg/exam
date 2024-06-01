@@ -1,8 +1,14 @@
-const {business} = {business: 49}
+const bonus = {
+	name: "Elizaveta",
+	scores: 72
+}
 
-const multiply = business * 97.65
+const addition = {
+	... bonus,  scores:  bonus.scores++
+}
 
-const randomValue = multiply && "Rita" &&  "Lev"
 
-/* Какое значение получит переменная randomValue ? */
+const scores  = addition.scores
+
+// Какое значение получит переменная scores?
 
