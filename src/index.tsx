@@ -1,6 +1,6 @@
 
 type ActionType = {
-	type: "SUM"|"SUB"|"MULT"|"DIV"
+	type: "SUM"|"SUB"|"MULT"|"DIV"|"EXP"
 	payload: number
 }
 
@@ -12,13 +12,11 @@ export const calculator = (state: number, action: ActionType): number => {
 			return state - action.payload
 		case "DIV":
 			return state / action.payload
-		case "MULT":
-			return state * action.payload
+		case "EXP":
+			return state ** action.payload
 		default:
 			return state
 	}
 }
 
-const result = calculator(10, {XXX, payload: 5})
-console.log(result)
-//Что надо написать вместо XXX, что бы переменная result содержала значение 5?
+//Что вернёт такой вызов функции: calculator(10, {type: "MULT", payload: 2})?
