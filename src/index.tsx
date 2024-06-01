@@ -1,12 +1,20 @@
-const name = "Eva"
 
-const student = {
-	[name]: name
+type ActionType = {
+	type: "SUM"|"SUB"|"MULT"|"DIV"
+	payload: number
 }
 
-const number = student["name"]
-	? 37.76
-	: 43.23
+export const calculator = (state: number, action: ActionType) => {
+	switch (ХХХ) {
+		case "SUM":
+			return state + action.payload
+		case "SUB":
+			return state - action.payload
+		case "DIV":
+			return state / action.payload
+		default:
+			return state
+	}
+}
 
-/*Какое значение получит переменная number?*/
-//Что надо написать вместо XXX чтобы в консоли появилась строка "IT-INCUBATOR"?
+//Что надо написать вместо ХХХ, чтобы функция calculator работала?
