@@ -1,29 +1,30 @@
-type StudentType = {
+type UserType = {
 	id: number
-	name: string
+	userName: string
+	email: string
+	password: string
 }
 
-type FriendsType = {
-	[key: string]: Array<String>
+type ChangeUserPasswordTypeAT = {
+	type: "CHANGE-USER-PASSWORD"
+	payload: {
+		XXX
+		YYY
+	}
 }
 
-export const students: Array<StudentType> = [
-	{id: 1, name: "Bob"},
-	{id: 2, name: "Alex"},
-	{id: 3, name: "Ann"},
-	{id: 4, name: "Charley"},
-]
+export const userReducer =
+	(state: UserType[], action: ChangeUserPasswordTypeAT): UserType[] => {
+		switch (action.type) {
+			case "CHANGE-USER-PASSWORD":
+				return state.map(u =>
+					u.id === action.payload.id
+						? {...u, password: action.payload.newPassword}
+						: u)
+			default:
+				return state
+		}
+	}
 
-export const friends: FriendsType = {
-	1: ["Oliver", "Jack", "Oscar",],
-	2: ["Jack", "Lewis", "Thomas",],
-	3: ["William", "Michael", "Lewis",],
-	4: ["Oscar", "James", "William",],
-}
-
-//Дан список студентов и структура,
-//которая содержит список друзей каждого из студентов.
-//Id студента является ключом к массиву его друзей.
-//Какое значение лежит тут: friends[students[0].id][3]?
-
-
+//Какой код должен быть написан вместо XXX и YYY в типе //ChangeUserPasswordTypeAT, что бы редьюсер работал?
+//В ответе напишите через пробел: XXX  YYY
