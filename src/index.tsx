@@ -1,20 +1,8 @@
+const {business} = {business: 49}
 
-type ActionType = {
-	type: "SUM"|"SUB"|"MULT"|"DIV"
-	payload: number
-}
+const multiply = business * 97.65
 
-export const calculator = (state: number, action: ActionType) => {
-	switch (ХХХ) {
-		case "SUM":
-			return state + action.payload
-		case "SUB":
-			return state - action.payload
-		case "DIV":
-			return state / action.payload
-		default:
-			return state
-	}
-}
+const randomValue = multiply && "Rita" &&  "Lev"
 
-//Что надо написать вместо ХХХ, чтобы функция calculator работала?
+/* Какое значение получит переменная randomValue ? */
+
