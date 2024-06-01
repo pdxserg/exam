@@ -1,14 +1,30 @@
-const bonus = {
-	name: "Elizaveta",
-	scores: 72
+type UserType = {
+	id: number
+	userName: string
+	email: string
+	password: string
 }
 
-const addition = {
-	... bonus,  scores:  bonus.scores++
+type ChangeUserPasswordTypeAT = {
+	type: "CHANGE-USER-PASSWORD"
+	payload: {
+		XXX
+		YYY
+	}
 }
 
+export const userReducer =
+	(state: UserType[], action: ChangeUserPasswordTypeAT): UserType[] => {
+		switch (action.type) {
+			case "CHANGE-USER-PASSWORD":
+				return state.map(u =>
+					u.id === action.payload.id
+						? {...u, password: action.payload.newPassword}
+						: u)
+			default:
+				return state
+		}
+	}
 
-const scores  = addition.scores
-
-// Какое значение получит переменная scores?
-
+//Какой код должен быть написан вместо XXX и YYY в типе //ChangeUserPasswordTypeAT, что бы редьюсер работал?
+//В ответе напишите через пробел: XXX  YYY
