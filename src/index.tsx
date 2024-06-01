@@ -1,22 +1,24 @@
-import React, {useState, MouseEvent} from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
 
-function ColorButton() {
-	const [isColored, setIsColored] = useState<boolean>(false)
-	return (
-		<button
-			style={{ backgroundColor: `${ XXX === true ? "red": ""}`}}
-			onClick={()=>setIsColored(true)}
-		>
-			Меняю цвет по клику
-		</button>
-	)
+type ActionType = {
+	type: "SUM"|"SUB"|"MULT"|"DIV"
+	payload: number
 }
 
+export const calculator = (state: number, action: ActionType): number => {
+	switch (action.type) {
+		case "SUM":
+			return state + action.payload
+		case "SUB":
+			return state - action.payload
+		case "DIV":
+			return state / action.payload
+		case "MULT":
+			return state * action.payload
+		default:
+			return state
+	}
+}
 
-ReactDOM.render(
-	<ColorButton/>, document.getElementById('root')
-);
-
-// Что надо написать вместо XXX, чтобы при клике кнопка становилась красной?
+const result = calculator(10, {XXX, payload: 5})
+console.log(result)
+//Что надо написать вместо XXX, что бы переменная result содержала значение 5?
