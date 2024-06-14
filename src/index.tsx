@@ -1,7 +1,7 @@
 export const reducer = (state: any, action: any) => {
 	switch (action.type) {
 		case 'TRACK-ADDED':
-			return XXX
+			return [{id:action.trackId, likesCount: 0},...state]
 		default:
 			return state
 	}
