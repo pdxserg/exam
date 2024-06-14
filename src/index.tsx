@@ -1,16 +1,25 @@
-type Status = 'Stopped' | 'Playing' | 'Paused'
 type StateType = {
 	volume: number // in percents
 	trackUrl: string // 'https://blabla.com/track01.mp3',
 	currentPlayPosition: number // milliseconds,
-	status: Status
 }
-export const playerReducer = (state: StateType, action: any) => {
+
+export const reducer = (state: StateType, action: any) => {
 	switch (action.type) {
-		case 'TRACK-STATUS-CHANGED':
+		case XXX:
 			return {
 				...state,
-				status: action.status
+				trackUrl: action.url
+			}
+		case YYY:
+			return {
+				...state,
+				volume: 0
+			}
+		case ZZZ:
+			return {
+				...state,
+				currentPlayPosition: 0
 			}
 		default:
 			return state
@@ -19,16 +28,8 @@ export const playerReducer = (state: StateType, action: any) => {
 
 const muteTrackAC = () => ({type: 'TRACK-MUTED'})
 const changeTrackAC = (url: string) => ({type: 'TRACK-URL-CHANGED', url})
-const changeTrackPlayStatusAC = (status: Status) => ({type: 'TRACK-STATUS-CHANGED', status})
+// перемотатьНаНачало:
+const rewindToStart = () => ({type: 'TRACK-REWOUND-TO-START'})
 
-const state: StateType = {
-	status: 'Stopped',
-	currentPlayPosition: 1213,
-	trackUrl: 'https://blabla.com/track01.mp3',
-	volume: 100
-}
-
-const newState = playerReducer(state, XXX)
-console.log(newState.status === 'Paused')
-
-//Напишите вместо XXX правильный вызов правильного AC, чтобы в консоли было true
+// Какие типы должны быть вместо XXX, YYY и ZZZ?
+// Ответ дать через пробел, например:   'BLABLA' 'HEYНЕY' 'HIPHOP'
