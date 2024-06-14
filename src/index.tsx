@@ -1,23 +1,34 @@
-export const reducer = (state: any, action: any) => {
+type Status = 'Stopped' | 'Playing' | 'Paused'
+type StateType = {
+	volume: number // in percents
+	trackUrl: string // 'https://blabla.com/track01.mp3',
+	currentPlayPosition: number // milliseconds,
+	status: Status
+}
+export const playerReducer = (state: StateType, action: any) => {
 	switch (action.type) {
-		case 'TRACK-DELETED':
-			return state.filter((track: any) => XXX)
+		case 'TRACK-STATUS-CHANGED':
+			return {
+				...state,
+				status: action.status
+			}
 		default:
 			return state
 	}
 }
 
-const deleteTrackAC = (trackId: number) => ({type: 'TRACK-DELETED', trackId})
+const muteTrackAC = () => ({type: 'TRACK-MUTED'})
+const changeTrackAC = (url: string) => ({type: 'TRACK-URL-CHANGED', url})
+const changeTrackPlayStatusAC = (status: Status) => ({type: 'TRACK-STATUS-CHANGED', status})
 
+const state: StateType = {
+	status: 'Stopped',
+	currentPlayPosition: 1213,
+	trackUrl: 'https://blabla.com/track01.mp3',
+	volume: 100
+}
 
-const state = [
-	{id: 12, likesCount: 10},
-	{id: 14, likesCount: 2},
-	{id: 100, likesCount: 0}
-]
-const newState = reducer(state, deleteTrackAC(14))
+const newState = playerReducer(state, XXX)
+console.log(newState.status === 'Paused')
 
-console.log(newState.length === 2)
-
-
-// Что нужно написать вместо XXX, чтобы корректно удалить трек и в консоли увидеть true?
+//Напишите вместо XXX правильный вызов правильного AC, чтобы в консоли было true
