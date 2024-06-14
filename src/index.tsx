@@ -1,35 +1,29 @@
-type StateType = {
-	volume: number // in percents
-	trackUrl: string // 'https://blabla.com/track01.mp3',
-	currentPlayPosition: number // milliseconds,
-}
-
-export const reducer = (state: StateType, action: any) => {
+export const reducer = (state: any, action: any) => {
 	switch (action.type) {
-		case XXX:
+		case 'TRACK-LIKED':
 			return {
 				...state,
-				trackUrl: action.url
-			}
-		case YYY:
-			return {
-				...state,
-				volume: 0
-			}
-		case ZZZ:
-			return {
-				...state,
-				currentPlayPosition: 0
+				[XXX]: {
+					...state[XXX],
+					likesCount: state[XXX].likesCount + 1
+				}
 			}
 		default:
 			return state
 	}
 }
 
-const muteTrackAC = () => ({type: 'TRACK-MUTED'})
-const changeTrackAC = (url: string) => ({type: 'TRACK-URL-CHANGED', url})
-// перемотатьНаНачало:
-const rewindToStart = () => ({type: 'TRACK-REWOUND-TO-START'})
+const likeTrackAC = (trackId: number) => ({type: 'TRACK-LIKED', trackId})
 
-// Какие типы должны быть вместо XXX, YYY и ZZZ?
-// Ответ дать через пробел, например:   'BLABLA' 'HEYНЕY' 'HIPHOP'
+
+const state = {
+	12: {id: 12, likesCount: 10},
+	14: {id: 14, likesCount: 2},
+	100: {id: 100, likesCount: 0},
+}
+const newState = reducer(state, likeTrackAC(14))
+
+console.log(newState[14].likesCount === 3)
+
+// Что нужно написать вместо XXX, чтобы в консоли увидеть true?
+// ❗ Захардкодженные значения использовать запрещено
