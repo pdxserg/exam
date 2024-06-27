@@ -1,8 +1,18 @@
+import {combineReducers, createStore} from 'redux'
 
-const myFunction = (a: number, b = 3) => a + b;
+let initialState = {items: [{name: 'Dimych'}, {name: 'Ignat'}]}
+const usersReducer = (state = initialState, action: any) => {
+	return state
+}
 
-const result = myFunction(346, undefined) % 2
+const store = createStore(combineReducers({
+	users: usersReducer
+}))
 
-const winner = result ? "Artem" : "Artem"
+store.XXX(() => {
+	console.log('state changed')
+})
 
-//Какое значение получит переменная winner?
+store.dispatch({type: 'ANY'})
+
+// Что нужно написать вместо XXX, чтобы в консоли увидеть 'state changed'?
