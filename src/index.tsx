@@ -1,42 +1,43 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 
-export const TempManager = () => {
-	const [temp, setTemp] = useState(0)
-	const [seconds, setSeconds] = useState(0)
+export const App = () => {
+	const [temp, setTemp] = useState(10)
+	const [seconds, setSeconds] = useState(100)
 
-	const resetTemp = () => setTemp(0)
-	const increaseSeconds = () => setSeconds(seconds + 100)
+	const increaseSeconds = () => setSeconds(seconds + 10)
+	const increaseTemp = XXX
 
-	return (
-		<>
-			<TempDisplay temp={temp} reset={resetTemp}/>
-			<div>
-				<p><b>Секунды:</b> {seconds} с</p>
-				<button onClick={increaseSeconds}>
-					Увеличить время на 100 секунд
-				</button>
-			</div>
-		</>
-	)
+	return <>
+		<TempDisplay temp={temp} increaseTemp={increaseTemp}/>
+
+		<div>
+			<b>Секунды :</b> {seconds} с
+			<button style={{marginLeft: '15px'}}
+			        onClick={increaseSeconds}>
+				Увеличить на 10 секунд
+			</button>
+		</div>
+	</>
 }
-
 const TempDisplay = React.memo((props: any) => {
 	console.log('Render TempDisplay')
 	return (
-		<div>
-			<p><b>Температура</b>: {props.temp} &#176;</p>
-			<button onClick={props.reset}>Reset</button>
+		<div style={{marginBottom: '15px'}}
+		     onClick={props.reset}>
+			<b>Температура:</b> {props.temp} &#176;
+			<button style={{marginLeft: '15px'}}
+			        onClick={props.increaseTemp}>
+				Увеличить температуру на 1 градус
+			</button>
 		</div>
 	)
 })
 
-ReactDOM.render(<TempManager/>, document.getElementById('root'))
+ReactDOM.render(<App/>, document.getElementById('root'));
 
+// Что надо написать вместо XXX для того, чтобы обязательно выполнялись 2 условия:
+// 1) При нажатии на кнопку "Увеличить температуру на 1 градус" температура увеличивалась
+// 2) Компонент TempDisplay не должен перерисовываться при нажатии на кнопку "Увеличить на 10 секунд"
 
-//При увеличении времени (при клике на button) компонент TempDisplay
-//тоже перерисовывается. Эта перерисовка является избыточной.
-//Найдите в чем причина лишних перерисовок.
-//Исправленную версию строки напишите в качестве ответа.
-
-//Пример ответа: const increaseSeconds = () => setSeconds(seconds + 100)
+// Пример ответа: useEffect(() => setCounter(count + 1), [count])
