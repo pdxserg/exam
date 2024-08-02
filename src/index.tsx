@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, {useMemo, useState} from 'react'
 import ReactDOM from 'react-dom'
 
 type ButtonType = {
@@ -18,9 +18,9 @@ export const App = ({isAdmin}: { isAdmin: boolean }) => {
 
 	const increaseSeconds = () => setSeconds(seconds + 10)
 
-	const correctButtons = XXX(() => {
+	const correctButtons = useMemo (() => {
 		return buttons.filter(b => isAdmin ? true : !b.forAdminOnly)
-	}, [YYY])
+	},[])
 
 	return <>
 		<ButtonsPanel buttons={correctButtons}/>
