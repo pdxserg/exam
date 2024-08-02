@@ -6,3 +6,6 @@ const myNumber = mappedArray[0] && mappedArray[mappedArray.length - 1]
 const bigCount = 41 + myNumber
 
 //Какое значение получит переменная bigCount?//
+
+
+// bigCount = 0 !!!!!!
