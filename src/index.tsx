@@ -1,26 +1,30 @@
-import {combineReducers, createStore} from 'redux'
+export const reducer = (state: any, action: any) => {
+	switch (action.type) {
+		case 'USER-NAME-UPDATED':
+			return XXX
 
-let initialState = {items: [{name: 'Dimych'}, {name: 'Ignat'}]}
-const usersReducer = (state = initialState, action: any) => {
-	return state
+		default:
+			return state
+	}
 }
 
-let authInitialState = {login: 'Margo', settings: {theme: 'dark'}}
-const authReducer = (state = authInitialState, action: any) => {
-	return state
+const updateUserNameAC = (name: string) => ({type: 'USER-NAME-UPDATED', name})
+
+
+const state = {
+	count: 10,
+	user: {
+		name: 'Dimych',
+		age: 18,
+		isMarried: true,
+		status: "offline"
+	},
+	books: ['you don\'t know JS']
 }
+const newState = reducer(state, updateUserNameAC('Dmitry'))
 
-const store = createStore(combineReducers({
-	users: usersReducer,
-	XXX
-}))
+console.log(newState.user.name === 'Dmitry')
+console.log(newState.books === state.books)
+console.log(newState.user !== state.user)
 
-store.subscribe(() => {
-	const login = store.getState().auth.login
-	console.log(login)
-})
-
-store.dispatch({type: 'ANY'})
-export default store;
-
-// Что нужно написать вместо XXX, чтобы в консоли увидеть 'Margo'?
+//Что нужно написать вместо XXX, чтобы корректно обновить имя пользователя и в консоли увидеть:  true true true?
