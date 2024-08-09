@@ -1,11 +1,26 @@
-const numbers = [31, 82, 94, 73]
-const mapFunction = (el: number, index: number) => el * index
-const mappedArray = numbers.map(mapFunction)
+import {combineReducers, createStore} from 'redux'
 
-const myNumber = mappedArray[0] && mappedArray[mappedArray.length - 1]
-const bigCount = 41 + myNumber
+let initialState = {items: [{name: 'Dimych'}, {name: 'Ignat'}]}
+const usersReducer = (state = initialState, action: any) => {
+	return state
+}
 
-//Какое значение получит переменная bigCount?//
+let authInitialState = {login: 'Margo', settings: {theme: 'dark'}}
+const authReducer = (state = authInitialState, action: any) => {
+	return state
+}
 
+const store = createStore(combineReducers({
+	users: usersReducer,
+	XXX
+}))
 
-// bigCount = 0 !!!!!!
+store.subscribe(() => {
+	const login = store.getState().auth.login
+	console.log(login)
+})
+
+store.dispatch({type: 'ANY'})
+export default store;
+
+// Что нужно написать вместо XXX, чтобы в консоли увидеть 'Margo'?
