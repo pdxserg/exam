@@ -1,30 +1,22 @@
 export const reducer = (state: any, action: any) => {
 	switch (action.type) {
-		case 'USER-NAME-UPDATED':
-			return XXX
-
+		case 'TRACK-DELETED':
+			return state.filter((track: any) => track.id !== action.trackId)
 		default:
 			return state
 	}
 }
 
-const updateUserNameAC = (name: string) => ({type: 'USER-NAME-UPDATED', name})
+const deleteTrackAC =(trackId: number) =>(XXX)
 
 
-const state = {
-	count: 10,
-	user: {
-		name: 'Dimych',
-		age: 18,
-		isMarried: true,
-		status: "offline"
-	},
-	books: ['you don\'t know JS']
-}
-const newState = reducer(state, updateUserNameAC('Dmitry'))
+const state = [
+	{id: 12, likesCount: 10},
+	{id: 14, likesCount: 2},
+	{id: 100, likesCount: 0}
+]
 
-console.log(newState.user.name === 'Dmitry')
-console.log(newState.books === state.books)
-console.log(newState.user !== state.user)
+const newState = reducer(state, deleteTrackAC(14))
+console.log(newState.length === 2)
 
-//Что нужно написать вместо XXX, чтобы корректно обновить имя пользователя и в консоли увидеть:  true true true?
+// Что нужно написать вместо XXX, чтобы корректно удалить трек и в консоли увидеть true?
