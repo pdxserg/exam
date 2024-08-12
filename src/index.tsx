@@ -1,49 +1,67 @@
-import {combineReducers, createStore} from 'redux'
-import ReactDOM from 'react-dom'
-import {Provider, useSelector} from 'react-redux'
 import React from 'react'
+import { createStore } from 'redux'
+import { Provider, useSelector, useDispatch } from 'react-redux'
+import ReactDOM from 'react-dom'
 
-let initialState = {items:
+type StudentType = {
+	id: number
+	name: string
+	age: number
+}
+
+const initState = {
+	students:
 		[
-			{id: 1, name: 'Dimych'},
-			{id: 2, name: 'Ignat'}
-		]
+			{id: 1, name: 'Bob', age: 23},
+			{id: 2, name: 'Alex', age: 22}
+		] as Array<StudentType>
 }
-const usersReducer = (state = initialState, action: any) => {
+type AddStudentAT = {
+	type: 'ADD-STUDENT'
+	name: string
+	age: number
+	id: number
+}
+
+type InitialStateType = typeof initState
+
+const studentsReducer = (state: InitialStateType = initState, action: AddStudentAT): InitialStateType => {
+	switch (action.type) {
+		case 'ADD-STUDENT':
+			return {
+				...state,
+				students: [...state.students, {
+					name: action.name,
+					age: action.age,
+					id: action.id
+				}]
+			}
+	}
 	return state
 }
 
-let authInitialState = {login: 'Margo', settings: {theme: 'dark'}}
-const authReducer = (state = authInitialState, action: any) => {
-	return state
+const appStore = createStore(studentsReducer)
+type RootStateType = ReturnType<typeof studentsReducer>
+
+
+const StudentList = () => {
+	const students = useSelector((state: RootStateType) => state.students)
+	return (
+		<ul>
+			{students.map(s => <li key={s.id}>{`${s.name}. ${s.age} years.`}</li>)}
+		</ul>
+	)
 }
-
-let rootReducer = combineReducers({
-	users: usersReducer,
-	auth: authReducer
-})
-
-const store = createStore(rootReducer)
-type RootStateType = ReturnType<typeof rootReducer>
-
-const selector = (state: RootStateType) => state.users.items
-
-const Users = () => {
-
-	const users = XXX
-
-	return <ul>
-		{users.map(u => <li key={u.id}>{u.name}</li>)}
-	</ul>
+const App = () => {
+	return <StudentList/>
 }
 
 ReactDOM.render(<div>
-		<Provider store={store}>
-			<Users/>
-		</Provider>
+		<XXX YYY={ZZZ}>
+			<App/>
+		</XXX>
 	</div>,
 	document.getElementById('root')
 )
 
-// Что нужно написать вместо XXX, чтобы отрендерить список юзеров?
-// ❗ Ответ дать минимально возможным объёмом кода
+// Что нужно написать вместо XXX, YYY и ZZZ, чтобы отобразился список студентов?
