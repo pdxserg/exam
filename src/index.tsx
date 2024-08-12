@@ -1,30 +1,49 @@
-export const reducer = (state: any, action: any) => {
-	switch (action.type) {
-		case 'USER-NAME-UPDATED':
-			return XXX
+import {combineReducers, createStore} from 'redux'
+import ReactDOM from 'react-dom'
+import {Provider, useSelector} from 'react-redux'
+import React from 'react'
 
-		default:
-			return state
-	}
+let initialState = {items:
+		[
+			{id: 1, name: 'Dimych'},
+			{id: 2, name: 'Ignat'}
+		]
+}
+const usersReducer = (state = initialState, action: any) => {
+	return state
 }
 
-const updateUserNameAC = (name: string) => ({type: 'USER-NAME-UPDATED', name})
-
-
-const state = {
-	count: 10,
-	user: {
-		name: 'Dimych',
-		age: 18,
-		isMarried: true,
-		status: "offline"
-	},
-	books: ['you don\'t know JS']
+let authInitialState = {login: 'Margo', settings: {theme: 'dark'}}
+const authReducer = (state = authInitialState, action: any) => {
+	return state
 }
-const newState = reducer(state, updateUserNameAC('Dmitry'))
 
-console.log(newState.user.name === 'Dmitry')
-console.log(newState.books === state.books)
-console.log(newState.user !== state.user)
+let rootReducer = combineReducers({
+	users: usersReducer,
+	auth: authReducer
+})
 
-//Что нужно написать вместо XXX, чтобы корректно обновить имя пользователя и в консоли увидеть:  true true true?
+const store = createStore(rootReducer)
+type RootStateType = ReturnType<typeof rootReducer>
+
+const selector = (state: RootStateType) => state.users.items
+
+const Users = () => {
+
+	const users = XXX
+
+	return <ul>
+		{users.map(u => <li key={u.id}>{u.name}</li>)}
+	</ul>
+}
+
+ReactDOM.render(<div>
+		<Provider store={store}>
+			<Users/>
+		</Provider>
+	</div>,
+	document.getElementById('root')
+)
+
+// Что нужно написать вместо XXX, чтобы отрендерить список юзеров?
+// ❗ Ответ дать минимально возможным объёмом кода
