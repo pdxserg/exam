@@ -1,75 +1,30 @@
-import {createStore} from 'redux'
-import ReactDOM from 'react-dom'
-import {Provider, useSelector, useDispatch} from 'react-redux'
-import React from 'react'
-
-const students = {
-	students: [
-		{id: 1, name: 'Bob'},
-		{id: 2, name: 'Alex'},
-		{id: 3, name: 'Donald'},
-		{id: 4, name: 'Ann'},
-	]
-}
-type RemoveStudentAT = {
-	type: "REMOVE-STUDENT"
-	id: number
-}
-const RemoveStudentAC = (id: number): RemoveStudentAT => ({
-	type: "REMOVE-STUDENT",
-	id
-})
-
-const studentsReducer = (state = students, action: RemoveStudentAT) => {
+export const reducer = (state: any, action: any) => {
 	switch (action.type) {
-		case "REMOVE-STUDENT":
-			return {
-				...state,
-				students: state.students.filter(s => s.id !== action.id)
-			}
+		case 'USER-NAME-UPDATED':
+			return XXX
+
+		default:
+			return state
 	}
-	return state
 }
 
-const store = createStore(studentsReducer)
-type RootStateType = ReturnType<typeof studentsReducer>
+const updateUserNameAC = (name: string) => ({type: 'USER-NAME-UPDATED', name})
 
 
-const StudentList = () => {
-	const listItemStyles = {
-		width: "100px",
-		borderBottom: "1px solid gray",
-		cursor: "pointer",
-	}
-	const students = useSelector((state: RootStateType) => state.students)
-	const dispatch = useDispatch()
-	const studentsList = students.map(s => {
-		const removeStudent = () => {
-			XXX(YYY( ZZZ))
-		}
-		return (
-			<li key={s.id}
-			    style={listItemStyles}
-			    onClick={removeStudent}>
-				{s.name}
-			</li>)
-	})
-	return (
-		<ol>
-			{studentsList}
-		</ol>
-
-	)
+const state = {
+	count: 10,
+	user: {
+		name: 'Dimych',
+		age: 18,
+		isMarried: true,
+		status: "offline"
+	},
+	books: ['you don\'t know JS']
 }
+const newState = reducer(state, updateUserNameAC('Dmitry'))
 
+console.log(newState.user.name === 'Dmitry')
+console.log(newState.books === state.books)
+console.log(newState.user !== state.user)
 
-ReactDOM.render(<div>
-		<Provider store={store}>
-			<StudentList/>
-		</Provider>
-	</div>,
-	document.getElementById('root')
-)
-
-// Что нужно написать вместо XXX, YYY и ZZZ, чтобы при клике по имени студент
-// удалялся из списка? Напишите через пробел.
+//Что нужно написать вместо XXX, чтобы корректно обновить имя пользователя и в консоли увидеть:  true true true?
