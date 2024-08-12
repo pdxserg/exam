@@ -1,32 +1,18 @@
-export const reducer = (state: stateType, action: action):stateType => {
-	switch (action.type) {
-		case 'USER-NAME-UPDATED':
-			return {...state, user :{...state.user, name: action.name}}
+import {combineReducers, createStore} from 'redux'
 
-		default:
-			return state
-	}
+let initialState = {items: [{name: 'Dimych'}, {name: 'Ignat'}]}
+const usersReducer = (state = initialState, action: any) => {
+	return state
 }
 
-type action =ReturnType<typeof updateUserNameAC>
+const store = createStore(combineReducers({
+	users: usersReducer
+}))
 
-const updateUserNameAC = (name: string) => ({type: 'USER-NAME-UPDATED', name})
+store.subscribe(() => {
+	console.log('state changed')
+})
 
-type stateType=  typeof state
-const state = {
-	count: 10,
-	user: {
-		name: 'Dimych',
-		age: 18,
-		isMarried: true,
-		status: "offline"
-	},
-	books: ['you don\'t know JS']
-}
-const newState = reducer(state, updateUserNameAC('Dmitry'))
+store.dispatch({type: 'ANY'})
 
-console.log(newState.user.name === 'Dmitry')
-console.log(newState.books === state.books)
-console.log(newState.user !== state.user)
-
-//Что нужно написать вместо XXX, чтобы корректно обновить имя пользователя и в консоли увидеть:  true true true?
+// Что нужно написать вместо XXX, чтобы в консоли увидеть 'state changed'?
