@@ -13,7 +13,7 @@ const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incub
 
 const api = {
 	getUsers(pageNumber: number) {
-		return instance.get(`users?pageSize=${3}&pageNumber${pageNumber}`)
+		return instance.get(`users?pageSize=${pageNumber}&pageNumber${pageNumber}`)
 	},
 }
 
