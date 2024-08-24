@@ -1,65 +1,121 @@
-
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client';
 
-// Types
-type PostType = {
-	body: string
+// TYPES
+type ProductType = {
 	id: string
 	title: string
-	userId: string
+	description: string
+	price: number
 }
 
+type FilmType = {
+	id: number
+	nameOriginal: string
+	description: string
+	ratingImdb: number
+}
+
+type ProductsResponseType = {
+	total: number
+	messages: string[]
+	page: number
+	pageCount: number
+	data: ProductType[]
+}
+
+type FilmsResponseType = {
+	total: number
+	messages: string[]
+	page: number
+	pageCount: number
+	data: FilmType[]
+}
+
+type CommonResponseType = {
+	// your code
+}
 
 // Api
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
-const postsAPI = {
-	getPosts() {
-		return instance.get<PostType[]>('posts')
+const api = {
+	getProducts() {
+		return instance.get<ProductsResponseType>('products')
 	},
-	deletePost(id: string) {
-		return axios.delete<{ message: string }>(`posts/${id}`)
+	getFilms() {
+		return instance.get<FilmsResponseType>('films')
 	}
 }
 
 
 // App
-export const App = () => {
-
-	const [posts, setPosts] = useState<PostType[]>([])
-
-	useEffect(() => {
-		postsAPI.getPosts()
-			.then((res) => {
-				setPosts(res.data)
-			})
-	}, [])
-
-	const deletePostHandler = (id: string) => {
-		postsAPI.deletePost(id)
-			.then((res) => {
-				const newPostsArr = posts.filter(p => p.id !== id)
-				setPosts(newPostsArr)
-			})
-	};
-
+const App = () => {
 	return (
 		<>
-			<h1>📜 Список постов</h1>
-			{posts.map(p => {
-				return (
-					<div key={p.id}>
-						<b>title</b>: {p.title}
-						<button style={{marginLeft: '15px'}}
-						        onClick={() => deletePostHandler(p.id)}>
-							x
-						</button>
-					</div>
-				)
-			})}
+			<h1>🛒 Products && 🎦 Films</h1>
+			<div style={{display: 'flex', justifyContent: 'space-evenly'}}>
+				<Products/>
+				<Films/>
+			</div>
 		</>
+	)
+}
+
+const Products = () => {
+
+	const [products, setProducts] = useState<ProductType[]>([])
+
+	useEffect(() => {
+		api.getProducts()
+			.then((res) => setProducts(res.data.data))
+	}, [])
+
+	return (
+		<div style={{width: '45%'}}>
+			<h2>🛒 Products</h2>
+			<div>
+				{
+					products.map(p => {
+						return (
+							<div key={p.id}>
+								<b>{p.title}</b>
+								<p>{p.description}</p>
+								<p>💵 {p.price} $</p>
+							</div>
+						)
+					})
+				}</div>
+		</div>
+	)
+}
+
+const Films = () => {
+
+	const [films, setFilms] = useState<FilmType[]>([])
+
+	useEffect(() => {
+		api.getFilms()
+			.then((res) => setFilms(res.data.data))
+	}, [])
+
+	return (
+		<div style={{width: '45%'}}>
+			<h2>🎦 Films</h2>
+			<div>
+				{
+					films.map(f => {
+						return (
+							<div key={f.id}>
+								<b>{f.nameOriginal}</b>
+								<p>{f.description}</p>
+								<p>⭐ {f.ratingImdb} </p>
+							</div>
+						)
+					})
+				}</div>
+		</div>
 	)
 }
 
@@ -68,7 +124,20 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(<App/>)
 
 // 📜 Описание:
-// Почему не удаляется post при нажатии на кнопку удаления (х) ?
-// Найдите ошибку и вставьте исправленную строку кода в качестве ответа
+// При запуске проекта на экране вы увидите 2 списка: Products и Films.
+// С ними все хорошо, но обратите внимание на типизацию ответов с сервера ProductsResponseType и FilmsResponseType.
+// Дублирование типов на лицо.
+// Ваша задача написать дженериковый тип CommonResponseType и заменить им дублирующие типы.
+// Очередность свойств в типах менять запрещено (по причине что нам будет тяжело перебрать все правильные варианты :) )
+// Параметр тип назовите буквой T
 //
-// 🖥 Пример ответа: return axios.delete
+// В качестве ответа нужно скопировать полностью рабочий дженериковый тип CommonResponseType
+//
+// 🖥 Пример ответа:
+// type CommonResponseType = {
+//   total: T
+//   messages: T[]
+//   page: T
+//   pageCount: T
+//   data: T[]
+// }
