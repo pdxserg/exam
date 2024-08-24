@@ -1,28 +1,31 @@
 import axios from 'axios'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client';
 
 // Types
-type CommentType = {
-	postId: string
+type PhotoType = {
+	albumId: string
 	id: string
-	name: string
-	email: string
-	body: string
+	title: string
+	url: string
+}
+
+type PayloadType = {
+	title: string
+	url?: string
 }
 
 // Api
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
-const commentsAPI = {
-	getComments() {
-		return instance.get<CommentType[]>('comments')
+const photoId = '637df6dc99fdc52af974a517'
+
+const photosAPI = {
+	getPhoto() {
+		return instance.get<PhotoType>(`photos/${photoId}`)
 	},
-	createComment() {
-		const payload = {body: 'Это просто заглушка. Backend сам сгенерирует новый комментарий и вернет его вам'}
-		// Promise.resolve() стоит в качестве заглушки, чтобы TS не ругался и код компилировался
-		// Promise.resolve() нужно удалить и написать правильный запрос для создания нового комментария
-		return instance.post<CommentType>(`comments`, payload)
+	updatePhoto(payload: PayloadType) {
+		return instance.put<PhotoType>(`photos/${photoId}`, payload)
 	}
 }
 
@@ -30,48 +33,53 @@ const commentsAPI = {
 // App
 export const App = () => {
 
-	const [comments, setComments] = useState<CommentType[]>([])
+	const [photo, setPhoto] = useState<PhotoType | null>(null)
 
 	useEffect(() => {
-		commentsAPI.getComments()
+		photosAPI.getPhoto()
 			.then((res) => {
-				setComments(res.data)
+				setPhoto(res.data)
 			})
 	}, [])
 
-	const createPostHandler = () => {
-		commentsAPI.createComment()
-			.then((res: any) => {
-				const newComment = res.data
-				setComments([newComment, ...comments,])
+	const updatePhotoHandler = () => {
+		// ❗ title и url указаны в качестве заглушки. Server сам сгенерирует новый title
+		const payload = {
+			title: 'Новый title',
+			url: 'data:image/png;base64,iVBORw0FAKEADDRESSnwMZAABJRUrkJggg=='
+		}
+		photosAPI.updatePhoto(payload)
+			.then((res) => {
+				setPhoto(res.data)
 			})
 	};
 
 	return (
 		<>
-			<h1>📝 Список комментариев</h1>
-			<div style={{marginBottom: '15px'}}>
+			<h1>📸 Фото</h1>
+			<div>
+				<div style={{marginBottom: '15px'}}>
+					<h1>title: {photo?.title}</h1>
+					<div><img src={photo?.url} alt=""/></div>
+				</div>
 				<button style={{marginLeft: '15px'}}
-				        onClick={() => createPostHandler()}>
-					Добавить новый комментарий
+				        onClick={updatePhotoHandler}>
+					Изменить title
 				</button>
 			</div>
-
-			{
-				comments.map(c => {
-					return <div key={c.id}><b>Comment</b>: {c.body} </div>
-				})
-			}
 		</>
 	)
 }
+
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(<App/>)
 
 // 📜 Описание:
-// Напишите запрос на сервер для создания нового комментария.
-// Типизацию возвращаемых данных в ответе указывать необязательно, но можно и указать (в ответах учтены оба варианта).
-// Исправленную версию строки напишите в качестве ответа.
+// При нажатии на кнопку "Изменить title" title должен обновиться,
+// но из-за невнимательности была допущена ошибка и изменение не происходит
 //
-// 🖥 Пример ответа: return Promise.resolve(payload)
+// Найдите и исправьте ошибку
+// Исправленную версию строки напишите в качестве ответа.
+
+// 🖥 Пример ответа: photosAPI.updatePhotoTitle(id, title)
