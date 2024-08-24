@@ -3,70 +3,48 @@ import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client';
 
 // Types
-type PhotoType = {
-	albumId: string
-	id: string
-	title: string
-	url: string
+type TodoType = {
+	id: string;
+	tile: string;
+	order: number;
+	createdAt: string;
+	updatedAt: string;
+	complete: boolean;
 }
 
-type PayloadType = {
-	title: string
-	url?: string
-}
 
 // Api
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
-const photoId = '637df6dc99fdc52af974a517'
-
-const photosAPI = {
-	getPhoto() {
-		return instance.get<PhotoType>(`photos/${photoId}`)
+const todosAPI = {
+	getTodos() {
+		return instance.get<TodoType[]>('todos')
 	},
-	updatePhoto(payload: PayloadType) {
-		return instance.put<PhotoType>(`photos/${photoId}`, {payload})
-	}
 }
 
 
 // App
-export const App = () => {
+const App = () => {
 
-	const [photo, setPhoto] = useState<PhotoType | null>(null)
+	const [todos, setTodos] = useState<TodoType[]>([])
 
 	useEffect(() => {
-		photosAPI.getPhoto()
-			.then((res) => {
-				setPhoto(res.data)
-			})
+		todosAPI.getTodos().then((res) => setTodos(res.data))
 	}, [])
-
-	const updatePhotoHandler = () => {
-		// ❗ title и url указаны в качестве заглушки. Server сам сгенерирует новый title
-		const payload = {
-			title: 'Новый title',
-			url: 'data:image/png;base64,iVBORw0FAKEADDRESSnwMZAABJRUrkJggg=='
-		}
-		photosAPI.updatePhoto(payload)
-			.then((res) => {
-				setPhoto(res.data)
-			})
-	};
 
 	return (
 		<>
-			<h1>📸 Фото</h1>
-			<div>
-				<div style={{marginBottom: '15px'}}>
-					<h1>title: {photo?.title}</h1>
-					<div><img src={photo?.url} alt=""/></div>
-				</div>
-				<button style={{marginLeft: '15px'}}
-				        onClick={updatePhotoHandler}>
-					Изменить title
-				</button>
-			</div>
+			<h2>✅ Список тудулистов</h2>
+			{
+				todos.map((t) => {
+					return (
+						<div style={t.complete ? {color: 'grey'} : {}} key={t.id}>
+							<input type="checkbox" checked={t.complete}/>
+							<b>Описание</b>: {t.tile}
+						</div>
+					)
+				})
+			}
 		</>
 	)
 }
@@ -76,10 +54,8 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(<App/>)
 
 // 📜 Описание:
-// При нажатии на кнопку "Изменить title" title должен обновиться,
-// но из-за невнимательности была допущена ошибка и изменение не происходит
-//
-// Найдите и исправьте ошибку
-// Исправленную версию строки напишите в качестве ответа.
+// При написании типизации по невнимательности было допущено несколько ошибок.
+// Напишите через пробел правильные свойства в TodoType, в которых была допущена ошибка.
+// Debugger / network / документация вам в помощь
 
-// 🖥 Пример ответа: photosAPI.updatePhotoTitle(id, title)
+// 🖥 Пример ответа: id status isDone
