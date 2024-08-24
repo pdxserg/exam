@@ -5,11 +5,11 @@ import ReactDOM from 'react-dom/client';
 // Types
 type TodoType = {
 	id: string;
-	tile: string;
+	title: string;
 	order: number;
 	createdAt: string;
 	updatedAt: string;
-	complete: boolean;
+	completed: boolean;
 }
 
 
@@ -17,33 +17,41 @@ type TodoType = {
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
 const todosAPI = {
-	getTodos() {
-		return instance.get<TodoType[]>('todos')
-	},
+	getTodo(todoId: string) {
+		return instance.get<TodoType>(`todos/ ${todoId}`)
+	}
 }
 
 
 // App
-const App = () => {
+export const App = () => {
 
-	const [todos, setTodos] = useState<TodoType[]>([])
+	const [todo, setTodo] = useState<TodoType | null>(null)
+	const [error, setError] = useState<string>('')
 
 	useEffect(() => {
-		todosAPI.getTodos().then((res) => setTodos(res.data))
+		const todoId = "637cb9342f24ad82bcb07d8d"
+		todosAPI.getTodo(todoId)
+			.then((res: any) => setTodo(res.data))
+			.catch(e => {
+				setError('Ошибка 😰. Анализируй network 😉')
+			})
 	}, [])
+
 
 	return (
 		<>
-			<h2>✅ Список тудулистов</h2>
+			<h2>✅ Тудулист</h2>
 			{
-				todos.map((t) => {
-					return (
-						<div style={t.complete ? {color: 'grey'} : {}} key={t.id}>
-							<input type="checkbox" checked={t.complete}/>
-							<b>Описание</b>: {t.tile}
+				!!todo
+					? <div>
+						<div style={todo?.completed ? {color: 'grey'} : {}} key={todo?.id}>
+							<input type="checkbox" checked={todo?.completed}/>
+							<b>Описание</b>: {todo?.title}
 						</div>
-					)
-				})
+						<h2>Так держать. Ты справился 🚀</h2>
+					</div>
+					: <h2 style={{ color: 'red' }}>{error}</h2>
 			}
 		</>
 	)
@@ -54,8 +62,8 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(<App/>)
 
 // 📜 Описание:
-// При написании типизации по невнимательности было допущено несколько ошибок.
-// Напишите через пробел правильные свойства в TodoType, в которых была допущена ошибка.
-// Debugger / network / документация вам в помощь
+// Студент по неопытности допустил одну маленькую ошибку, но из-за нее он не может вывести на экран тудулист.
+// Найдите ошибку и вставьте исправленную версию строки кода в качестве ответа
+// P.S. Эта ошибка из реальной жизни, студенты часто ошибаются подобным образом и не могут понять в чем дело.
 
-// 🖥 Пример ответа: id status isDone
+// 🖥 Пример ответа:  .then((res: any) => setTodo(res.data.data))
