@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client';
 // Types
 type TodoType = {
 	id: string;
-	title: string;
+	tile: string;
 	order: number;
 	createdAt: string;
 	updatedAt: string;
@@ -17,44 +17,33 @@ type TodoType = {
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
 const todosAPI = {
-	getTodo(todoId: string) {
-		return instance.get<TodoType>(`todos/${todoId}`)
-
-	}
+	getTodos() {
+		return instance.get<TodoType[]>('todos')
+	},
 }
 
 
 // App
-export const App = () => {
+const App = () => {
 
-	const [todo, setTodo] = useState<TodoType | null>(null)
-	const [error, setError] = useState<string>('')
+	const [todos, setTodos] = useState<TodoType[]>([])
 
 	useEffect(() => {
-		const todoId = "637cb9342f24ad82bcb07d8d"
-		todosAPI.getTodo(todoId)
-			.then((res) => {
-				setTodo(res.data)
-			})
-			.catch(e => {
-				setError('Ошибка 😰. Анализируй network 😉')
-			})
+		todosAPI.getTodos().then((res) => setTodos(res.data))
 	}, [])
-
 
 	return (
 		<>
-			<h2>✅ Тудулист</h2>
+			<h2>✅ Список тудулистов</h2>
 			{
-				!!todo
-					? <div>
-						<div style={todo?.completed ? {color: 'grey'} : {}} key={todo?.id}>
-							<input type="checkbox" checked={todo?.completed}/>
-							<b>Описание</b>: {todo?.title}
+				todos.map((t) => {
+					return (
+						<div style={t.completed ? {color: 'grey'} : {}} key={t.id}>
+							<input type="checkbox" checked={t.completed}/>
+							<b>Описание</b>: {t.tile}
 						</div>
-						<h2>Так держать. Ты справился 🚀</h2>
-					</div>
-					: <h2 style={{ color: 'red' }}>{error}</h2>
+					)
+				})
 			}
 		</>
 	)
@@ -65,8 +54,8 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(<App/>)
 
 // 📜 Описание:
-// Студент по неопытности допустил одну маленькую ошибку, но из-за нее он не может вывести на экран тудулист.
-// Найдите ошибку и вставьте исправленную версию строки кода в качестве ответа
-// P.S. Эта ошибка из реальной жизни, студенты часто ошибаются подобным образом и не могут понять в чем дело.
+// При написании типизации по невнимательности было допущено несколько ошибок.
+// Напишите через пробел правильные свойства в TodoType, в которых была допущена ошибка.
+// Debugger / network / документация вам в помощь
 
-// 🖥 Пример ответа:  .then((res: any) => setTodo(res.data.data))
+// 🖥 Пример ответа: id status isDone
