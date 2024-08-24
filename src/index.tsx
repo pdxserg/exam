@@ -1,143 +1,77 @@
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client';
 
-// TYPES
-type ProductType = {
+// Types
+type CommentType = {
+	postId: string
 	id: string
-	title: string
-	description: string
-	price: number
-}
-
-type FilmType = {
-	id: number
-	nameOriginal: string
-	description: string
-	ratingImdb: number
-}
-
-type ProductsResponseType = {
-	total: number
-	messages: string[]
-	page: number
-	pageCount: number
-	data: ProductType[]
-}
-
-type FilmsResponseType = {
-	total: number
-	messages: string[]
-	page: number
-	pageCount: number
-	data: FilmType[]
-}
-
-type CommonResponseType = {
-	// your code
+	name: string
+	email: string
+	body: string
 }
 
 // Api
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
-const api = {
-	getProducts() {
-		return instance.get<ProductsResponseType>('products')
+const commentsAPI = {
+	getComments() {
+		return instance.get<CommentType[]>('comments')
 	},
-	getFilms() {
-		return instance.get<FilmsResponseType>('films')
+	createComment() {
+		const payload = {body: 'Это просто заглушка. Backend сам сгенерирует новый комментарий и вернет его вам'}
+		// Promise.resolve() стоит в качестве заглушки, чтобы TS не ругался и код компилировался
+		// Promise.resolve() нужно удалить и написать правильный запрос для создания нового комментария
+		return Promise.resolve()
 	}
 }
 
 
 // App
-const App = () => {
+export const App = () => {
+
+	const [comments, setComments] = useState<CommentType[]>([])
+
+	useEffect(() => {
+		commentsAPI.getComments()
+			.then((res) => {
+				setComments(res.data)
+			})
+	}, [])
+
+	const createPostHandler = () => {
+		commentsAPI.createComment()
+			.then((res: any) => {
+				const newComment = res.data
+				setComments([newComment, ...comments,])
+			})
+	};
+
 	return (
 		<>
-			<h1>🛒 Products && 🎦 Films</h1>
-			<div style={{display: 'flex', justifyContent: 'space-evenly'}}>
-				<Products/>
-				<Films/>
+			<h1>📝 Список комментариев</h1>
+			<div style={{marginBottom: '15px'}}>
+				<button style={{marginLeft: '15px'}}
+				        onClick={() => createPostHandler()}>
+					Добавить новый комментарий
+				</button>
 			</div>
+
+			{
+				comments.map(c => {
+					return <div key={c.id}><b>Comment</b>: {c.body} </div>
+				})
+			}
 		</>
 	)
 }
-
-const Products = () => {
-
-	const [products, setProducts] = useState<ProductType[]>([])
-
-	useEffect(() => {
-		api.getProducts()
-			.then((res) => setProducts(res.data.data))
-	}, [])
-
-	return (
-		<div style={{width: '45%'}}>
-			<h2>🛒 Products</h2>
-			<div>
-				{
-					products.map(p => {
-						return (
-							<div key={p.id}>
-								<b>{p.title}</b>
-								<p>{p.description}</p>
-								<p>💵 {p.price} $</p>
-							</div>
-						)
-					})
-				}</div>
-		</div>
-	)
-}
-
-const Films = () => {
-
-	const [films, setFilms] = useState<FilmType[]>([])
-
-	useEffect(() => {
-		api.getFilms()
-			.then((res) => setFilms(res.data.data))
-	}, [])
-
-	return (
-		<div style={{width: '45%'}}>
-			<h2>🎦 Films</h2>
-			<div>
-				{
-					films.map(f => {
-						return (
-							<div key={f.id}>
-								<b>{f.nameOriginal}</b>
-								<p>{f.description}</p>
-								<p>⭐ {f.ratingImdb} </p>
-							</div>
-						)
-					})
-				}</div>
-		</div>
-	)
-}
-
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(<App/>)
 
 // 📜 Описание:
-// При запуске проекта на экране вы увидите 2 списка: Products и Films.
-// С ними все хорошо, но обратите внимание на типизацию ответов с сервера ProductsResponseType и FilmsResponseType.
-// Дублирование типов на лицо.
-// Ваша задача написать дженериковый тип CommonResponseType и заменить им дублирующие типы.
-// Очередность свойств в типах менять запрещено (по причине что нам будет тяжело перебрать все правильные варианты :) )
-// Параметр тип назовите буквой T
+// Напишите запрос на сервер для создания нового комментария.
+// Типизацию возвращаемых данных в ответе указывать необязательно, но можно и указать (в ответах учтены оба варианта).
+// Исправленную версию строки напишите в качестве ответа.
 //
-// В качестве ответа нужно скопировать полностью рабочий дженериковый тип CommonResponseType
-//
-// 🖥 Пример ответа:
-// type CommonResponseType = {
-//   total: T
-//   messages: T[]
-//   page: T
-//   pageCount: T
-//   data: T[]
-// }
+// 🖥 Пример ответа: return Promise.resolve(payload)
