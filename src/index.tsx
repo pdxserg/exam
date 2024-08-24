@@ -18,7 +18,8 @@ const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incub
 
 const todosAPI = {
 	getTodo(todoId: string) {
-		return instance.get<TodoType>(`todos/ ${todoId}`)
+		return instance.get<TodoType>(`todos/${todoId}`)
+
 	}
 }
 
@@ -32,7 +33,9 @@ export const App = () => {
 	useEffect(() => {
 		const todoId = "637cb9342f24ad82bcb07d8d"
 		todosAPI.getTodo(todoId)
-			.then((res: any) => setTodo(res.data))
+			.then((res) => {
+				setTodo(res.data)
+			})
 			.catch(e => {
 				setError('Ошибка 😰. Анализируй network 😉')
 			})
