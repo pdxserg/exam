@@ -1,47 +1,65 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom/client'
 
-// Types
-type TodoType = {
+type UserType = {
 	id: string;
-	tile: string;
-	order: number;
-	createdAt: string;
-	updatedAt: string;
-	complete: boolean;
+	name: string;
+	age: number;
 }
 
-
-// Api
+// API
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
-const todosAPI = {
-	getTodos() {
-		return instance.get<TodoType[]>('todos')
+const api = {
+	getUsers(pageNumber: number) {
+		return instance.get(`users?pageSize=${3}&pageNumber${pageNumber}`)
 	},
 }
 
-
 // App
-const App = () => {
+const buttons = [
+	{id: 1, title: '1'},
+	{id: 2, title: '2'},
+	{id: 3, title: '3'},
+]
 
-	const [todos, setTodos] = useState<TodoType[]>([])
+export const App = () => {
+
+	const [users, setUsers] = useState<UserType[]>([])
+	const [currentPage, setCurrentPage] = useState(1)
 
 	useEffect(() => {
-		todosAPI.getTodos().then((res) => setTodos(res.data))
-	}, [])
+		api.getUsers(currentPage)
+			.then((res: any) => {
+				setUsers(res.data.items)
+			})
+	}, [currentPage])
+
+	const setPageHandler = (page: number) => {
+		setCurrentPage(page)
+	};
 
 	return (
 		<>
-			<h2>✅ Список тудулистов</h2>
+			<h1>👪 Список пользователей</h1>
 			{
-				todos.map((t) => {
+				users.map(u => {
+					return <div style={{marginBottom: '25px'}} key={u.id}>
+						<p><b>name</b>: {u.name}</p>
+						<p><b>age</b>: {u.age}</p>
+					</div>
+				})
+			}
+
+			{
+				buttons.map(b => {
 					return (
-						<div style={t.complete ? {color: 'grey'} : {}} key={t.id}>
-							<input type="checkbox" checked={t.complete}/>
-							<b>Описание</b>: {t.tile}
-						</div>
+						<button key={b.id}
+						        style={b.id === currentPage ? {backgroundColor: 'lightblue'} : {}}
+						        onClick={() => setPageHandler(b.id)}>
+							{b.title}
+						</button>
 					)
 				})
 			}
@@ -54,8 +72,8 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(<App/>)
 
 // 📜 Описание:
-// При написании типизации по невнимательности было допущено несколько ошибок.
-// Напишите через пробел правильные свойства в TodoType, в которых была допущена ошибка.
-// Debugger / network / документация вам в помощь
+// При переходе по страницам должны подгружаться новые пользователи.
+// Однако в коде допущена ошибка и всегда подгружаются одни и теже пользователи.
+// Задача: найти эту ошибку, и исправленную версию строки написать в качестве ответа.
 
-// 🖥 Пример ответа: id status isDone
+// 🖥 Пример ответа: const [currentPage, setCurrentPage] = useState(page)
