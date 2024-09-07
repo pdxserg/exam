@@ -1,24 +1,28 @@
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client';
 
 // Types
-type TodoType = {
-	id: string;
-	title: string;
-	order: number;
-	createdAt: string;
-	updatedAt: string;
-	completed: boolean;
+type CommentType = {
+	postId: string
+	id: string
+	name: string
+	email: string
+	body: string
 }
-
 
 // Api
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
-const todosAPI = {
-	getTodo(todoId: string) {
-		return instance.get<TodoType>(`todos/ ${todoId}`)
+const commentsAPI = {
+	getComments() {
+		return instance.get<CommentType[]>('comments')
+	},
+	createComment() {
+		const payload = {body: 'Это просто заглушка. Backend сам сгенерирует новый комментарий и вернет его вам'}
+		// Promise.resolve() стоит в качестве заглушки, чтобы TS не ругался и код компилировался
+		// Promise.resolve() нужно удалить и написать правильный запрос для создания нового комментария
+		return instance.post(`comments`, payload)
 	}
 }
 
@@ -26,44 +30,48 @@ const todosAPI = {
 // App
 export const App = () => {
 
-	const [todo, setTodo] = useState<TodoType | null>(null)
-	const [error, setError] = useState<string>('')
+	const [comments, setComments] = useState<CommentType[]>([])
 
 	useEffect(() => {
-		const todoId = "637cb9342f24ad82bcb07d8d"
-		todosAPI.getTodo(todoId)
-			.then((res: any) => setTodo(res.data))
-			.catch(e => {
-				setError('Ошибка 😰. Анализируй network 😉')
+		commentsAPI.getComments()
+			.then((res) => {
+				setComments(res.data)
 			})
 	}, [])
 
+	const createPostHandler = () => {
+		commentsAPI.createComment()
+			.then((res: any) => {
+				const newComment = res.data
+				setComments([newComment, ...comments,])
+			})
+	};
 
 	return (
 		<>
-			<h2>✅ Тудулист</h2>
+			<h1>📝 Список комментариев</h1>
+			<div style={{marginBottom: '15px'}}>
+				<button style={{marginLeft: '15px'}}
+				        onClick={() => createPostHandler()}>
+					Добавить новый комментарий
+				</button>
+			</div>
+
 			{
-				!!todo
-					? <div>
-						<div style={todo?.completed ? {color: 'grey'} : {}} key={todo?.id}>
-							<input type="checkbox" checked={todo?.completed}/>
-							<b>Описание</b>: {todo?.title}
-						</div>
-						<h2>Так держать. Ты справился 🚀</h2>
-					</div>
-					: <h2 style={{ color: 'red' }}>{error}</h2>
+				comments.map(c => {
+					return <div key={c.id}><b>Comment</b>: {c.body} </div>
+				})
 			}
 		</>
 	)
 }
 
-
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(<App/>)
 
 // 📜 Описание:
-// Студент по неопытности допустил одну маленькую ошибку, но из-за нее он не может вывести на экран тудулист.
-// Найдите ошибку и вставьте исправленную версию строки кода в качестве ответа
-// P.S. Эта ошибка из реальной жизни, студенты часто ошибаются подобным образом и не могут понять в чем дело.
-
-// 🖥 Пример ответа:  .then((res: any) => setTodo(res.data.data))
+// Напишите запрос на сервер для создания нового комментария.
+// Типизацию возвращаемых данных в ответе указывать необязательно, но можно и указать (в ответах учтены оба варианта).
+// Исправленную версию строки напишите в качестве ответа.
+//
+// 🖥 Пример ответа: return Promise.resolve(payload)
