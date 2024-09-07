@@ -3,49 +3,70 @@ import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client';
 
 // Types
-type PostType = {
+type PhotoType = {
+	albumId: string
 	id: string
-	body: string
 	title: string
-	userId: string
+	url: string
 }
 
+type PayloadType = {
+	title: string
+	url?: string
+}
 
 // Api
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
-const postsAPI = {
-	getPosts() {
-		// Promise.resolve() стоит в качестве заглушки, чтобы TS не ругался и код компилировался
-		// Promise.resolve() нужно удалить и написать правильный запрос для получения постов
-		return Promise.resolve()
+const photoId = '637df6dc99fdc52af974a517'
+
+const photosAPI = {
+	getPhoto() {
+		return instance.get<PhotoType>(`photos/${photoId}`)
 	},
+	updatePhoto(payload: PayloadType) {
+		return instance.put<PhotoType>(`photos/${photoId}`, {payload})
+	}
 }
 
 
 // App
 export const App = () => {
 
-	const [posts, setPosts] = useState<PostType[]>([])
+	const [photo, setPhoto] = useState<PhotoType | null>(null)
 
 	useEffect(() => {
-		postsAPI.getPosts()
-			.then((res: any) => {
-				setPosts(res.data)
+		photosAPI.getPhoto()
+			.then((res) => {
+				setPhoto(res.data)
 			})
 	}, [])
 
+	const updatePhotoHandler = () => {
+		// ❗ title и url указаны в качестве заглушки. Server сам сгенерирует новый title
+		const payload = {
+			title: 'Новый title',
+			url: 'data:image/png;base64,iVBORw0FAKEADDRESSnwMZAABJRUrkJggg=='
+		}
+		photosAPI.updatePhoto(payload)
+			.then((res) => {
+				setPhoto(res.data)
+			})
+	};
 
 	return (
 		<>
-			<h1>📜 Список постов</h1>
-			{
-				posts.length
-					? posts.map(p => {
-						return <div key={p.id}><b>title</b>: {p.title}</div>
-					})
-					: <h2>Постов нету 😥</h2>
-			}
+			<h1>📸 Фото</h1>
+			<div>
+				<div style={{marginBottom: '15px'}}>
+					<h1>title: {photo?.title}</h1>
+					<div><img src={photo?.url} alt=""/></div>
+				</div>
+				<button style={{marginLeft: '15px'}}
+				        onClick={updatePhotoHandler}>
+					Изменить title
+				</button>
+			</div>
 		</>
 	)
 }
@@ -55,8 +76,10 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(<App/>)
 
 // 📜 Описание:
-// Напишите запрос на сервер для получения всех постов
-// Типизацию возвращаемых данных в ответе указывать необязательно, но можно и указать (в ответах учтены оба варианта).
+// При нажатии на кнопку "Изменить title" title должен обновиться,
+// но из-за невнимательности была допущена ошибка и изменение не происходит
+//
+// Найдите и исправьте ошибку
 // Исправленную версию строки напишите в качестве ответа.
 
-// 🖥 Пример ответа: return Promise.resolve()
+// 🖥 Пример ответа: photosAPI.updatePhotoTitle(id, title)
