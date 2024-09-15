@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import {configureStore, combineReducers, Dispatch} from "@reduxjs/toolkit";
 
 // Types
 type PostType = {
@@ -25,8 +25,8 @@ const postsAPI = {
 	getPosts() {
 		return instance.get<PostType[]>("posts");
 	},
-	updatePostTitle(postId: string, post: PayloadType) {
-		return instance.put<PostType>(`posts/${postId}`, post);
+	updatePostTitle(postId: string, payload: PayloadType) {
+		return instance.put<PostType>(`posts/${postId}`, payload);
 	},
 };
 
@@ -66,17 +66,22 @@ const getPostsTC = (): AppThunk => (dispatch) => {
 
 const updatePostTC =
 	(postId: string): AppThunk =>
-		(dispatch, getState: any) => {
+		(dispatch:Dispatch, getState: ()=>RootState) => {
+	debugger
 			try {
-				const currentPost = getState().find((p: PostType) => p.id === postId);
+			//❗️❗️❗️❗️❗️❗️
+				const currentPost = getState().posts.find((p: PostType) => p.id === postId);
+				// ❗️❗️❗️❗️❗️❗️
 
 				if (currentPost) {
-					const payload = { title: "Это просто заглушка. Backend сам сгенерирует новый title" };
+					debugger
+					const payload = { title: "Это просто заглушка. Backend сам сгенерирует новый title"};
 					postsAPI.updatePostTitle(postId, payload).then((res) => {
 						dispatch(updatePostTitleAC(res.data));
 					});
 				}
 			} catch (e) {
+		debugger
 				alert("Обновить пост не удалось 😢");
 			}
 		};
