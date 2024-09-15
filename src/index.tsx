@@ -1,26 +1,96 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client';
+import axios from "axios";
+import React, { useEffect } from "react";
+import ReactDOM from "react-dom/client";
+import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
+// Types
+type CommentType = {
+	postId: string;
+	id: string;
+	name: string;
+	email: string;
+	body: string;
+};
 
-const thunkCreator = () => (XXX: any, YYY: any) => {
-	// сode...
-}
+// Api
+const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
+const commentsAPI = {
+	getComments() {
+		return instance.get<CommentType[]>("comments");
+	},
+};
+
+// Reducer
+const initState = [] as CommentType[];
+
+type InitStateType = typeof initState;
+
+const commentsReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
+	switch (action.type) {
+		case "COMMENTS/GET-COMMENTS":
+			return action.comments;
+		default:
+			return state;
+	}
+};
+
+const getCommentsAC = (comments: CommentType[]) =>
+	({ type: "COMMENTS/GET-COMMENTS", comments }) as const;
+type ActionsType = ReturnType<typeof getCommentsAC>;
+
+const getCommentsTC = (): ThunkAction<any, any, any, any> => (dispatch) => {
+	commentsAPI.getComments().then((res) => {
+		dispatch(getCommentsAC(res.data));
+	});
+};
+
+// Store
+const rootReducer = combineReducers({
+	comments: commentsReducer,
+});
+
+const store = configureStore({ reducer: rootReducer });
+type RootState = ReturnType<typeof store.getState>;
+type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
+const useAppDispatch = () => useDispatch<AppDispatch>();
+const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 // App
-const App = () => {
+export const App = () => {
+	const comments = useAppSelector((state) => state.comments);
+	const dispatch = useAppDispatch();
+
+	useEffect(() => {
+		dispatch(getCommentsTC());
+	}, []);
+
 	return (
 		<>
-			<h1>В этом задании смотреть на экран не нужно. Ничего не изменится 😈</h1>
-			<p>Читайте описание к заданию</p>
+			<h1>📝 Список комментариев</h1>
+			{comments.map((c) => {
+				return (
+					<div key={c.id}>
+						<b>Comment</b>: {c.body}{" "}
+					</div>
+				);
+			})}
 		</>
-	)
-}
+	);
+};
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(<App/>)
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+root.render(
+	<Provider store={store}>
+		<App />
+	</Provider>,
+);
 
 // 📜 Описание:
-// Вместо XXX и YYY через пробел напишите параметры которые приходят в санку.
-//
-// 🖥 Пример ответа: useCallback state
+// Ваша задача стоит в том чтобы правильно передать нужные типы в дженериковый тип ThunkAction<any, any, any, any>.
+// Что нужно написать вместо any, any, any, any чтобы правильно типизировать thunk creator?
+// Ответ дайте через пробел
+
+// 🖥 Пример ответа: unknown status isDone void
