@@ -1,87 +1,82 @@
+import axios from "axios";
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import axios from "axios";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import { ThunkDispatch } from "redux-thunk";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Types
-type PostType = {
+type CommentType = {
+	postId: string;
 	id: string;
+	name: string;
+	email: string;
 	body: string;
-	title: string;
-	userId: string;
 };
 
 // Api
 const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
-const postsAPI = {
-	getPosts() {
-		return instance.get<PostType[]>("posts");
+const commentsAPI = {
+	getComments() {
+		return instance.get<CommentType[]>("comments");
 	},
 };
 
 // Reducer
-const initState = [] as PostType[];
+const initState = [] as CommentType[];
 
 type InitStateType = typeof initState;
 
-const postsReducer = (
-	state: InitStateType = initState,
-	action: GetPostsActionType,
-): InitStateType => {
+const commentsReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
 	switch (action.type) {
-		case "POSTS/GET-POSTS":
-			return action.posts;
+		case "COMMENTS/GET-COMMENTS":
+			return action.comments;
+		default:
+			return state;
 	}
-	return state;
 };
 
-const getPostsAC = (posts: PostType[]) => ({ type: "POSTS/GET-POSTS", posts }) as const;
-type GetPostsActionType = ReturnType<typeof getPostsAC>;
+const getCommentsAC = (comments: CommentType[]) =>
+	({ type: "COMMENTS/GET-COMMENTS", comments }) as const;
+type ActionsType = ReturnType<typeof getCommentsAC>;
 
-const getPostsTC = (): AppThunk => (dispatch) => {
-	postsAPI.getPosts().then((res) => {
-		dispatch(getPostsAC(res.data));
+const getCommentsTC = () => (dispatch: DispatchType) => {
+	commentsAPI.getComments().then((res) => {
+		dispatch(getCommentsAC(res.data));
 	});
 };
 
 // Store
 const rootReducer = combineReducers({
-	posts: postsReducer,
+	comments: commentsReducer,
 });
 
 const store = configureStore({ reducer: rootReducer });
-type RootState = ReturnType<typeof store.getState>;
-type AppDispatch = ThunkDispatch<RootState, unknown, GetPostsActionType>;
-type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, GetPostsActionType>;
-const useAppDispatch = () => useDispatch<AppDispatch>();
+type RootState = ReturnType<typeof rootReducer>;
+type DispatchType = ThunkDispatch<any, any, any>;
+const useAppDispatch = () => useDispatch<DispatchType>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 // App
-const App = () => {
+export const App = () => {
+	const comments = useAppSelector((state) => state.comments);
 	const dispatch = useAppDispatch();
-	const posts = useAppSelector((state) => state.posts);
 
 	useEffect(() => {
-		dispatch(getPostsTC);
+		dispatch(getCommentsTC());
 	}, []);
 
 	return (
 		<>
-			<h1>📜 Список постов</h1>
-			{posts.length ? (
-				posts.map((p) => {
-					return (
-						<div key={p.id}>
-							<b>title</b>: {p.title}
-						</div>
-					);
-				})
-			) : (
-				<h2>Постов нету 😥</h2>
-			)}
+			<h1>📝 Список комментариев</h1>
+			{comments.map((c) => {
+				return (
+					<div key={c.id}>
+						<b>Comment</b>: {c.body}{" "}
+					</div>
+				);
+			})}
 		</>
 	);
 };
@@ -94,11 +89,8 @@ root.render(
 );
 
 // 📜 Описание:
-// При загрузке приложения вы должны увидеть список постов,
-// но из-за невнимательности была допущена ошибка.
+// Ваша задача стоит в том чтобы правильно передать нужные типы в дженериковый тип ThunkDispatch<any, any, any>.
+// Что нужно написать вместо any, any, any чтобы правильно типизировать dispatch ?
+// Ответ дайте через пробел
 
-// Найдите и исправьте ошибку
-// Исправленную версию строки напишите в качестве ответа.
-// 🖥 Пример ответа: type InitStateType = typeof initState
-
-// P.S. Эта ошибка из реальной жизни, студенты так часто ошибаются и не могут понять в чем дело.
+// 🖥 Пример ответа: unknown status isDone
