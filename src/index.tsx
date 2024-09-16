@@ -1,92 +1,108 @@
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
+import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
-import {configureStore, combineReducers, AnyAction} from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Types
-type PostType = {
+type CommentType = {
+	postId: string;
 	id: string;
+	name: string;
+	email: string;
 	body: string;
-	title: string;
-	userId: string;
 };
 
 // Api
 const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
-const postsAPI = {
-	getPosts() {
-		return instance.get<PostType[]>("posts");
+const commentsAPI = {
+	getComments() {
+		return instance.get<CommentType[]>("comments");
+	},
+	createComment() {
+		const payload = {
+			body: "Это просто заглушка. Backend сам сгенерирует новый комментарий и вернет его вам",
+		};
+		return instance.post("comments", payload);
 	},
 };
 
 // Reducer
-const initState = [] as PostType[];
+const initState = [] as CommentType[];
 
 type InitStateType = typeof initState;
 
-const postsReducer = (
-	state: InitStateType = initState,
-	action: GetPostsActionType,
-): InitStateType => {
+const commentsReducer = (state: InitStateType = initState, action: ActionsType) => {
 	switch (action.type) {
-
-		case "POSTS/GET-POSTS":
-			debugger
-			return action.posts;
+		case "COMMENTS/GET-COMMENTS":
+			return action.comments;
+		case "COMMENTS/CREATE-COMMENT":
+			return [action.comment, ...state];
+		default:
+			return state;
 	}
-	return state;
 };
 
-const getPostsAC = (posts: PostType[]) => ({ type: "POSTS/GET-POSTS", posts }) as const;
-type GetPostsActionType = ReturnType<typeof getPostsAC>;
+const getCommentsAC = (comments: CommentType[]) =>
+	({ type: "COMMENTS/GET-COMMENTS", comments }) as const;
+const createCommentAC = (comment: CommentType) =>
+	({ type: "COMMENTS/CREATE-COMMENT", comment }) as const;
 
-const getPostsTC = (): AppThunk => (dispatch) => {
-	debugger
-	postsAPI.getPosts()
-		.then((res) => {
-		dispatch(getPostsAC(res.data));
+type ActionsType = ReturnType<typeof getCommentsAC> | ReturnType<typeof createCommentAC>;
+
+const getCommentsTC = (): AppThunk => (dispatch) => {
+	commentsAPI.getComments().then((res) => {
+		dispatch(getCommentsAC(res.data));
+	});
+};
+
+const addCommentTC = (): AppThunk => (dispatch) => {
+	commentsAPI.createComment().then((res) => {
+		dispatch(createCommentAC(res.data));
 	});
 };
 
 // Store
 const rootReducer = combineReducers({
-	posts: postsReducer,
+	comments: commentsReducer,
 });
 
 const store = configureStore({ reducer: rootReducer });
 type RootState = ReturnType<typeof store.getState>;
-type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction>;
-type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, GetPostsActionType>;
+type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
+type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, ActionsType>;
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 // App
 const App = () => {
 	const dispatch = useAppDispatch();
-	const posts = useAppSelector((state) => state.posts);
+	const comments = useAppSelector((state) => state.comments);
 
 	useEffect(() => {
-		//  answer✅❗️✅❗️✅❗️✅❗️
-		dispatch(getPostsTC());
+		dispatch(getCommentsTC());
 	}, []);
+
+	const addCommentHandler = () => {
+		//answer✅❗️✅❗️✅❗️✅❗️✅❗️
+		dispatch(addCommentTC())
+	};
 
 	return (
 		<>
-			<h1>📜 Список постов</h1>
-			{posts.length ? (
-				posts.map((p) => {
-					return (
-						<div key={p.id}>
-							<b>title</b>: {p.title}
-						</div>
-					);
-				})
-			) : (
-				<h2>Постов нету 😥</h2>
-			)}
+			<h1>📝 Список комментариев</h1>
+			<button style={{ marginBottom: "10px" }} onClick={addCommentHandler}>
+				Добавить новый комментарий
+			</button>
+			{comments.map((p) => {
+				return (
+					<div key={p.id}>
+						<b>описание</b>: {p.body}
+					</div>
+				);
+			})}
 		</>
 	);
 };
@@ -99,11 +115,9 @@ root.render(
 );
 
 // 📜 Описание:
-// При загрузке приложения вы должны увидеть список постов,
-// но из-за невнимательности была допущена ошибка.
+// При нажатии на кнопку "Добавить новый комментарий" комментарий должен добавиться,
+// но появляется alert.
+// Вместо alerta напишите код, чтобы комментарий добавлялся.
+// Правильную версию строки напишите в качестве ответа.
 
-// Найдите и исправьте ошибку
-// Исправленную версию строки напишите в качестве ответа.
-// 🖥 Пример ответа: type InitStateType = typeof initState
-
-// P.S. Эта ошибка из реальной жизни, студенты так часто ошибаются и не могут понять в чем дело.
+// 🖥 Пример ответа: return instance.get<CommentType[]>('comments?_limit=10')
