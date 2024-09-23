@@ -1,86 +1,119 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import axios from "axios";
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import axios from "axios";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Types
-type PostType = {
+type TodoType = {
 	id: string;
-	body: string;
 	title: string;
-	userId: string;
+	order: number;
+	createdAt: string;
+	updatedAt: string;
+	completed: boolean;
 };
 
 // Api
 const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
-const postsAPI = {
-	getPosts() {
-		return instance.get<PostType[]>("posts");
+const todosAPI = {
+	getTodos() {
+		return instance.get<TodoType[]>("todos");
+	},
+	changeTodoStatus(id: string, completed: boolean) {
+		return instance.put(`todos/${id}`, { completed });
 	},
 };
 
 // Reducer
-const initState = [] as PostType[];
+const initState = [] as TodoType[];
 
 type InitStateType = typeof initState;
 
-const postsReducer = (
-	state: InitStateType = initState,
-	action: GetPostsActionType,
-): InitStateType => {
+const todosReducer = (state: InitStateType = initState, action: ActionsType) => {
 	switch (action.type) {
-		case "POSTS/GET-POSTS":
-			return action.posts;
+		case "TODOS/GET-TODOS":
+			return action.todos;
+
+		case "TODOS/CHANGE-TODO-STATUS":
+			return state.map((t) => {
+				if (t.id === action.todo.id) {
+					return { ...t, completed: action.todo.completed };
+				} else {
+					return t;
+				}
+			});
+
+		default:
+			return state;
 	}
-	return state;
 };
 
-const getPostsAC = (posts: PostType[]) => ({ type: "POSTS/GET-POSTS", posts }) as const;
-type GetPostsActionType = ReturnType<typeof getPostsAC>;
+const getTodosAC = (todos: TodoType[]) => ({ type: "TODOS/GET-TODOS", todos }) as const;
+const changeTodoStatusAC = (todo: TodoType) =>
+	({ type: "TODOS/CHANGE-TODO-STATUS", todo }) as const;
+type ActionsType = ReturnType<typeof getTodosAC> | ReturnType<typeof changeTodoStatusAC>;
 
-const getPostsTC = (): AppThunk => (dispatch) => {
-	postsAPI.getPosts().then((res) => {
-		dispatch(getPostsAC(res.data));
+// Thunk
+const getTodosTC = (): AppThunk => (dispatch) => {
+	todosAPI.getTodos().then((res) => {
+		dispatch(getTodosAC(res.data));
 	});
 };
 
+const changeTodoStatusTC =
+	(id: string, completed: boolean): AppThunk =>
+		(dispatch) => {
+			todosAPI.changeTodoStatus(id, completed).then((res) => {
+				dispatch(changeTodoStatusAC(res.data));
+			});
+		};
+
 // Store
 const rootReducer = combineReducers({
-	posts: postsReducer,
+	todos: todosReducer,
 });
 
 const store = configureStore({ reducer: rootReducer });
 type RootState = ReturnType<typeof store.getState>;
-type AppDispatch = ThunkDispatch<RootState, unknown, GetPostsActionType>;
-type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, GetPostsActionType>;
+type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
+type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, ActionsType>;
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 // App
 const App = () => {
 	const dispatch = useAppDispatch();
-	const posts = useAppSelector((state) => state.posts);
+	const todos = useAppSelector((state) => state.todos);
 
 	useEffect(() => {
-		dispatch(getPostsTC);
+		getTodosTC();
 	}, []);
+
+	const changeStatusHandler = (id: string, completed: boolean) => {
+		dispatch(changeTodoStatusTC(id, completed));
+	};
 
 	return (
 		<>
-			<h1>📜 Список постов</h1>
-			{posts.length ? (
-				posts.map((p) => {
+			<h2>✅ Список тудулистов</h2>
+			{todos.length ? (
+				todos.map((t) => {
 					return (
-						<div key={p.id}>
-							<b>title</b>: {p.title}
+						<div style={t.completed ? { color: "grey" } : {}} key={t.id}>
+							<input
+								type="checkbox"
+								checked={t.completed}
+								onChange={() => changeStatusHandler(t.id, !t.completed)}
+							/>
+							<b>Описание</b>: {t.title}
 						</div>
 					);
 				})
 			) : (
-				<h2>Постов нету 😥</h2>
+				<h2>Тудулистов нету 😥</h2>
 			)}
 		</>
 	);
@@ -94,11 +127,9 @@ root.render(
 );
 
 // 📜 Описание:
-// При загрузке приложения вы должны увидеть список постов,
+// При загрузке приложения вы должны увидеть список тудулистов,
 // но из-за невнимательности была допущена ошибка.
-
-// Найдите и исправьте ошибку
+// Найдите и исправьте ошибку.
 // Исправленную версию строки напишите в качестве ответа.
-// 🖥 Пример ответа: type InitStateType = typeof initState
 
-// P.S. Эта ошибка из реальной жизни, студенты так часто ошибаются и не могут понять в чем дело.
+// 🖥 Пример ответа: type InitStateType = typeof initState
