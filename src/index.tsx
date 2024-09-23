@@ -86,8 +86,7 @@ const App = () => {
 	}, []);
 
 	const addCommentHandler = () => {
-		//answer✅❗️✅❗️✅❗️✅❗️✅❗️
-		dispatch(addCommentTC())
+		alert("Комментарий добавить не получилось. Напишите код самостоятельно 🚀");
 	};
 
 	return (
