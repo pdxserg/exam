@@ -1,8 +1,8 @@
+import axios from "axios";
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import axios from "axios";
+import { ThunkDispatch } from "redux-thunk";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Types
@@ -21,12 +21,6 @@ const commentsAPI = {
 	getComments() {
 		return instance.get<CommentType[]>("comments");
 	},
-	createComment() {
-		const payload = {
-			body: "Это просто заглушка. Backend сам сгенерирует новый комментарий и вернет его вам",
-		};
-		return instance.post("comments", payload);
-	},
 };
 
 // Reducer
@@ -34,12 +28,10 @@ const initState = [] as CommentType[];
 
 type InitStateType = typeof initState;
 
-const commentsReducer = (state: InitStateType = initState, action: ActionsType) => {
+const commentsReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
 	switch (action.type) {
 		case "COMMENTS/GET-COMMENTS":
 			return action.comments;
-		case "COMMENTS/CREATE-COMMENT":
-			return [action.comment, ...state];
 		default:
 			return state;
 	}
@@ -47,20 +39,11 @@ const commentsReducer = (state: InitStateType = initState, action: ActionsType) 
 
 const getCommentsAC = (comments: CommentType[]) =>
 	({ type: "COMMENTS/GET-COMMENTS", comments }) as const;
-const createCommentAC = (comment: CommentType) =>
-	({ type: "COMMENTS/CREATE-COMMENT", comment }) as const;
+type ActionsType = ReturnType<typeof getCommentsAC>;
 
-type ActionsType = ReturnType<typeof getCommentsAC> | ReturnType<typeof createCommentAC>;
-
-const getCommentsTC = (): AppThunk => (dispatch) => {
+const getCommentsTC = () => (dispatch: DispatchType) => {
 	commentsAPI.getComments().then((res) => {
 		dispatch(getCommentsAC(res.data));
-	});
-};
-
-const addCommentTC = (): AppThunk => (dispatch) => {
-	commentsAPI.createComment().then((res) => {
-		dispatch(createCommentAC(res.data));
 	});
 };
 
@@ -70,35 +53,27 @@ const rootReducer = combineReducers({
 });
 
 const store = configureStore({ reducer: rootReducer });
-type RootState = ReturnType<typeof store.getState>;
-type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
-type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, ActionsType>;
-const useAppDispatch = () => useDispatch<AppDispatch>();
+type RootState = ReturnType<typeof rootReducer>;
+type DispatchType = ThunkDispatch<any, any, any>;
+const useAppDispatch = () => useDispatch<DispatchType>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 // App
-const App = () => {
-	const dispatch = useAppDispatch();
+export const App = () => {
 	const comments = useAppSelector((state) => state.comments);
+	const dispatch = useAppDispatch();
 
 	useEffect(() => {
 		dispatch(getCommentsTC());
 	}, []);
 
-	const addCommentHandler = () => {
-		alert("Комментарий добавить не получилось. Напишите код самостоятельно 🚀");
-	};
-
 	return (
 		<>
 			<h1>📝 Список комментариев</h1>
-			<button style={{ marginBottom: "10px" }} onClick={addCommentHandler}>
-				Добавить новый комментарий
-			</button>
-			{comments.map((p) => {
+			{comments.map((c) => {
 				return (
-					<div key={p.id}>
-						<b>описание</b>: {p.body}
+					<div key={c.id}>
+						<b>Comment</b>: {c.body}{" "}
 					</div>
 				);
 			})}
@@ -114,9 +89,8 @@ root.render(
 );
 
 // 📜 Описание:
-// При нажатии на кнопку "Добавить новый комментарий" комментарий должен добавиться,
-// но появляется alert.
-// Вместо alerta напишите код, чтобы комментарий добавлялся.
-// Правильную версию строки напишите в качестве ответа.
+// Ваша задача стоит в том чтобы правильно передать нужные типы в дженериковый тип ThunkDispatch<any, any, any>.
+// Что нужно написать вместо any, any, any чтобы правильно типизировать dispatch ?
+// Ответ дайте через пробел
 
-// 🖥 Пример ответа: return instance.get<CommentType[]>('comments?_limit=10')
+// 🖥 Пример ответа: unknown status isDone
