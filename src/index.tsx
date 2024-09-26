@@ -1,59 +1,40 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import axios, { AxiosError } from "axios";
-import { configureStore, combineReducers, Dispatch } from "@reduxjs/toolkit";
+import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
-// TYPES
-type TodoType = {
-	id: string;
-	title: string;
-	order: number;
-	createdAt: string;
-	updatedAt: string;
-	completed: boolean;
-};
+// Types
+type NullableType<T> = null | T;
 
-type UserType = {
-	id: string;
-	name: string;
-	age: number;
-};
-
-type UsersResponseType = {
-	items: UserType[];
-	totalCount: number;
+type LoginFieldsType = {
+	email: string;
+	password: string;
 };
 
 // API
 const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
 const api = {
-	getTodos() {
-		return instance.get<TodoType[]>("todos");
-	},
-	getUsers() {
-		return instance.get<UsersResponseType>("users");
+	login(data: LoginFieldsType) {
+		return instance.post("auth/login", data);
 	},
 };
 
 // Reducer
 const initState = {
 	isLoading: false,
-	error: null as string | null,
-	todos: [] as TodoType[],
-	users: [] as UserType[],
+	error: null as NullableType<string>,
+	isLoggedIn: false,
 };
 
 type InitStateType = typeof initState;
 
 const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
 	switch (action.type) {
-		case "APP/GET-TODOS":
-			return { ...state, todos: action.todos };
-		case "APP/GET-USERS":
-			return { ...state, users: action.users };
+		case "APP/SET-IS-LOGGED-IN":
+			return { ...state, isLoggedIn: action.isLoggedIn };
 		case "APP/IS-LOADING":
 			return { ...state, isLoading: action.isLoading };
 		case "APP/SET-ERROR":
@@ -63,49 +44,34 @@ const appReducer = (state: InitStateType = initState, action: ActionsType): Init
 	}
 };
 
-const getUsersAC = (users: UserType[]) => ({ type: "APP/GET-USERS", users }) as const;
-const getTodosAC = (todos: TodoType[]) => ({ type: "APP/GET-TODOS", todos }) as const;
+// Actions
+const setIsLoggedIn = (isLoggedIn: boolean) =>
+	({ type: "APP/SET-IS-LOGGED-IN", isLoggedIn }) as const;
 const setLoadingAC = (isLoading: boolean) => ({ type: "APP/IS-LOADING", isLoading }) as const;
 const setError = (error: string | null) => ({ type: "APP/SET-ERROR", error }) as const;
-
 type ActionsType =
-	| ReturnType<typeof getUsersAC>
-	| ReturnType<typeof getTodosAC>
+	| ReturnType<typeof setIsLoggedIn>
 	| ReturnType<typeof setLoadingAC>
 	| ReturnType<typeof setError>;
 
-// Utils functions
-function baseSuccessHandler<T>(dispatch: Dispatch, actionCreator: Function, data: T) {
-	dispatch(actionCreator(data));
-	dispatch(setLoadingAC(false));
-}
-
 // Thunk
-const getTodosTC = (): AppThunk => (dispatch) => {
-	dispatch(setLoadingAC(true));
-	api
-		.getTodos()
-		.then((res) => {
-			// ❗❗❗ XXX ❗❗❗
-		})
-		.catch((e: AxiosError) => {
-			dispatch(setError(e.message));
-			dispatch(setLoadingAC(false));
-		});
-};
-
-const getUsersTC = (): AppThunk => (dispatch) => {
-	dispatch(setLoadingAC(true));
-	api
-		.getUsers()
-		.then((res) => {
-			// ❗❗❗ YYY ❗❗❗
-		})
-		.catch((e: AxiosError) => {
-			dispatch(setError(e.message));
-			dispatch(setLoadingAC(false));
-		});
-};
+const loginTC =
+	(values: LoginFieldsType): AppThunk =>
+		(dispatch) => {
+			dispatch(setLoadingAC(true));
+			api
+				.login(values)
+				.then((res) => {
+					dispatch(setIsLoggedIn(true));
+					alert("Вы залогинились успешно");
+				})
+				.catch((e) => {
+					console.log(e)
+				})
+				.finally(() => {
+					dispatch(setLoadingAC(false));
+				});
+		};
 
 // Store
 const rootReducer = combineReducers({
@@ -119,75 +85,58 @@ type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, A
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-// COMPONENTS
 // Loader
 export const Loader = () => {
 	return <h1>Loading ...</h1>;
 };
 
-const App = () => {
-	return (
-		<>
-			<h1>✅Todos & 🙂Users</h1>
-			<div style={{ display: "flex", justifyContent: "space-evenly" }}>
-				<Todos />
-				<Users />
-			</div>
-		</>
-	);
-};
-
-const Todos = () => {
+// App
+export const App = () => {
 	const dispatch = useAppDispatch();
-	const todos = useAppSelector((state) => state.app.todos);
+
+	const [form, setForm] = useState<LoginFieldsType>({ email: "", password: "" });
+
 	const error = useAppSelector((state) => state.app.error);
 	const isLoading = useAppSelector((state) => state.app.isLoading);
 
-	useEffect(() => {
-		dispatch(getTodosTC());
-	}, []);
+	const changeFormValuesHandler = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+		if (field === "email") {
+			setForm({ ...form, email: e.currentTarget.value });
+		}
+		if (field === "password") {
+			setForm({ ...form, password: e.currentTarget.value });
+		}
+	};
+
+	const submitForm = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
+		dispatch(loginTC(form));
+	};
 
 	return (
 		<div>
-			<h2>✅ Список тудулистов</h2>
 			{!!error && <h2 style={{ color: "red" }}>{error}</h2>}
 			{isLoading && <Loader />}
-			{todos.map((t) => {
-				return (
-					<div style={t.completed ? { color: "grey" } : {}} key={t.id}>
-						<input type="checkbox" checked={t.completed} />
-						<b>Описание</b>: {t.title}
-					</div>
-				);
-			})}
-		</div>
-	);
-};
-
-const Users = () => {
-	const dispatch = useAppDispatch();
-	const users = useAppSelector((state) => state.app.users);
-	const error = useAppSelector((state) => state.app.error);
-	const isLoading = useAppSelector((state) => state.app.isLoading);
-
-	useEffect(() => {
-		dispatch(getUsersTC());
-	}, []);
-
-	return (
-		<div>
-			<h2>🙂 Список юзеров</h2>
-			{!!error && <h2 style={{ color: "red" }}>{error}</h2>}
-			{isLoading && <Loader />}
-			<div>
-				{users.map((u) => {
-					return (
-						<div key={u.id}>
-							<b>name</b>:{u.name} - <b>age</b>:{u.age}
-						</div>
-					);
-				})}
-			</div>
+			<form>
+				<div>
+					<input
+						placeholder={"Введите email"}
+						value={form.email}
+						onChange={(e) => changeFormValuesHandler(e, "email")}
+					/>
+				</div>
+				<div>
+					<input
+						type={"password"}
+						placeholder={"Введите пароль"}
+						value={form.password}
+						onChange={(e) => changeFormValuesHandler(e, "password")}
+					/>
+				</div>
+				<button type="submit" onClick={submitForm}>
+					Залогиниться
+				</button>
+			</form>
 		</div>
 	);
 };
@@ -200,12 +149,11 @@ root.render(
 );
 
 // 📜 Описание:
-// Перед вами список тудулистов и пользователей, которые находятся в постоянной загрузке.
-// Откройте network и вы увидите что запросы на сервер уходят и возвращаются с хорошими данными,
-// но вместо этого пользователь видит на экране Loader.
-// Для обработки успешного результата написана утилитная функция baseSuccessHandler.
-// Ваша задача воспользоваться этой функцией отобразить Todos и Users
-// Что нужно написать вместо XXX и YYY, чтобы реализовать данную задачу?
-// Ответ дайте через пробел.
+// Перед вами форма логинизации. Введите любые логин и пароль и попробуйте залогиниться.
+// У вас это навряд ли получится 😈, т.к. вы не знаете email и пароль.
+// Откройте Network и проанализируйте запрос.
+// Задача: вывести сообщение об ошибке, которую возвращает сервер, говорящую о том что email или password некорректны.
 
-// 🖥 Пример ответа: dispatch(baseSuccessHandler(1,2,3))  dispatch(baseSuccessHandler(3,2,1)
+// В качестве ответа указать строку коду, которая позволит это осуществить.
+// 🖥 Пример ответа: dispatch('Error message')
+// ❗ Типизировать ошибку не надо, т.к. там есть много нюансов, о которых вы узнаете позже
