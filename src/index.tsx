@@ -1,115 +1,60 @@
-import React, { useEffect } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import axios, { AxiosError } from "axios";
-import { configureStore, combineReducers, Dispatch } from "@reduxjs/toolkit";
+import axios from "axios";
+import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
-// TYPES
-type TodoType = {
+// Types
+type PhotoType = {
+	albumId: string;
 	id: string;
 	title: string;
-	order: number;
-	createdAt: string;
-	updatedAt: string;
-	completed: boolean;
+	url: string;
 };
 
-type UserType = {
-	id: string;
-	name: string;
-	age: number;
-};
-
-type UsersResponseType = {
-	items: UserType[];
-	totalCount: number;
-};
-
-// API
+// Api
 const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
-const api = {
-	getTodos() {
-		return instance.get<TodoType[]>("todo");
-	},
-	getUsers() {
-		return instance.get<UsersResponseType>("user");
+const photosAPI = {
+	getPhotos() {
+		return instance.get<PhotoType[]>("photos?delay=2");
 	},
 };
 
 // Reducer
 const initState = {
 	isLoading: false,
-	error: null as string | null,
-	todos: [] as TodoType[],
-	users: [] as UserType[],
+	photos: [] as PhotoType[],
 };
 
 type InitStateType = typeof initState;
 
-const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
+const photoReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
 	switch (action.type) {
-		case "APP/GET-TODOS":
-			return { ...state, todos: action.todos };
-		case "APP/GET-USERS":
-			return { ...state, users: action.users };
-		case "APP/IS-LOADING":
+		case "PHOTO/GET-PHOTOS":
+			return { ...state, photos: action.photos };
+		case "PHOTO/IS-LOADING":
 			return { ...state, isLoading: action.isLoading };
-		case "APP/SET-ERROR":
-			return { ...state, error: action.error };
 		default:
 			return state;
 	}
 };
 
-const getUsersAC = (users: UserType[]) => ({ type: "APP/GET-USERS", users }) as const;
-const getTodosAC = (todos: TodoType[]) => ({ type: "APP/GET-TODOS", todos }) as const;
-const setLoadingAC = (isLoading: boolean) => ({ type: "APP/IS-LOADING", isLoading }) as const;
-const setError = (error: string | null) => ({ type: "APP/SET-ERROR", error }) as const;
+const getPhotosAC = (photos: PhotoType[]) => ({ type: "PHOTO/GET-PHOTOS", photos }) as const;
+const setLoadingAC = (isLoading: boolean) => ({ type: "PHOTO/IS-LOADING", isLoading }) as const;
+type ActionsType = ReturnType<typeof getPhotosAC> | ReturnType<typeof setLoadingAC>;
 
-type ActionsType =
-	| ReturnType<typeof getUsersAC>
-	| ReturnType<typeof getTodosAC>
-	| ReturnType<typeof setLoadingAC>
-	| ReturnType<typeof setError>;
-
-// Utils functions
-function baseErrorHandler(dispatch: Dispatch, message: string) {
-	dispatch(setError(message));
-	dispatch(setLoadingAC(false));
-}
-
-// Thunk
-const getTodosTC = (): AppThunk => (dispatch) => {
+const getPhotosTC = (): AppThunk => (dispatch) => {
 	dispatch(setLoadingAC(true));
-	api
-		.getTodos()
-		.then((res) => {
-			dispatch(getTodosAC(res.data));
-			dispatch(setLoadingAC(false));
-		})
-		.catch((e: AxiosError) => {
-			// ❗❗❗ XXX ❗❗❗
-		});
-};
-
-const getUsersTC = (): AppThunk => (dispatch) => {
-	dispatch(setLoadingAC(true));
-	api
-		.getUsers()
-		.then((res) => {
-			dispatch(getUsersAC(res.data.items));
-			dispatch(setLoadingAC(false));
-		})
-		.catch((e: AxiosError) => {
-			// ❗❗❗ XXX ❗❗❗
-		});
+	photosAPI.getPhotos().then((res) => {
+		dispatch(getPhotosAC(res.data));
+	});
 };
 
 // Store
 const rootReducer = combineReducers({
-	app: appReducer,
+	photo: photoReducer,
 });
 
 const store = configureStore({ reducer: rootReducer });
@@ -119,76 +64,39 @@ type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, A
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-// COMPONENTS
 // Loader
 export const Loader = () => {
 	return <h1>Loading ...</h1>;
 };
 
+// App
 const App = () => {
+	const dispatch = useAppDispatch();
+	const photos = useAppSelector((state) => state.photo.photos);
+	const isLoading = useAppSelector((state) => state.photo.isLoading);
+
+	const getPhotosHandler = () => {
+		dispatch(getPhotosTC());
+	};
+
 	return (
 		<>
-			<h1>✅Todos & 🙂Users</h1>
-			<div style={{ display: "flex", justifyContent: "space-evenly" }}>
-				<Todos />
-				<Users />
-			</div>
-		</>
-	);
-};
-
-const Todos = () => {
-	const dispatch = useAppDispatch();
-	const todos = useAppSelector((state) => state.app.todos);
-	const error = useAppSelector((state) => state.app.error);
-	const isLoading = useAppSelector((state) => state.app.isLoading);
-
-	useEffect(() => {
-		dispatch(getTodosTC());
-	}, []);
-
-	return (
-		<div>
-			<h2>✅ Список тудулистов</h2>
-			{!!error && <h2 style={{ color: "red" }}>{error}</h2>}
+			<h1>📸 Фото</h1>
+			<button onClick={getPhotosHandler}>Подгрузить фотографии</button>
 			{isLoading && <Loader />}
-			{todos.map((t) => {
-				return (
-					<div style={t.completed ? { color: "grey" } : {}} key={t.id}>
-						<input type="checkbox" checked={t.completed} />
-						<b>Описание</b>: {t.title}
-					</div>
-				);
-			})}
-		</div>
-	);
-};
-
-const Users = () => {
-	const dispatch = useAppDispatch();
-	const users = useAppSelector((state) => state.app.users);
-	const error = useAppSelector((state) => state.app.error);
-	const isLoading = useAppSelector((state) => state.app.isLoading);
-
-	useEffect(() => {
-		dispatch(getUsersTC());
-	}, []);
-
-	return (
-		<div>
-			<h2>🙂 Список юзеров</h2>
-			{!!error && <h2 style={{ color: "red" }}>{error}</h2>}
-			{isLoading && <Loader />}
-			<div>
-				{users.map((u) => {
+			<div style={{ display: "flex", gap: "20px", margin: "20px" }}>
+				{photos.map((p) => {
 					return (
-						<div key={u.id}>
-							<b>name</b>:{u.name} - <b>age</b>:{u.age}
+						<div key={p.id}>
+							<b>title</b>: {p.title}
+							<div>
+								<img src={p.url} alt="" />
+							</div>
 						</div>
 					);
 				})}
 			</div>
-		</div>
+		</>
 	);
 };
 
@@ -200,12 +108,10 @@ root.render(
 );
 
 // 📜 Описание:
-// Перед вами список тудулистов и пользователей, которые находятся в постоянной загрузке.
-// Откройте network и вы увидите что запросы падают с ошибками,
-// но в коде этот никак не обрабатывается.
-// Для обработки ошибок написана утилитная функция baseErrorHandler.
-// Ваша задача воспользоваться этой функцией и вывести ошибки на экран.
-// Что нужно написать вместо XXX, чтобы ошибки обработались и пользователь их увидел ?
-//❗ Код фиксить не нужно.
+// При нажатии на кнопку "Подгрузить фотографии" вы должны увидеть Loading...,
+// и через 3 секунды непосредственно фотографии.
+// Но после подгрузки данных Loader не убирается.
+// Какой код нужно написать, чтобы Loader перестал отображаться после получения данных
+// В качестве ответа напишите строку кода.
 
-// 🖥 Пример ответа: dispatch(setLoadingAC(false))
+// 🖥 Пример ответа: console.log('stop Loader')
