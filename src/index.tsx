@@ -66,13 +66,16 @@ const getPostsTC = (): AppThunk => (dispatch) => {
 
 const updatePostTC =
 	(postId: string): AppThunk =>
-		(dispatch, getState: any) => {
+		(dispatch, getState  ) => {
+	debugger
 			try {
-				const currentPost = getState().find((p: PostType) => p.id === postId);
+			// ‼️‼️‼️‼️
+				const currentPost = getState().posts.find((p: PostType) => p.id === postId);
 
 				if (currentPost) {
 					const payload = { title: "Это просто заглушка. Backend сам сгенерирует новый title" };
 					postsAPI.updatePostTitle(postId, payload).then((res) => {
+						debugger
 						dispatch(updatePostTitleAC(res.data));
 					});
 				}
@@ -103,6 +106,7 @@ const App = () => {
 	}, []);
 
 	const updatePostHandler = (postId: string) => {
+		debugger
 		dispatch(updatePostTC(postId));
 	};
 
