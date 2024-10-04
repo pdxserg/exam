@@ -1,119 +1,47 @@
-import React, { useEffect } from "react";
-import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
-import axios from "axios";
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import React from 'react'
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-// Utils
-console.log = () => {};
 
-// Api
-const instance = axios.create({
-	baseURL: "xxx",
-});
+export const PageNotFound = () => {
+	return <h2>⛔ 404. Page not found ⛔</h2>
+}
 
-const api = {
-	getUsers() {
-		/* 1 */
-		return instance.get("xxx");
-	},
-};
+export const Profile = () => {
+	return <h2>😎 Профиль</h2>
+}
 
-// Reducer
-const initState = {
-	isLoading: false,
-	users: [] as any[],
-};
 
-type InitStateType = typeof initState;
-
-const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
-	switch (action.type) {
-		case "APP/SET-USERS":
-			/* 2 */
-			return { ...state, users: action.users };
-		default:
-			return state;
-	}
-};
-
-// Actions
-const setUsersAC = (users: any[]) => ({ type: "APP/SET-USERS", users }) as const;
-type ActionsType = ReturnType<typeof setUsersAC>;
-
-// Thunk
-const getUsersTC = (): AppThunk => (dispatch) => {
-	/* 3 */
-	api.getUsers().then((res) => {
-		/* 4 */
-		dispatch(setUsersAC(res.data.data));
-	});
-};
-
-// Store
-const rootReducer = combineReducers({
-	app: appReducer,
-});
-
-const store = configureStore({ reducer: rootReducer });
-type RootState = ReturnType<typeof store.getState>;
-type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
-type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, ActionsType>;
-const useAppDispatch = () => useDispatch<AppDispatch>();
-const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-
-// Login
-export const Login = () => {
-	const users = useAppSelector((state) => state.app.users);
-	/* 5 */
-
+export const Main = () => {
 	return (
-		<div>
-			{/* 6 */}
-			{users.map((u) => (
-				<p key={u.id}>{u.email}</p>
-			))}
-			<h1>
-				В данном задании на экран смотреть не нужно. Рекомендуем взять ручку, листик и
-				последовательно, спокойно расставить цифры в нужном порядке. Прежде чем давать ответ
-				обязательно посчитайте к-во цифр и сверьте с подсказкой. Удачи 🚀
-			</h1>
-		</div>
-	);
-};
+		<>
+			<h2>✅ Список тудулистов</h2>
+			<h2>📜 Список постов</h2>
+		</>
+	)
+}
 
 // App
 export const App = () => {
-	/* 7 */
-	const dispatch = useAppDispatch();
 
-	useEffect(() => {
-		/* 8 */
-		dispatch(getUsersTC());
-	}, []);
-
-	/* 9 */
 	return (
 		<Routes>
-			<Route path={""} element={<Login />} />
+			<Route path={''} element={<Main/>}/>
+			<Route path={'profile'} element={<Profile/>}/>
+			//✅✅✅✅
+			<Route path={'/*'} element={<Navigate to={'profile'}/>}/>
+			{/* ❗❗❗ XXX ❗❗❗  */}
 		</Routes>
-	);
-};
+	)
+}
 
-const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
-root.render(
-	<Provider store={store}>
-		<BrowserRouter>
-			<App />
-		</BrowserRouter>
-	</Provider>,
-);
+
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(<BrowserRouter><App/></BrowserRouter>)
 
 // 📜 Описание:
-// Задача: напишите в какой последовательности вызовутся числа при успешном запросе.
-// Подсказка: будет 11 чисел.
-// Ответ дайте через пробел.
+// Вместо ХХХ напишите роут таким образом, чтобы вне зависимости от того чтобы будет в урле (login или home или...)
+// вас всегда редиректило на страницу профиля и при в это в урле по итогу
+// был адрес /profile
 
-// 🖥 Пример ответа: 1 2 3 4 5 6 7 8 9 1 2
+// 🖥 Пример ответа: <Route path={'/'} element={'to profile page'}/>
