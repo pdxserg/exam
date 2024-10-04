@@ -3,49 +3,39 @@ import React from 'react'
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
-
-// Types
-type LoginFieldsType = {
-	firstName: string
-	email: string
-}
-
 // Main
 export const Login = () => {
 
 	const formik = useFormik({
 		initialValues: {
-			firstName: '',
 			email: '',
-		},
-		validate: (values) => {
-			const errors: Partial<LoginFieldsType> = {};
-
-			if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-				errors.email = 'Invalid email address';
-			}
-			return errors
+			password: '',
 		},
 		onSubmit: values => {
 			alert(JSON.stringify(values, null, 2));
-		}
+		},
 	});
 
-	// Функция необходима для того, чтобы вебшторм не ругался на true в JSX
-	const getTrue = () => {
-		return true
-	}
-
 	return (
+		//✅✅✅✅✅✅
 		<form onSubmit={formik.handleSubmit}>
 			<div>
-				<input placeholder={'Введите имя'} {...formik.getFieldProps('firstName')}/>
+				<input
+					name="email"
+					onChange={formik.handleChange}
+					value={formik.values.email}
+					type="text"
+					placeholder={'Введите email'}
+				/>
 			</div>
 			<div>
-				<input placeholder={'Введите email'}{...formik.getFieldProps('email')}/>
-				//✅✅✅✅✅
-				{formik.touched.email  && <div style={{color: 'red'}}>{formik.errors.email}</div>}
-
+				<input
+					name="password"
+					onChange={formik.handleChange}
+					value={formik.values.password}
+					type="password"
+					placeholder={'Введите пароль'}
+				/>
 			</div>
 			<button type="submit">Отправить</button>
 		</form>
@@ -65,11 +55,9 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(<BrowserRouter><App/></BrowserRouter>)
 
 // 📜 Описание:
-// Загрузив приложение вы увидите ошибку под полем email, но вы еще ничего не ввели.
-// Исправьте 46 строку кода так, чтобы:
-// 1) Сообщение об ошибке показывалось только в том случае, когда email введен некорректно.
-// 2) Вместо ERROR должен быть конкретный текст ошибки прописанный в валидации к этому полю.
-// 3) Сообщение должно показываться только в том случае, когда мы взаимодействовали с полем.
-// Исправленную версию строки напишите в качестве ответа.
+// При заполнении данных формы и их отправке вы должны увидеть alert c
+// введенными значениями, но из-за допущенной ошибки форма работает не корректно.
+// Найдите ошибку и исправленную версию строки напишите в качестве ответа.
+// ❗После того как показался alert форма не должна перегружать все приложение
 
-// 🖥 Пример ответа: {true && <div style={{color: 'red'}}>error.email</div>}
+// 🖥 Пример ответа: <div onClick={handleClick}>
