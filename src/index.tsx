@@ -4,46 +4,64 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 
-// Types
-type LoginFieldsType = {
-	firstName: string
-	email: string
-}
-
 // Main
 export const Login = () => {
 
 	const formik = useFormik({
 		initialValues: {
 			firstName: '',
+			lastName: '',
 			email: '',
-		},
-		validate: (values) => {
-			const errors: Partial<LoginFieldsType> = {};
-
-			if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-				errors.email = 'Invalid email address';
-			}
-			return errors
+			password: '',
+			phone: '',
 		},
 		onSubmit: values => {
 			alert(JSON.stringify(values, null, 2));
-		}
+		},
 	});
-
-	// Функция необходима для того, чтобы вебшторм не ругался на true в JSX
-	const getTrue = () => {
-		return true
-	}
 
 	return (
 		<form onSubmit={formik.handleSubmit}>
 			<div>
-				<input placeholder={'Введите имя'} {...formik.getFieldProps('firstName')}/>
+				<input
+					name="firstName"
+					onChange={formik.handleChange}
+					value={formik.values.firstName}
+					placeholder={'Введите имя'}
+				/>
 			</div>
 			<div>
-				<input placeholder={'Введите email'}{...formik.getFieldProps('email')}/>
-				{getTrue() && <div style={{color: 'red'}}>ERROR</div>}
+				<input
+					name="lastName"
+					onChange={formik.handleChange}
+					value={formik.values.lastName}
+					placeholder={'Введите фамилию'}
+				/>
+			</div>
+			<div>
+				<input
+					name="email"
+					onChange={formik.handleChange}
+					value={formik.values.email}
+					placeholder={'Введите email'}
+				/>
+			</div>
+			<div>
+				<input
+					name="password"
+					onChange={formik.handleChange}
+					value={formik.values.password}
+					placeholder={'Введите пароль'}
+					type={'password'}
+				/>
+			</div>
+			<div>
+				<input
+					name="password"
+					onChange={formik.handleChange}
+					value={formik.values.phone}
+					placeholder={'Введите телефон'}
+				/>
 			</div>
 			<button type="submit">Отправить</button>
 		</form>
@@ -63,11 +81,8 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(<BrowserRouter><App/></BrowserRouter>)
 
 // 📜 Описание:
-// Загрузив приложение вы увидите ошибку под полем email, но вы еще ничего не ввели.
-// Исправьте 46 строку кода так, чтобы:
-// 1) Сообщение об ошибке показывалось только в том случае, когда email введен некорректно.
-// 2) Вместо ERROR должен быть конкретный текст ошибки прописанный в валидации к этому полю.
-// 3) Сообщение должно показываться только в том случае, когда мы взаимодействовали с полем.
-// Исправленную версию строки напишите в качестве ответа.
+// Форма заполнения данных работает некорректно.
+// Пользователи жалуются на поле ввода "Телефона"
+// Найдите в коде ошибку. Исправленную версию строки напишите в качестве ответа.
 
-// 🖥 Пример ответа: {true && <div style={{color: 'red'}}>error.email</div>}
+// 🖥 Пример ответа: <form onSubmit={formik.handleSubmit}>
