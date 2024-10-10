@@ -3,40 +3,34 @@ import React from 'react'
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
+
+// Types
+type LoginFieldsType = {
+	firstName?: string
+}
+
 // Main
 export const Login = () => {
 
 	const formik = useFormik({
 		initialValues: {
-			email: '',
-			password: '',
+			firstName: '',
+		},
+		validate: (values) => {
+			const errors: LoginFieldsType = {};
+			return errors
 		},
 		onSubmit: values => {
 			alert(JSON.stringify(values, null, 2));
-		},
+		}
 	});
 
 	return (
-		<form>
+		<form onSubmit={formik.handleSubmit}>
 			<div>
-				<input
-					name="email"
-					onChange={formik.handleChange}
-					value={formik.values.email}
-					type="text"
-					placeholder={'Введите email'}
-				/>
+				<input placeholder={'Введите имя'} {...formik.getFieldProps('firstName')}/>
 			</div>
-			<div>
-				<input
-					name="password"
-					onChange={formik.handleChange}
-					value={formik.values.password}
-					type="password"
-					placeholder={'Введите пароль'}
-				/>
-			</div>
-			<button type="submit">Отправить</button>
+			<button type="submit" disabled={!(formik.isValid && formik.dirty)}>Отправить</button>
 		</form>
 	);
 }
@@ -54,9 +48,12 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(<BrowserRouter><App/></BrowserRouter>)
 
 // 📜 Описание:
-// При заполнении данных формы и их отправке вы должны увидеть alert c
-// введенными значениями, но из-за допущенной ошибки форма работает не корректно.
-// Найдите ошибку и исправленную версию строки напишите в качестве ответа.
-// ❗После того как показался alert форма не должна перегружать все приложение
+// Начните вводить в поле firstName символы. После ввода первого символа кнопка "Отправить" раздизаблится.
+// Задача: кнопка "Отправить" должна раздизаблиться только в том случае, если длинна имени больше, либо равна 5 символам.
+// Т.е. вам необходимо самостоятельно написать эту валидацию для поля firstName.
+// ❗ В качестве текста ошибки напишите 'Must be 5 characters or more'
+// ❗ Текст ошибки выводить не нужно (только если для себя поиграться).
 
-// 🖥 Пример ответа: <div onClick={handleClick}>
+// В качестве ответа напишите полностью строку кода с условием.
+// 🖥 Пример ответа: if (true) { errors.firstName = 'Must be 5 characters or more' }
+// ❗ Сторонние библиотеки (например yup) использовать запрещено
