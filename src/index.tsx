@@ -16,7 +16,6 @@ const instance = axios.create({
 
 const api = {
 	getUsers() {
-		/* 1 */
 		return instance.get("xxx");
 	},
 };
@@ -32,8 +31,11 @@ type InitStateType = typeof initState;
 const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
 	switch (action.type) {
 		case "APP/SET-USERS":
-			/* 2 */
+			/* 1 */
 			return { ...state, users: action.users };
+		case "APP/IS-LOADING":
+			/* 2 */
+			return { ...state, isLoading: action.isLoading };
 		default:
 			return state;
 	}
@@ -41,13 +43,17 @@ const appReducer = (state: InitStateType = initState, action: ActionsType): Init
 
 // Actions
 const setUsersAC = (users: any[]) => ({ type: "APP/SET-USERS", users }) as const;
-type ActionsType = ReturnType<typeof setUsersAC>;
+const setLoadingAC = (isLoading: boolean) => ({ type: "APP/IS-LOADING", isLoading }) as const;
+type ActionsType = ReturnType<typeof setUsersAC> | ReturnType<typeof setLoadingAC>;
 
 // Thunk
 const getUsersTC = (): AppThunk => (dispatch) => {
 	/* 3 */
+	dispatch(setLoadingAC(true));
 	api.getUsers().then((res) => {
 		/* 4 */
+		dispatch(setLoadingAC(false));
+		/* 5 */
 		dispatch(setUsersAC(res.data.data));
 	});
 };
@@ -64,14 +70,22 @@ type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, A
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
+// Loader
+export const Loader = () => {
+	/* 6 */
+	return <h1>Loading ...</h1>;
+};
+
 // Login
 export const Login = () => {
+	/* 7 */
+
 	const users = useAppSelector((state) => state.app.users);
-	/* 5 */
+	const isLoading = useAppSelector((state) => state.app.isLoading);
 
 	return (
 		<div>
-			{/* 6 */}
+			{isLoading && <Loader />}
 			{users.map((u) => (
 				<p key={u.id}>{u.email}</p>
 			))}
@@ -86,15 +100,15 @@ export const Login = () => {
 
 // App
 export const App = () => {
-	/* 7 */
+	/* 8 */
 	const dispatch = useAppDispatch();
 
 	useEffect(() => {
-		/* 8 */
+		/* 9 */
 		dispatch(getUsersTC());
 	}, []);
 
-	/* 9 */
+	/* 10 */
 	return (
 		<Routes>
 			<Route path={""} element={<Login />} />
@@ -113,7 +127,7 @@ root.render(
 
 // 📜 Описание:
 // Задача: напишите в какой последовательности вызовутся числа при успешном запросе.
-// Подсказка: будет 11 чисел.
+// Подсказка: будет 13 чисел.
 // Ответ дайте через пробел.
 
-// 🖥 Пример ответа: 1 2 3 4 5 6 7 8 9 1 2
+// 🖥 Пример ответа: 1 2 3 4 5 6 7 8 9 10 1 2 3
