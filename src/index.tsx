@@ -1,63 +1,166 @@
-import { useFormik } from 'formik';
-import React from 'react'
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-
+import { useFormik } from "formik";
+import React from "react";
+import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Types
 type LoginFieldsType = {
-	firstName?: string
-}
+	email: string;
+	password: string;
+};
 
-// Main
+// API
+const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
+
+const api = {
+	login(data: LoginFieldsType) {
+		return instance.post("auth/login", data);
+	},
+};
+
+// Reducer
+const initState = {
+	isLoading: false,
+	error: null as string | null,
+	isLoggedIn: false,
+};
+
+type InitStateType = typeof initState;
+
+const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
+	switch (action.type) {
+		case "APP/SET-IS-LOGGED-IN":
+			return { ...state, isLoggedIn: action.isLoggedIn };
+		case "APP/IS-LOADING":
+			return { ...state, isLoading: action.isLoading };
+		case "APP/SET-ERROR":
+			return { ...state, error: action.error };
+		default:
+			return state;
+	}
+};
+
+// Actions
+const setIsLoggedIn = (isLoggedIn: boolean) =>
+	({ type: "APP/SET-IS-LOGGED-IN", isLoggedIn }) as const;
+const setLoadingAC = (isLoading: boolean) => ({ type: "APP/IS-LOADING", isLoading }) as const;
+const setError = (error: string | null) => ({ type: "APP/SET-ERROR", error }) as const;
+type ActionsType =
+	| ReturnType<typeof setIsLoggedIn>
+	| ReturnType<typeof setLoadingAC>
+	| ReturnType<typeof setError>;
+
+// Thunk
+const loginTC =
+	(values: LoginFieldsType): AppThunk =>
+		(dispatch) => {
+			dispatch(setLoadingAC(true));
+			api
+				.login(values)
+				.then((res) => {
+					dispatch(setIsLoggedIn(true));
+					alert("Вы залогинились успешно");
+				})
+				.catch((e) => {
+					dispatch(setError(e.response.data.errors));
+				})
+				.finally(() => {
+					dispatch(setLoadingAC(false));
+					setTimeout(() => {
+						dispatch(setError(null));
+					}, 3000);
+				});
+		};
+
+// Store
+const rootReducer = combineReducers({
+	app: appReducer,
+});
+
+const store = configureStore({ reducer: rootReducer });
+type RootState = ReturnType<typeof store.getState>;
+type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
+type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, ActionsType>;
+const useAppDispatch = () => useDispatch<AppDispatch>();
+const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+// Loader
+export const Loader = () => {
+	return <h1>Loading ...</h1>;
+};
+
+// Profile
+export const Profile = () => {
+	return <h2>😎 Profile</h2>;
+};
+
+// Login
 export const Login = () => {
+	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
+
+	const error = useAppSelector((state) => state.app.error);
+	const isLoading = useAppSelector((state) => state.app.isLoading);
+	const isLoggedIn = useAppSelector((state) => state.app.isLoggedIn);
 
 	const formik = useFormik({
 		initialValues: {
-			firstName: '',
+			email: "darrell@gmail.com",
+			password: "123",
 		},
-		validate: (values) => {
-			const errors: LoginFieldsType = {};
-			//✅✅✅✅
-			 if (values.firstName.length < 5) errors.firstName = 'Must be 5 characters or more'
-			return errors
+		onSubmit: (values) => {
+			dispatch(loginTC(values));
 		},
-		onSubmit: values => {
-			alert(JSON.stringify(values, null, 2));
-		}
 	});
 
 	return (
-		<form onSubmit={formik.handleSubmit}>
-			<div>
-				<input placeholder={'Введите имя'} {...formik.getFieldProps('firstName')}/>
-			</div>
-			<button type="submit" disabled={!(formik.isValid && formik.dirty)}>Отправить</button>
-			{formik.errors && <div>{formik.errors.firstName}</div> }
-			<p>{formik.values.firstName.length}</p>
-		</form>
+		<div>
+			{!!error && <h2 style={{ color: "red" }}>{error}</h2>}
+			{isLoading && <Loader />}
+			<form onSubmit={formik.handleSubmit}>
+				<div>
+					<input placeholder={"Введите email"} {...formik.getFieldProps("email")} />
+				</div>
+				<div>
+					<input
+						type={"password"}
+						placeholder={"Введите пароль"}
+						{...formik.getFieldProps("password")}
+					/>
+				</div>
+				<button type="submit">Залогиниться</button>
+			</form>
+		</div>
 	);
-}
+};
 
 // App
 export const App = () => {
 	return (
 		<Routes>
-			<Route path={''} element={<Login/>}/>
+			<Route path={""} element={<Login />} />
+			<Route path={"profile"} element={<Profile />} />
 		</Routes>
-	)
-}
+	);
+};
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(<BrowserRouter><App/></BrowserRouter>)
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+root.render(
+	<Provider store={store}>
+		<BrowserRouter>
+			<App />
+		</BrowserRouter>
+	</Provider>,
+);
 
 // 📜 Описание:
-// Начните вводить в поле firstName символы. После ввода первого символа кнопка "Отправить" раздизаблится.
-// Задача: кнопка "Отправить" должна раздизаблиться только в том случае, если длинна имени больше, либо равна 5 символам.
-// Т.е. вам необходимо самостоятельно написать эту валидацию для поля firstName.
-// ❗ В качестве текста ошибки напишите 'Must be 5 characters or more'
-// ❗ Текст ошибки выводить не нужно (только если для себя поиграться).
+// ❗ Email и password менять не надо. Это просто тестовые данные с которыми будет происходить успешный запрос.
+// Нажмите на кнопку "Залогиниться" и вы увидели alert с успешным сообщением
+// Задача: при успешной логинизации, редиректнуть пользователя на страницу Profile.
 
-// В качестве ответа напишите полностью строку кода с условием.
-// 🖥 Пример ответа: if (true) { errors.firstName = 'Must be 5 characters or more' }
-// ❗ Сторонние библиотеки (например yup) использовать запрещено
+// Напишите строку кода, которую нужно добавить
+// 🖥 Пример ответа: if (true) { console.log('hello') }
