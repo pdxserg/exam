@@ -1,96 +1,77 @@
-import axios from "axios";
-import React, { useEffect } from "react";
-import ReactDOM from "react-dom/client";
-import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import axios from 'axios'
+import React, { ChangeEvent, useEffect, useState } from 'react'
+import ReactDOM from 'react-dom/client';
 
 // Types
 type CommentType = {
-	postId: string;
-	id: string;
-	name: string;
-	email: string;
-	body: string;
-};
+	postId: string
+	id: string
+	name: string
+	email: string
+	body: string
+}
 
 // Api
-const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
+const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
 const commentsAPI = {
 	getComments() {
-		return instance.get<CommentType[]>("comments");
+		return instance.get<CommentType[]>('comments')
 	},
-};
-
-// Reducer
-const initState = [] as CommentType[];
-
-type InitStateType = typeof initState;
-
-const commentsReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
-	switch (action.type) {
-		case "COMMENTS/GET-COMMENTS":
-			return action.comments;
-		default:
-			return state;
+	createComment() {
+		const payload = {body: 'Это просто заглушка. Backend сам сгенерирует новый комментарий и вернет его вам'}
+		// Promise.resolve() стоит в качестве заглушки, чтобы TS не ругался и код компилировался
+		// Promise.resolve() нужно удалить и написать правильный запрос для создания нового комментария
+		return Promise.resolve()
 	}
-};
+}
 
-const getCommentsAC = (comments: CommentType[]) =>
-	({ type: "COMMENTS/GET-COMMENTS", comments }) as const;
-type ActionsType = ReturnType<typeof getCommentsAC>;
-
-const getCommentsTC = (): ThunkAction<any, any, any, any> => (dispatch) => {
-	commentsAPI.getComments().then((res) => {
-		dispatch(getCommentsAC(res.data));
-	});
-};
-
-// Store
-const rootReducer = combineReducers({
-	comments: commentsReducer,
-});
-
-const store = configureStore({ reducer: rootReducer });
-type RootState = ReturnType<typeof store.getState>;
-type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
-const useAppDispatch = () => useDispatch<AppDispatch>();
-const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 // App
 export const App = () => {
-	const comments = useAppSelector((state) => state.comments);
-	const dispatch = useAppDispatch();
+
+	const [comments, setComments] = useState<CommentType[]>([])
 
 	useEffect(() => {
-		dispatch(getCommentsTC());
-	}, []);
+		commentsAPI.getComments()
+			.then((res) => {
+				setComments(res.data)
+			})
+	}, [])
+
+	const createPostHandler = () => {
+		commentsAPI.createComment()
+			.then((res: any) => {
+				const newComment = res.data
+				setComments([newComment, ...comments,])
+			})
+	};
 
 	return (
 		<>
 			<h1>📝 Список комментариев</h1>
-			{comments.map((c) => {
-				return (
-					<div key={c.id}>
-						<b>Comment</b>: {c.body}{" "}
-					</div>
-				);
-			})}
-		</>
-	);
-};
+			<div style={{marginBottom: '15px'}}>
+				<button style={{marginLeft: '15px'}}
+				        onClick={() => createPostHandler()}>
+					Добавить новый комментарий
+				</button>
+			</div>
 
-const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
-root.render(
-	<Provider store={store}>
-		<App />
-	</Provider>,
-);
+			{
+				comments.map(c => {
+					return <div key={c.id}><b>Comment</b>: {c.body} </div>
+				})
+			}
+		</>
+	)
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(<App/>)
 
 // 📜 Описание:
-// Ваша задача стоит в том чтобы правильно передать нужные типы в дженериковый тип ThunkAction<any, any, any, any>.
-// Что нужно написать вместо any, any, any, any чтобы правильно типизировать thunk creator?
-// Ответ дайте через пробел
-
-// 🖥 Пример ответа: unknown status isDone void
+// Напишите запрос на сервер для создания нового комментария.
+// Типизацию возвращаемых данных в ответе указывать необязательно, но можно и указать (в ответах учтены оба варианта).
+// Исправленную версию строки напишите в качестве ответа.
+//
+// 🖥 Пример ответа: return Promise.resolve(payload)
