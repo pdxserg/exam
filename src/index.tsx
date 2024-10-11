@@ -1,136 +1,44 @@
-import React, { useEffect } from "react";
-import ReactDOM from "react-dom/client";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
-import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import axios from "axios";
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import React from 'react'
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-// Types
-type PostType = {
-	body: string;
-	id: string;
-	title: string;
-	userId: string;
-};
 
-type PayloadType = {
-	title: string;
-	body?: string;
-};
+export const PageNotFound = () => {
+	return <h2>⛔ 404. Page not found ⛔</h2>
+}
 
-// Api
-const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
+export const Profile = () => {
+	return <h2>😎 Профиль</h2>
+}
 
-const postsAPI = {
-	getPosts() {
-		return instance.get<PostType[]>("posts");
-	},
-	updatePostTitle(postId: string, post: PayloadType) {
-		return instance.put<PostType>(`posts/${postId}`, post);
-	},
-};
 
-// Reducer
-const initState = [] as PostType[];
-
-type InitStateType = typeof initState;
-
-const postsReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
-	switch (action.type) {
-		case "POSTS/GET-POSTS":
-			return action.posts;
-
-		case "POSTS/UPDATE-POST-TITLE":
-			return state.map((p) => {
-				if (p.id === action.post.id) {
-					return { ...p, title: action.post.title };
-				} else {
-					return p;
-				}
-			});
-
-		default:
-			return state;
-	}
-};
-
-const getPostsAC = (posts: PostType[]) => ({ type: "POSTS/GET-POSTS", posts }) as const;
-const updatePostTitleAC = (post: PostType) => ({ type: "POSTS/UPDATE-POST-TITLE", post }) as const;
-type ActionsType = ReturnType<typeof getPostsAC> | ReturnType<typeof updatePostTitleAC>;
-
-const getPostsTC = (): AppThunk => (dispatch) => {
-	postsAPI.getPosts().then((res) => {
-		dispatch(getPostsAC(res.data));
-	});
-};
-
-const updatePostTC =
-	(postId: string): AppThunk =>
-		(dispatch, getState: any) => {
-			try {
-				const currentPost = getState().find((p: PostType) => p.id === postId);
-
-				if (currentPost) {
-					const payload = { title: "Это просто заглушка. Backend сам сгенерирует новый title" };
-					postsAPI.updatePostTitle(postId, payload).then((res) => {
-						dispatch(updatePostTitleAC(res.data));
-					});
-				}
-			} catch (e) {
-				alert("Обновить пост не удалось 😢");
-			}
-		};
-
-// Store
-const rootReducer = combineReducers({
-	posts: postsReducer,
-});
-
-const store = configureStore({ reducer: rootReducer });
-type RootState = ReturnType<typeof store.getState>;
-type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
-type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, ActionsType>;
-const useAppDispatch = () => useDispatch<AppDispatch>();
-const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-
-// App
-const App = () => {
-	const dispatch = useAppDispatch();
-	const posts = useAppSelector((state) => state.posts);
-
-	useEffect(() => {
-		dispatch(getPostsTC());
-	}, []);
-
-	const updatePostHandler = (postId: string) => {
-		dispatch(updatePostTC(postId));
-	};
-
+export const Main = () => {
 	return (
 		<>
-			<h1>📜 Список постов</h1>
-			{posts.map((p) => {
-				return (
-					<div key={p.id}>
-						<b>title</b>: {p.title}
-						<button onClick={() => updatePostHandler(p.id)}>Обновить пост</button>
-					</div>
-				);
-			})}
+			<h2>✅ Список тудулистов</h2>
+			<h2>📜 Список постов</h2>
 		</>
-	);
-};
+	)
+}
 
-const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
-root.render(
-	<Provider store={store}>
-		<App />
-	</Provider>,
-);
+// App
+export const App = () => {
+
+	return (
+		<Routes>
+			<Route path={'profile'} element={<Profile/>}/>
+			{/* ❗❗❗ XXX ❗❗❗  */}
+		</Routes>
+	)
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(<BrowserRouter><App/></BrowserRouter>)
 
 // 📜 Описание:
-// Попробуйте обновить пост и вы увидите alert с ошибкой.
-// Debugger / network / console.log вам в помощь
-// Найдите ошибку и вставьте исправленную строку кода в качестве ответа.
+// Вместо ХХХ напишите роут таким образом, чтобы вне зависимости от того чтобы будет в урле (login или home или...)
+// вас всегда редиректило на страницу профиля и при в это в урле по итогу
+// был адрес /profile
 
-// 🖥 Пример ответа: const payload = {...currentPost, tile: 'Летим 🚀'}
+// 🖥 Пример ответа: <Route path={'/'} element={'to profile page'}/>
