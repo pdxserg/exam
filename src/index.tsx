@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
@@ -6,74 +6,102 @@ import axios from "axios";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Types
-type TodoType = {
+type PostDomainType = PostType & {
+	isDisabled: boolean;
+};
+
+type PostType = {
+	body: string;
 	id: string;
 	title: string;
-	order: number;
-	createdAt: string;
-	updatedAt: string;
-	completed: boolean;
+	userId: string;
 };
 
 // Api
 const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
-const todosAPI = {
-	getTodos() {
-		return instance.get<TodoType[]>("todos");
+const postsAPI = {
+	getPosts() {
+		return instance.get<PostType[]>("posts");
 	},
-	changeTodoStatus(id: string, completed: boolean) {
-		return instance.put(`todos/${id}`, { completed });
+	deletePost(id: string) {
+		return instance.delete<{ message: string }>(`posts/${id}?delay=3`);
 	},
 };
 
 // Reducer
-const initState = [] as TodoType[];
+const initState = {
+	isLoading: false,
+	posts: [] as PostDomainType[],
+};
 
 type InitStateType = typeof initState;
 
-const todosReducer = (state: InitStateType = initState, action: ActionsType) => {
+const postsReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
 	switch (action.type) {
-		case "TODOS/GET-TODOS":
-			return action.todos;
+		case "POSTS/GET-POSTS":
+			return {
+				...state,
+				posts: action.posts.map((t) => {
+					return { ...t, isDisabled: false };
+				}),
+			};
 
-		case "TODOS/CHANGE-TODO-STATUS":
-			return state.map((t) => {
-				if (t.id === action.todo.id) {
-					return { ...t, completed: action.todo.completed };
-				} else {
-					return t;
-				}
-			});
+		case "POSTS/DELETE-POST":
+			return { ...state, posts: state.posts.filter((t) => t.id !== action.id) };
+
+		case "POSTS/IS-LOADING":
+			return { ...state, isLoading: action.isLoading };
+
+		case "POSTS/IS-DISABLED":
+			return {
+				...state,
+				posts: state.posts.map((t) => {
+					if (t.id === action.id) {
+						return { ...t, isDisabled: action.isDisabled };
+					} else {
+						return t;
+					}
+				}),
+			};
 
 		default:
 			return state;
 	}
 };
 
-const getTodosAC = (todos: TodoType[]) => ({ type: "TODOS/GET-TODOS", todos }) as const;
-const changeTodoStatusAC = (todo: TodoType) =>
-	({ type: "TODOS/CHANGE-TODO-STATUS", todo }) as const;
-type ActionsType = ReturnType<typeof getTodosAC> | ReturnType<typeof changeTodoStatusAC>;
+const getPostsAC = (posts: PostType[]) => ({ type: "POSTS/GET-POSTS", posts }) as const;
+const deletePostAC = (id: string) => ({ type: "POSTS/DELETE-POST", id }) as const;
+const setLoadingAC = (isLoading: boolean) => ({ type: "POSTS/IS-LOADING", isLoading }) as const;
+const setIsDisabled = (isDisabled: boolean, id: string) =>
+	({ type: "POSTS/IS-DISABLED", isDisabled, id }) as const;
+type ActionsType =
+	| ReturnType<typeof getPostsAC>
+	| ReturnType<typeof deletePostAC>
+	| ReturnType<typeof setLoadingAC>
+	| ReturnType<typeof setIsDisabled>;
 
 // Thunk
-const getTodosTC = (): AppThunk => (dispatch) => {
-	todosAPI.getTodos().then((res) => {
-		dispatch(getTodosAC(res.data));
+const getPostsTC = (): AppThunk => (dispatch) => {
+	postsAPI.getPosts().then((res) => {
+		dispatch(getPostsAC(res.data));
 	});
 };
 
-const changeTodoStatusTC =
-	(id: string, completed: boolean): AppThunk =>
+const deletePostTC =
+	(id: string): AppThunk =>
 		(dispatch) => {
-			todosAPI.changeTodoStatus(id, completed).then((res) => {
-				dispatch(changeTodoStatusAC(res.data));
+			dispatch(setIsDisabled(true, id));
+			dispatch(setLoadingAC(true));
+			postsAPI.deletePost(id).then((res) => {
+				dispatch(deletePostAC(id));
+				dispatch(setLoadingAC(false));
 			});
 		};
 
 // Store
 const rootReducer = combineReducers({
-	todos: todosReducer,
+	posts: postsReducer,
 });
 
 const store = configureStore({ reducer: rootReducer });
@@ -83,39 +111,42 @@ type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, A
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
+// Loader
+export const Loader = () => {
+	return <h1>Loading ...</h1>;
+};
+
 // App
 const App = () => {
 	const dispatch = useAppDispatch();
-	const todos = useAppSelector((state) => state.todos);
+	const posts = useAppSelector((state) => state.posts.posts);
+	const isLoading = useAppSelector((state) => state.posts.isLoading);
 
 	useEffect(() => {
-		getTodosTC();
+		dispatch(getPostsTC());
 	}, []);
 
-	const changeStatusHandler = (id: string, completed: boolean) => {
-		dispatch(changeTodoStatusTC(id, completed));
+	const deletePostHandler = (id: string) => {
+		dispatch(deletePostTC(id));
 	};
 
 	return (
-		<>
-			<h2>✅ Список тудулистов</h2>
-			{todos.length ? (
-				todos.map((t) => {
+		<div>
+			<div style={{ position: "absolute", top: "0px" }}>{isLoading && <Loader />}</div>
+			<div style={{ marginTop: "100px" }}>
+				<h1>📜 Список постов</h1>
+				{posts.map((p) => {
 					return (
-						<div style={t.completed ? { color: "grey" } : {}} key={t.id}>
-							<input
-								type="checkbox"
-								checked={t.completed}
-								onChange={() => changeStatusHandler(t.id, !t.completed)}
-							/>
-							<b>Описание</b>: {t.title}
+						<div key={p.id}>
+							<b>title</b>: {p.title}
+							<button style={{ marginLeft: "15px" }} onClick={() => deletePostHandler(p.id)}>
+								удалить пост
+							</button>
 						</div>
 					);
-				})
-			) : (
-				<h2>Тудулистов нету 😥</h2>
-			)}
-		</>
+				})}
+			</div>
+		</div>
 	);
 };
 
@@ -127,9 +158,16 @@ root.render(
 );
 
 // 📜 Описание:
-// При загрузке приложения вы должны увидеть список тудулистов,
-// но из-за невнимательности была допущена ошибка.
-// Найдите и исправьте ошибку.
-// Исправленную версию строки напишите в качестве ответа.
+// Перед вами список постов.
+// Откройте network и быстро нажмите на кнопку удалить пост несколько раз подряд.
+// Откройте вкладку Preview и проанализируйте ответ с сервера
+// Первое сообщение будет "Post has been successfully deleted",
+// а следующие "Post with id: 63626ac315d01f80765587ee does not exist"
+// Т.е. бэкенд первый раз удаляет, а потом уже не может, т.к. пост удален из базы данных.
 
-// 🖥 Пример ответа: type InitStateType = typeof initState
+// Ваша задача при первом клике задизаблить кнопку удаления,
+// соответсвенно не давать пользователю возможности слать повторные запросы.
+// ❗ Необходимо задизаблить кнопку именно удаляемого поста, а не все кнопки.
+// Необходимую строку кода для решения этой задачи напишите в качестве ответа.
+
+// 🖥 Пример ответа: style={{marginRight: '20px'}}
