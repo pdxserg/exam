@@ -28,6 +28,7 @@ const appReducer = (state: InitStateType = initState, action: ActionsType): Init
 		case "SET_IS_INITIALIZED":
 			return { ...state, isInitialized: action.isInitialized };
 		case "SET_LOADING":
+			console.log("loading")
 			return { ...state, isLoading: action.isLoading };
 		case "SET_IS_LOGGED_IN":
 			return { ...state, isLoggedIn: action.isLoggedIn };
@@ -58,9 +59,10 @@ type ActionsType =
 // Thunk
 const me = (): AppThunk => async (dispatch) => {
 	dispatch(setLoading(true));
+
 	api
 		.me()
-		.then((res) => {
+		.then(() => {
 			dispatch(setIsLoggedIn(true));
 		})
 		.finally(() => {
@@ -70,7 +72,9 @@ const me = (): AppThunk => async (dispatch) => {
 };
 
 // Components
-const Loader = () => <h2>🔘 Крутилка...</h2>;
+const Loader = () =>  <h2>🔘 Крутилка...</h2>;
+
+
 
 const Login = () => {
 	const isInitialized = useAppSelector((state) => state.app.isInitialized);
@@ -105,9 +109,15 @@ export const App = () => {
 	useEffect(() => {
 		dispatch(me());
 	}, []);
+	// ✅✅✅✅✅ ANSWER
+	if (!isInitialized){return <Loader/>}
+
 
 	return (
-		<Routes>
+	 // !isInitialized
+		//  ? <Loader />
+		// :
+		 <Routes>
 			<Route path={"/"} element={<Profile />} />
 			<Route path={"login"} element={<Login />} />
 		</Routes>
