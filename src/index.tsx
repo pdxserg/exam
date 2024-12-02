@@ -1,44 +1,100 @@
 import ReactDOM from 'react-dom/client';
-import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import React from 'react'
 
-const newSum = 1000
+type UserType = {
+	id: number
+	name: string
+	avatar: string
+	age: number
+	address: string
+}
 
-const Login = () => {
+const users: UserType[] = [
+	{
+		id: 1,
+		name: 'my Name',
+		age: 32,
+		avatar: '—ฅ/ᐠ.̫ .ᐟ\\ฅ—',
+		address: 'my Address'
+	},
+	{
+		id: 2,
+		name: 'John',
+		age: 22,
+		avatar: ':)',
+		address: 'California'
+	},
+	{
+		id: 3,
+		name: 'Mike',
+		age: 18,
+		avatar: '^._.^',
+		address: 'New York'
+	},
+	{
+		id: 4,
+		name: 'Emma',
+		age: 38,
+		avatar: '/ᐠ-ꞈ-ᐟ\\',
+		address: 'Washington'
+	},
+]
+
+const StartPage = () => {
 	const navigate = useNavigate()
+	const friends = users.filter(u => u.id !== 1)
+	console.log(useParams())
 
-	useEffect(() => {
-		navigate(`/balance/${newSum}`)
-	}, [])
+	const mappedFriends = friends.map((f, i) => {
+		const go = () => {
+			navigate('/friend/' + f.id)
 
-	return (
-		<h1>Login</h1>
-	)
-}
-
-const Balance = () => {
-	const [balance, setBalance] = useState(500)
-
-	const params = useParams()
-
-	useEffect( ()=> {
-		if (params.bonus) {
-			// ❗❗❗ XXX ❗❗❗
-			// ✅✅✅✅✅ANSWER
-			setBalance((prevBalance) => prevBalance + Number(params.bonus));
 		}
-	},[] )
+
+		return (
+			<div key={i} onClick={go} style={{paddingLeft: 24, color: 'blue', cursor: 'pointer'}}>
+				{f.name}, {f.age}
+			</div>
+		)
+	})
 
 	return (
-		<h1>💵 balance: {balance}</h1>
+		<div>
+			<h2>🙂 My profile</h2>
+			<Profile userId={1}/>
+			<hr/>
+			<h2>👪 Friends</h2>
+			{mappedFriends}
+		</div>
+	)
+}
+const Profile: React.FC<{ userId?: number }> = ({userId}) => {
+	const {id} = useParams<{ id: string }>()
+	const user = users.find(u => u.id === +(id || userId || 0))
+
+	return (
+		<div>
+			<div>
+				<b>avatar</b> {user?.avatar}
+			</div>
+			<div>
+				<div><b>name</b>: {user?.name}</div>
+				<div><b>age</b>: {user?.age}</div>
+				<div><b>address</b>: {user?.address}</div>
+			</div>
+		</div>
 	)
 }
 
-export const Bank = () => {
+export const Friends = () => {
+
 	return (
 		<Routes>
-			<Route path={'/'} element={<Login/>}/>
-			<Route path={'/balance/:bonus'} element={<Balance/>}/>
+			<Route path={'/'} element={<StartPage/>}/>
+			//✅✅✅✅✅ANSWER
+			<Route path={'friend/:id'} element={<Profile/>}/>
+			<Route path={'*'} element={<div>❌404 Page Not Found❌</div>}/>
 		</Routes>
 	)
 }
@@ -46,13 +102,16 @@ export const Bank = () => {
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
 	<BrowserRouter>
-		<Bank/>
+		<Friends/>
 	</BrowserRouter>
 );
 
 // 📜 Описание:
-// Перед вами баланс равный 500.
-// Ваша задача вместо XXX написать код,
-// в результате которого баланс увеличится на сумму указанную в роуте.
-
-// 🖥 Пример ответа: balance = newSum
+// При загрузке приложения на экране отображается
+// профиль пользователя и список друзей.
+// Если кликнуть на пользователя, то видим ❌404 Page Not Found❌
+// Исправьте код, чтобы по клику на пользователя
+// отображалась странице с информацией о друге.
+// В качестве ответа укажите исправленную строку кода.
+//
+// 🖥 Пример ответа: <Profile userId={4}/>
