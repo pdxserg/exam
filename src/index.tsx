@@ -82,15 +82,13 @@ const Login = () => {
 	if (isAuth) {
 		navigate("/profile");
 	}
-const onClickk =()=>{
-		//✅✅✅✅✅ANSWER
-	dispatch(loginTC(email,password))
-}
+
 	return (
 		<div>
 			<input type={"text"} value={email} onChange={changeEmailHandler} />
 			<input type={"password"} value={password} onChange={changePasswordHandler} />
-			<button onClick={onClickk} disabled={!email || !password}>login</button>
+			✅✅✅✅✅ANSWER
+			<button onClick={()=>dispatch(loginTC(email,password))} disabled={!email || !password}>login</button>
 		</div>
 	);
 };
