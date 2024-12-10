@@ -1,57 +1,77 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-import { createRoot } from "react-dom/client";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { configureStore, createSlice } from "@reduxjs/toolkit"
+import { createRoot } from "react-dom/client"
+import { Provider, useDispatch, useSelector } from "react-redux"
 
 // slice
 const slice = createSlice({
-	name: "waterCounter",
+	name: "library",
 	initialState: {
-		liters: 10,
-	},
-	reducers: {
-		count: (state) => {
-			// ✅✅✅✅Answer
-			console.log(JSON.parse(JSON.stringify(state)));
+		collection: {
+			books: [
+				{ id: 1, title: "1984" },
+				{ id: 2, title: "Brave New World" },
+			],
 		},
 	},
-});
+	reducers: {
+		removeBook: (state, action) => {
+			// ✅✅✅✅Answer
+			const index = state.collection.books.findIndex(i=> i.id === action.payload)
+			if (index !== -1) {
+				state.collection.books.splice(index, 1)
+			}
+			// const index = state.findIndex(to => to.id === action.payload.id)
+			// state.collection.books.slice(action.payload,1)
+		},
+	},
+})
 
-const { count } = slice.actions;
+const { removeBook } = slice.actions
 
 // App.tsx
 const App = () => {
-	const water = useSelector((state: RootState) => state.waterCounter.liters);
-	const dispatch = useDispatch();
+	const books = useSelector((state: RootState) => state.library.collection.books)
+	const dispatch = useDispatch()
+
+	const removeLastBook = () => {
+		if (books.length > 0) {
+			dispatch(removeBook(books[books.length - 1].id))
+		}
+	}
 
 	return (
 		<>
-			<button onClick={() => dispatch(count())}>Get Water</button>
-			<span>{water} liters</span>
+			<button onClick={removeLastBook}>Remove Last Book</button>
+			<ul>
+				{books.map((book) => (
+					<li key={book.id}>{book.title}</li>
+				))}
+			</ul>
 		</>
-	);
-};
+	)
+}
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		waterCounter: slice.reducer,
+		library: slice.reducer,
 	},
-});
+})
 
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof store.getState>
 
 // main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-);
+)
 
 // 📜 Описание:
-// Откройте панель разработчика и нажмите на кнопку Get Water
-// В консоли вы увидите такой результат
-// Proxy(Object) {type_: 0, scope_: {…}, modified_: false, finalized_: false, assigned_: {…},
+// При нажатии на кнопку Remove Last Book, последняя книга в коллекции не удаляется 🥲
 
 // 🪛 Задача:
-// Выведите в консоль state таким образом, чтобы получить вот такой результат {liters: 10}
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Remove Last Book,
+// последняя книга удалялась из коллекции.
 // В качестве ответа укажите исправленную строку кода.
+// ❗Изменение стейта должно быть написано мутабельным образом.
