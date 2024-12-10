@@ -2,75 +2,62 @@ import { configureStore, createSlice } from "@reduxjs/toolkit"
 import { createRoot } from "react-dom/client"
 import { Provider, useDispatch, useSelector } from "react-redux"
 
-type Product = {
+type Note = {
 	id: number
-	name: string
-	inStock: boolean
+	content: string
+	important: boolean
 }
 
 // slice
 const slice = createSlice({
-	name: "products",
-	initialState: [
-		{ id: 1, name: "Laptop", inStock: true },
-		{ id: 2, name: "Headphones", inStock: false },
-		{ id: 3, name: "Smartphone", inStock: true },
-	] as Product[],
+	name: "notes",
+	initialState: {
+		items: [
+			{ id: 1, content: "Buy groceries", important: false },
+			{ id: 2, content: "Schedule meeting", important: true },
+			{ id: 3, content: "Call mom", important: false },
+		],
+	},
 	reducers: {
-		toggleInStock: (state, action) => {
-			const product = state.find((product) => product.id === action.payload.id)
-			if (product) {
-				product.inStock = action.payload.inStock
-			}
-		},
-		clearStock: (state) => {
+		updateNote: (state, action) => {
 			return state
 		},
 	},
 })
 
-const { toggleInStock, clearStock } = slice.actions
+const { updateNote } = slice.actions
 
 // App.tsx
 const App = () => {
-	const products = useSelector((state: RootState) => state.products)
+	const notes = useSelector((state: RootState) => state.notes.items)
 	const dispatch = useDispatch()
 
-	const handleLogout = () => {
-		dispatch(clearStock())
-	}
-
-	const toggleProductStock = (product: Product) => {
-		dispatch(toggleInStock({ id: product.id, inStock: !product.inStock }))
+	const toggleImportance = (note: Note) => {
+		dispatch(updateNote({ id: note.id, important: !note.important }))
 	}
 
 	return (
-		<div>
-			<button onClick={handleLogout}>Logout</button>
-			<ul>
-				{products.map((product) => (
-					<li key={product.id}>
-            <span
-	            style={{
-		            color: product.inStock ? "green" : "red",
-	            }}
-            >
-              {product.name} ({product.inStock ? "In Stock" : "Out of Stock"})
-            </span>
-						<button onClick={() => toggleProductStock(product)}>
-							{product.inStock ? "Mark Out of Stock" : "Mark In Stock"}
-						</button>
-					</li>
-				))}
-			</ul>
-		</div>
+		<ul>
+			{notes.map((note) => (
+				<li key={note.id}>
+          <span
+	          style={{
+		          fontWeight: note.important ? "bold" : "normal",
+	          }}
+          >
+            {note.content}
+          </span>
+					<button onClick={() => toggleImportance(note)}>{note.important ? "Unmark" : "Mark Important"}</button>
+				</li>
+			))}
+		</ul>
 	)
 }
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		products: slice.reducer,
+		notes: slice.reducer,
 	},
 })
 
@@ -84,9 +71,10 @@ createRoot(document.getElementById("root")!).render(
 )
 
 // 📜 Описание:
-// При нажатии на кнопку Logout массив товаров не очищается 🥲
+// При нажатии на кнопку Mark Important или Unmark рядом с заметкой, важность заметки не обновляется 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Logout,
-// массив товаров полностью очищался.
-// В качестве ответа укажите исправленную строку кода
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Mark Important или Unmark,
+// состояние важности заметки обновлялось.
+// В качестве ответа укажите исправленную строку кода.
+// ❗Изменение стейта должно быть написано мутабельным образом
