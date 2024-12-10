@@ -1,51 +1,76 @@
-import { configureStore, createSlice, nanoid } from "@reduxjs/toolkit"
+import { configureStore, createSlice } from "@reduxjs/toolkit"
 import { createRoot } from "react-dom/client"
 import { Provider, useDispatch, useSelector } from "react-redux"
 
+type Product = {
+	id: number
+	name: string
+	inStock: boolean
+}
+
 // slice
 const slice = createSlice({
-	name: "fruits",
-	initialState: {
-		basket: [
-			{ id: 1, name: "Apple" },
-			{ id: 2, name: "Banana" },
-		],
-	},
+	name: "products",
+	initialState: [
+		{ id: 1, name: "Laptop", inStock: true },
+		{ id: 2, name: "Headphones", inStock: false },
+		{ id: 3, name: "Smartphone", inStock: true },
+	] as Product[],
 	reducers: {
-		addFruit: (state, action) => {
+		toggleInStock: (state, action) => {
+			const product = state.find((product) => product.id === action.payload.id)
+			if (product) {
+				product.inStock = action.payload.inStock
+			}
+		},
+		clearStock: (state) => {
 			return state
 		},
 	},
 })
 
-const { addFruit } = slice.actions
+const { toggleInStock, clearStock } = slice.actions
 
 // App.tsx
 const App = () => {
-	const fruits = useSelector((state: RootState) => state.fruits.basket)
+	const products = useSelector((state: RootState) => state.products)
 	const dispatch = useDispatch()
 
-	const addNewFruit = () => {
-		const newFruit = { id: nanoid(), name: "Orange" }
-		dispatch(addFruit(newFruit))
+	const handleLogout = () => {
+		dispatch(clearStock())
+	}
+
+	const toggleProductStock = (product: Product) => {
+		dispatch(toggleInStock({ id: product.id, inStock: !product.inStock }))
 	}
 
 	return (
-		<>
-			<button onClick={addNewFruit}>Add Fruit</button>
+		<div>
+			<button onClick={handleLogout}>Logout</button>
 			<ul>
-				{fruits.map((fruit) => (
-					<li key={fruit.id}>{fruit.name}</li>
+				{products.map((product) => (
+					<li key={product.id}>
+            <span
+	            style={{
+		            color: product.inStock ? "green" : "red",
+	            }}
+            >
+              {product.name} ({product.inStock ? "In Stock" : "Out of Stock"})
+            </span>
+						<button onClick={() => toggleProductStock(product)}>
+							{product.inStock ? "Mark Out of Stock" : "Mark In Stock"}
+						</button>
+					</li>
 				))}
 			</ul>
-		</>
+		</div>
 	)
 }
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		fruits: slice.reducer,
+		products: slice.reducer,
 	},
 })
 
@@ -59,10 +84,9 @@ createRoot(document.getElementById("root")!).render(
 )
 
 // 📜 Описание:
-// При нажатии на кнопку Add Fruit, новый фрукт не добавляется в корзину 🥲
+// При нажатии на кнопку Logout массив товаров не очищается 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Add Fruit,
-// новый фрукт добавлялся в корзину
-// В качестве ответа укажите исправленную строку кода.
-// ❗Изменение стейта должно быть написано мутабельным образом
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Logout,
+// массив товаров полностью очищался.
+// В качестве ответа укажите исправленную строку кода
