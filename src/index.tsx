@@ -15,13 +15,11 @@ const slice = createSlice({
 	},
 	reducers: {
 		removeBook: (state, action) => {
-			// ✅✅✅✅Answer
-			const index = state.collection.books.findIndex(i=> i.id === action.payload)
+			const index= state.collection.books.findIndex(i=>i.id === action.payload)
+			console.log(index)
 			if (index !== -1) {
 				state.collection.books.splice(index, 1)
 			}
-			// const index = state.findIndex(to => to.id === action.payload.id)
-			// state.collection.books.slice(action.payload,1)
 		},
 	},
 })
