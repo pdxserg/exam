@@ -1,50 +1,55 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { createRoot } from "react-dom/client";
-import { Provider, useSelector } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 
 // slice
 const slice = createSlice({
-	name: "taskManager",
+	name: "classroom",
 	initialState: {
-		tasks: [
-			{ id: 1, title: "Task 1" },
-			{ id: 2, title: "Task 2" },
-			{ id: 3, title: "Task 3" },
+		students: [
+			{ id: 1, name: "Alice" },
+			{ id: 2, name: "Bob" },
+			{ id: 3, name: "Charlie" },
 		],
 	},
 	reducers: {
-		addTask: (state, action) => {
-			return state;
+		removeStudent: (state, action) => {
+			//✅✅✅✅ ANSWER
+			const index =  state.students.findIndex(i=>i.id === action.payload)
+			if (index !== -1){
+				state.students.splice(index,1)
+			}
 		},
-	},
-	selectors: {
-		// ❗❗❗ANSWER ❗❗❗
-		selectTasks: state=>state.tasks
 	},
 });
 
-const { addTask } = slice.actions;
-const { selectTasks } = slice.selectors;
+const { removeStudent } = slice.actions;
 
 // App.tsx
 const App = () => {
-	const tasks = useSelector(selectTasks);
+	const students = useSelector((state: RootState) => state.classroom.students);
+	const dispatch = useDispatch();
+
+	const handleRemove = (id: number) => {
+		dispatch(removeStudent(id));
+	};
 
 	return (
-		<>
-			<ul>
-				{tasks.map((task) => (
-					<li key={task.id}>{task.title}</li>
-				))}
-			</ul>
-		</>
+		<ul>
+			{students.map((student) => (
+				<li key={student.id}>
+					{student.name}
+					<button onClick={() => handleRemove(student.id)}>✖</button>
+				</li>
+			))}
+		</ul>
 	);
 };
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		taskManager: slice.reducer,
+		classroom: slice.reducer,
 	},
 });
 
@@ -58,7 +63,9 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// Перед вами нерабочий код и его нужно починить, чтобы отобразился массив тасок
+// При нажатии на кнопку ✖ рядом с именем студента, студент не удаляется из списка 🥲
 
 // 🪛 Задача:
-// Что нужно написать вместо // ❗❗❗XXX ❗❗❗, чтобы отобразился массив тасок
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку ✖, студент удалялся из списка.
+// В качестве ответа укажите исправленную строку кода.
+// ❗Изменение стейта должно быть написано мутабельным образом
