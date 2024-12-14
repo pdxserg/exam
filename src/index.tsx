@@ -1,52 +1,65 @@
-import { configureStore, createSlice, nanoid } from "@reduxjs/toolkit"
+import { configureStore, createSlice } from "@reduxjs/toolkit"
 import { createRoot } from "react-dom/client"
 import { Provider, useDispatch, useSelector } from "react-redux"
 
+type Note = {
+	id: number
+	content: string
+	important: boolean
+}
+
 // slice
 const slice = createSlice({
-	name: "fruits",
+	name: "notes",
 	initialState: {
-		basket: [
-			{ id: 1, name: "Apple" },
-			{ id: 2, name: "Banana" },
+		items: [
+			{ id: 1, content: "Buy groceries", important: false },
+			{ id: 2, content: "Schedule meeting", important: true },
+			{ id: 3, content: "Call mom", important: false },
 		],
 	},
 	reducers: {
-		addFruit: (state, action) => {
+		updateNote: (state, action) => {
 			//✅✅✅✅ ANSWER
-			 state.basket.unshift(action.payload)
+			const index = state.items.findIndex(e=>e.id === action.payload.id)
+			state.items[index].important= action.payload.important
 		},
 	},
 })
 
-const { addFruit } = slice.actions
+const { updateNote } = slice.actions
 
 // App.tsx
 const App = () => {
-	const fruits = useSelector((state: RootState) => state.fruits.basket)
+	const notes = useSelector((state: RootState) => state.notes.items)
 	const dispatch = useDispatch()
 
-	const addNewFruit = () => {
-		const newFruit = { id: nanoid(), name: "Orange" }
-		dispatch(addFruit(newFruit))
+	const toggleImportance = (note: Note) => {
+		dispatch(updateNote({ id: note.id, important: !note.important }))
 	}
 
 	return (
-		<>
-			<button onClick={addNewFruit}>Add Fruit</button>
-			<ul>
-				{fruits.map((fruit) => (
-					<li key={fruit.id}>{fruit.name}</li>
-				))}
-			</ul>
-		</>
+		<ul>
+			{notes.map((note) => (
+				<li key={note.id}>
+          <span
+	          style={{
+		          fontWeight: note.important ? "bold" : "normal",
+	          }}
+          >
+            {note.content}
+          </span>
+					<button onClick={() => toggleImportance(note)}>{note.important ? "Unmark" : "Mark Important"}</button>
+				</li>
+			))}
+		</ul>
 	)
 }
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		fruits: slice.reducer,
+		notes: slice.reducer,
 	},
 })
 
@@ -60,10 +73,10 @@ createRoot(document.getElementById("root")!).render(
 )
 
 // 📜 Описание:
-// При нажатии на кнопку Add Fruit, новый фрукт не добавляется в корзину 🥲
+// При нажатии на кнопку Mark Important или Unmark рядом с заметкой, важность заметки не обновляется 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Add Fruit,
-// новый фрукт добавлялся в корзину
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Mark Important или Unmark,
+// состояние важности заметки обновлялось.
 // В качестве ответа укажите исправленную строку кода.
 // ❗Изменение стейта должно быть написано мутабельным образом
