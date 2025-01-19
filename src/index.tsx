@@ -1,28 +1,25 @@
 import axios from 'axios'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client';
 
 // Types
-type CommentType = {
-	postId: string
-	id: string
-	name: string
-	email: string
+type PostType = {
 	body: string
+	id: string
+	title: string
+	userId: string
 }
+
 
 // Api
 const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
-const commentsAPI = {
-	getComments() {
-		return instance.get<CommentType[]>('comments')
+const postsAPI = {
+	getPosts() {
+		return instance.get<PostType[]>('posts')
 	},
-	createComment() {
-		const payload = {body: 'Это просто заглушка. Backend сам сгенерирует новый комментарий и вернет его вам'}
-		// Promise.resolve() стоит в качестве заглушки, чтобы TS не ругался и код компилировался
-		// Promise.resolve() нужно удалить и написать правильный запрос для создания нового комментария
-		return Promise.resolve()
+	deletePost(id: string) {
+		return axios.delete<{ message: string }>(`posts/${id}`)
 	}
 }
 
@@ -30,48 +27,47 @@ const commentsAPI = {
 // App
 export const App = () => {
 
-	const [comments, setComments] = useState<CommentType[]>([])
+	const [posts, setPosts] = useState<PostType[]>([])
 
 	useEffect(() => {
-		commentsAPI.getComments()
+		postsAPI.getPosts()
 			.then((res) => {
-				setComments(res.data)
+				setPosts(res.data)
 			})
 	}, [])
 
-	const createPostHandler = () => {
-		commentsAPI.createComment()
-			.then((res: any) => {
-				const newComment = res.data
-				setComments([newComment, ...comments,])
+	const deletePostHandler = (id: string) => {
+		postsAPI.deletePost(id)
+			.then((res) => {
+				const newPostsArr = posts.filter(p => p.id !== id)
+				setPosts(newPostsArr)
 			})
 	};
 
 	return (
 		<>
-			<h1>📝 Список комментариев</h1>
-			<div style={{marginBottom: '15px'}}>
-				<button style={{marginLeft: '15px'}}
-				        onClick={() => createPostHandler()}>
-					Добавить новый комментарий
-				</button>
-			</div>
-
-			{
-				comments.map(c => {
-					return <div key={c.id}><b>Comment</b>: {c.body} </div>
-				})
-			}
+			<h1>📜 Список постов</h1>
+			{posts.map(p => {
+				return (
+					<div key={p.id}>
+						<b>title</b>: {p.title}
+						<button style={{marginLeft: '15px'}}
+						        onClick={() => deletePostHandler(p.id)}>
+							x
+						</button>
+					</div>
+				)
+			})}
 		</>
 	)
 }
+
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(<App/>)
 
 // 📜 Описание:
-// Напишите запрос на сервер для создания нового комментария.
-// Типизацию возвращаемых данных в ответе указывать необязательно, но можно и указать (в ответах учтены оба варианта).
-// Исправленную версию строки напишите в качестве ответа.
+// Почему не удаляется post при нажатии на кнопку удаления (х) ?
+// Найдите ошибку и вставьте исправленную строку кода в качестве ответа
 //
-// 🖥 Пример ответа: return Promise.resolve(payload)
+// 🖥 Пример ответа: return axios.delete
