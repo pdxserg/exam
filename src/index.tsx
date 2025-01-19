@@ -1,82 +1,61 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit"
-import { createRoot } from "react-dom/client"
-import { Provider, useDispatch, useSelector } from "react-redux"
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom/client';
 
-type Note = {
-	id: number
-	content: string
-	important: boolean
+// Types
+type TodoType = {
+	id: string;
+	tile: string;
+	order: number;
+	createdAt: string;
+	updatedAt: string;
+	complete: boolean;
 }
 
-// slice
-const slice = createSlice({
-	name: "notes",
-	initialState: {
-		items: [
-			{ id: 1, content: "Buy groceries", important: false },
-			{ id: 2, content: "Schedule meeting", important: true },
-			{ id: 3, content: "Call mom", important: false },
-		],
-	},
-	reducers: {
-		updateNote: (state, action) => {
-			//✅✅✅✅ ANSWER
-			const index = state.items.findIndex(e=>e.id === action.payload.id)
-			state.items[index].important= action.payload.important
-		},
-	},
-})
 
-const { updateNote } = slice.actions
+// Api
+const instance = axios.create({baseURL: 'https://exams-frontend.kimitsu.it-incubator.io/api/'})
 
-// App.tsx
+const todosAPI = {
+	getTodos() {
+		return instance.get<TodoType[]>('todos')
+	},
+}
+
+
+// App
 const App = () => {
-	const notes = useSelector((state: RootState) => state.notes.items)
-	const dispatch = useDispatch()
 
-	const toggleImportance = (note: Note) => {
-		dispatch(updateNote({ id: note.id, important: !note.important }))
-	}
+	const [todos, setTodos] = useState<TodoType[]>([])
+
+	useEffect(() => {
+		todosAPI.getTodos().then((res) => setTodos(res.data))
+	}, [])
 
 	return (
-		<ul>
-			{notes.map((note) => (
-				<li key={note.id}>
-          <span
-	          style={{
-		          fontWeight: note.important ? "bold" : "normal",
-	          }}
-          >
-            {note.content}
-          </span>
-					<button onClick={() => toggleImportance(note)}>{note.important ? "Unmark" : "Mark Important"}</button>
-				</li>
-			))}
-		</ul>
+		<>
+			<h2>✅ Список тудулистов</h2>
+			{
+				todos.map((t) => {
+					return (
+						<div style={t.complete ? {color: 'grey'} : {}} key={t.id}>
+							<input type="checkbox" checked={t.complete}/>
+							<b>Описание</b>: {t.tile}
+						</div>
+					)
+				})
+			}
+		</>
 	)
 }
 
-// store.ts
-export const store = configureStore({
-	reducer: {
-		notes: slice.reducer,
-	},
-})
 
-export type RootState = ReturnType<typeof store.getState>
-
-// main.ts
-createRoot(document.getElementById("root")!).render(
-	<Provider store={store}>
-		<App />
-	</Provider>,
-)
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(<App/>)
 
 // 📜 Описание:
-// При нажатии на кнопку Mark Important или Unmark рядом с заметкой, важность заметки не обновляется 🥲
+// При написании типизации по невнимательности было допущено несколько ошибок.
+// Напишите через пробел правильные свойства в TodoType, в которых была допущена ошибка.
+// Debugger / network / документация вам в помощь
 
-// 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Mark Important или Unmark,
-// состояние важности заметки обновлялось.
-// В качестве ответа укажите исправленную строку кода.
-// ❗Изменение стейта должно быть написано мутабельным образом
+// 🖥 Пример ответа: id status isDone
