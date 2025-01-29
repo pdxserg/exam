@@ -1,77 +1,60 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import axios, { AxiosError } from "axios";
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import axios, { AxiosError } from "axios";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Types
-type NullableType<T> = null | T;
-
-type LoginFieldsType = {
+type CommentType = {
+	postId: string;
+	id: string;
+	name: string;
 	email: string;
-	password: string;
+	body: string;
 };
 
-// API
+// Api
 const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
-const api = {
-	login(data: LoginFieldsType) {
-		return instance.post("auth/login", data);
+const commentsAPI = {
+	getComments() {
+		return instance.get<CommentType[]>("comment");
 	},
 };
 
 // Reducer
 const initState = {
-	isLoading: false,
-	error: null as NullableType<string>,
-	isLoggedIn: false,
+	comments: [] as CommentType[],
 };
 
 type InitStateType = typeof initState;
 
-const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
+const appReducer = (state: InitStateType = initState, action: ActionsType) => {
 	switch (action.type) {
-		case "APP/SET-IS-LOGGED-IN":
-			return { ...state, isLoggedIn: action.isLoggedIn };
-		case "APP/IS-LOADING":
-			return { ...state, isLoading: action.isLoading };
-		case "APP/SET-ERROR":
-			return { ...state, error: action.error };
+		case "COMMENTS/GET-COMMENTS":
+			return { ...state, comments: action.comments };
+
 		default:
 			return state;
 	}
 };
 
-// Actions
-const setIsLoggedIn = (isLoggedIn: boolean) =>
-	({ type: "APP/SET-IS-LOGGED-IN", isLoggedIn }) as const;
-const setLoadingAC = (isLoading: boolean) => ({ type: "APP/IS-LOADING", isLoading }) as const;
-const setError = (error: string | null) => ({ type: "APP/SET-ERROR", error }) as const;
-type ActionsType =
-	| ReturnType<typeof setIsLoggedIn>
-	| ReturnType<typeof setLoadingAC>
-	| ReturnType<typeof setError>;
+const getCommentsAC = (comments: CommentType[]) =>
+	({ type: "COMMENTS/GET-COMMENTS", comments }) as const;
+type ActionsType = ReturnType<typeof getCommentsAC>;
 
 // Thunk
-const loginTC =
-	(values: LoginFieldsType): AppThunk =>
-		(dispatch) => {
-			dispatch(setLoadingAC(true));
-			api
-				.login(values)
-				.then((res) => {
-					dispatch(setIsLoggedIn(true));
-					alert("Вы залогинились успешно");
-				})
-				.catch((e) => {
-					console.log(e)
-				})
-				.finally(() => {
-					dispatch(setLoadingAC(false));
-				});
-		};
+const getCommentsTC = (): AppThunk => (dispatch) => {
+	commentsAPI
+		.getComments()
+		.then((res) => {
+			dispatch(getCommentsAC(res.data));
+		})
+		.catch((e: AxiosError) => {
+			alert(`Сообщение об ошибке: ${e.message}`);
+		});
+};
 
 // Store
 const rootReducer = combineReducers({
@@ -85,59 +68,30 @@ type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, A
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-// Loader
-export const Loader = () => {
-	return <h1>Loading ...</h1>;
-};
-
-// App
+// Components
 export const App = () => {
+	const comments = useAppSelector((state) => state.app.comments);
 	const dispatch = useAppDispatch();
 
-	const [form, setForm] = useState<LoginFieldsType>({ email: "", password: "" });
-
-	const error = useAppSelector((state) => state.app.error);
-	const isLoading = useAppSelector((state) => state.app.isLoading);
-
-	const changeFormValuesHandler = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-		if (field === "email") {
-			setForm({ ...form, email: e.currentTarget.value });
-		}
-		if (field === "password") {
-			setForm({ ...form, password: e.currentTarget.value });
-		}
-	};
-
-	const submitForm = (e: React.MouseEvent<HTMLButtonElement>) => {
-		e.preventDefault();
-		dispatch(loginTC(form));
-	};
+	useEffect(() => {
+		dispatch(getCommentsTC());
+	}, []);
 
 	return (
-		<div>
-			{!!error && <h2 style={{ color: "red" }}>{error}</h2>}
-			{isLoading && <Loader />}
-			<form>
-				<div>
-					<input
-						placeholder={"Введите email"}
-						value={form.email}
-						onChange={(e) => changeFormValuesHandler(e, "email")}
-					/>
-				</div>
-				<div>
-					<input
-						type={"password"}
-						placeholder={"Введите пароль"}
-						value={form.password}
-						onChange={(e) => changeFormValuesHandler(e, "password")}
-					/>
-				</div>
-				<button type="submit" onClick={submitForm}>
-					Залогиниться
-				</button>
-			</form>
-		</div>
+		<>
+			<h1>📝 Список комментариев</h1>
+			{comments.length ? (
+				comments.map((c) => {
+					return (
+						<div key={c.id}>
+							<b>Comment</b>: {c.body}{" "}
+						</div>
+					);
+				})
+			) : (
+				<h3>❌ Комментарии не подгрузились. Произошла какая-то ошибка. Найди и исправь ее</h3>
+			)}
+		</>
 	);
 };
 
@@ -149,11 +103,9 @@ root.render(
 );
 
 // 📜 Описание:
-// Перед вами форма логинизации. Введите любые логин и пароль и попробуйте залогиниться.
-// У вас это навряд ли получится 😈, т.к. вы не знаете email и пароль.
-// Откройте Network и проанализируйте запрос.
-// Задача: вывести сообщение об ошибке, которую возвращает сервер, говорящую о том что email или password некорректны.
+// ❌ Комментарии не подгрузились. Произошла какая-то ошибка.
+// В данном задании вам нужно найти ошибку и починить приложение.
+// Если сделаете все верно, то увидите комментарии.
+// В качестве ответа указать исправленную строку коду
 
-// В качестве ответа указать строку коду, которая позволит это осуществить.
-// 🖥 Пример ответа: dispatch('Error message')
-// ❗ Типизировать ошибку не надо, т.к. там есть много нюансов, о которых вы узнаете позже
+// 🖥 Пример ответа: const store = createStore(rootReducer, applyMiddleware(thunk))
