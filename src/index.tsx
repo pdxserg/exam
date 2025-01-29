@@ -2,68 +2,41 @@ import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
-import axios from "axios";
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import axios, { AxiosError } from "axios";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
 // Types
-type PostDomainType = PostType & {
-	isDisabled: boolean;
-};
-
 type PostType = {
-	body: string;
 	id: string;
+	body: string;
 	title: string;
 	userId: string;
 };
 
 // Api
-const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
+const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/ " });
 
 const postsAPI = {
 	getPosts() {
 		return instance.get<PostType[]>("posts");
 	},
-	deletePost(id: string) {
-		return instance.delete<{ message: string }>(`posts/${id}?delay=3`);
-	},
 };
 
 // Reducer
 const initState = {
-	isLoading: false,
-	posts: [] as PostDomainType[],
+	error: null as string | null,
+	posts: [] as PostType[],
 };
 
 type InitStateType = typeof initState;
 
-const postsReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
+const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
 	switch (action.type) {
 		case "POSTS/GET-POSTS":
-			return {
-				...state,
-				posts: action.posts.map((t) => {
-					return { ...t, isDisabled: false };
-				}),
-			};
+			return { ...state, posts: action.posts };
 
-		case "POSTS/DELETE-POST":
-			return { ...state, posts: state.posts.filter((t) => t.id !== action.id) };
-
-		case "POSTS/IS-LOADING":
-			return { ...state, isLoading: action.isLoading };
-
-		case "POSTS/IS-DISABLED":
-			return {
-				...state,
-				posts: state.posts.map((t) => {
-					if (t.id === action.id) {
-						return { ...t, isDisabled: action.isDisabled };
-					} else {
-						return t;
-					}
-				}),
-			};
+		case "POSTS/SET-ERROR":
+			return { ...state, error: action.error };
 
 		default:
 			return state;
@@ -71,37 +44,24 @@ const postsReducer = (state: InitStateType = initState, action: ActionsType): In
 };
 
 const getPostsAC = (posts: PostType[]) => ({ type: "POSTS/GET-POSTS", posts }) as const;
-const deletePostAC = (id: string) => ({ type: "POSTS/DELETE-POST", id }) as const;
-const setLoadingAC = (isLoading: boolean) => ({ type: "POSTS/IS-LOADING", isLoading }) as const;
-const setIsDisabled = (isDisabled: boolean, id: string) =>
-	({ type: "POSTS/IS-DISABLED", isDisabled, id }) as const;
-type ActionsType =
-	| ReturnType<typeof getPostsAC>
-	| ReturnType<typeof deletePostAC>
-	| ReturnType<typeof setLoadingAC>
-	| ReturnType<typeof setIsDisabled>;
+const setErrorAC = (error: string | null) => ({ type: "POSTS/SET-ERROR", error }) as const;
+type ActionsType = ReturnType<typeof getPostsAC> | ReturnType<typeof setErrorAC>;
 
 // Thunk
 const getPostsTC = (): AppThunk => (dispatch) => {
-	postsAPI.getPosts().then((res) => {
-		dispatch(getPostsAC(res.data));
-	});
+	postsAPI
+		.getPosts()
+		.then((res) => {
+			dispatch(getPostsAC(res.data));
+		})
+		.catch((e: AxiosError) => {
+			console.log(e)
+		});
 };
-
-const deletePostTC =
-	(id: string): AppThunk =>
-		(dispatch) => {
-			dispatch(setIsDisabled(true, id));
-			dispatch(setLoadingAC(true));
-			postsAPI.deletePost(id).then((res) => {
-				dispatch(deletePostAC(id));
-				dispatch(setLoadingAC(false));
-			});
-		};
 
 // Store
 const rootReducer = combineReducers({
-	posts: postsReducer,
+	app: appReducer,
 });
 
 const store = configureStore({ reducer: rootReducer });
@@ -111,42 +71,35 @@ type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, A
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-// Loader
-export const Loader = () => {
-	return <h1>Loading ...</h1>;
-};
-
-// App
-const App = () => {
+// Components
+export const App = () => {
 	const dispatch = useAppDispatch();
-	const posts = useAppSelector((state) => state.posts.posts);
-	const isLoading = useAppSelector((state) => state.posts.isLoading);
+
+	const posts = useAppSelector((state) => state.app.posts);
+	const error = useAppSelector((state) => state.app.error);
 
 	useEffect(() => {
 		dispatch(getPostsTC());
 	}, []);
 
-	const deletePostHandler = (id: string) => {
-		dispatch(deletePostTC(id));
-	};
-
 	return (
-		<div>
-			<div style={{ position: "absolute", top: "0px" }}>{isLoading && <Loader />}</div>
-			<div style={{ marginTop: "100px" }}>
-				<h1>📜 Список постов</h1>
-				{posts.map((p) => {
+		<>
+			<h1>📜 Список постов</h1>
+			{posts.length ? (
+				posts.map((c) => {
 					return (
-						<div key={p.id}>
-							<b>title</b>: {p.title}
-							<button style={{ marginLeft: "15px" }} onClick={() => deletePostHandler(p.id)}>
-								удалить пост
-							</button>
+						<div key={c.id}>
+							<b>Описание</b>: {c.body}{" "}
 						</div>
 					);
-				})}
-			</div>
-		</div>
+				})
+			) : (
+				<h3>
+					❌ Посты не подгрузились. Произошла какая-то ошибка. Выведите сообщение об ошибке на экран
+				</h3>
+			)}
+			<h2 style={{ color: "red" }}>{!!error && error}</h2>
+		</>
 	);
 };
 
@@ -158,16 +111,9 @@ root.render(
 );
 
 // 📜 Описание:
-// Перед вами список постов.
-// Откройте network и быстро нажмите на кнопку удалить пост несколько раз подряд.
-// Откройте вкладку Preview и проанализируйте ответ с сервера
-// Первое сообщение будет "Post has been successfully deleted",
-// а следующие "Post with id: 63626ac315d01f80765587ee does not exist"
-// Т.е. бэкенд первый раз удаляет, а потом уже не может, т.к. пост удален из базы данных.
+// ❌ Посты не подгрузились. Произошла какая-то ошибка.
+// Чинить приложение не нужно (если только для себя, в ответе это не учитывается).
+// Задача: вывести сообщение об ошибке на экран.
+// В качестве ответа указать строку коду, которая позволит это осуществить
 
-// Ваша задача при первом клике задизаблить кнопку удаления,
-// соответсвенно не давать пользователю возможности слать повторные запросы.
-// ❗ Необходимо задизаблить кнопку именно удаляемого поста, а не все кнопки.
-// Необходимую строку кода для решения этой задачи напишите в качестве ответа.
-
-// 🖥 Пример ответа: style={{marginRight: '20px'}}
+// 🖥 Пример ответа: const store = createStore(rootReducer, applyMiddleware(thunk))
