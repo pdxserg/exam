@@ -1,115 +1,107 @@
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import axios, { AxiosError } from "axios";
-import { configureStore, combineReducers, Dispatch } from "@reduxjs/toolkit";
+import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import axios from "axios";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
-// TYPES
-type TodoType = {
+// Types
+type PostDomainType = PostType & {
+	isDisabled: boolean;
+};
+
+type PostType = {
+	body: string;
 	id: string;
 	title: string;
-	order: number;
-	createdAt: string;
-	updatedAt: string;
-	completed: boolean;
+	userId: string;
 };
 
-type UserType = {
-	id: string;
-	name: string;
-	age: number;
-};
-
-type UsersResponseType = {
-	items: UserType[];
-	totalCount: number;
-};
-
-// API
+// Api
 const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
-const api = {
-	getTodos() {
-		return instance.get<TodoType[]>("todos");
+const postsAPI = {
+	getPosts() {
+		return instance.get<PostType[]>("posts");
 	},
-	getUsers() {
-		return instance.get<UsersResponseType>("users");
+	deletePost(id: string) {
+		return instance.delete<{ message: string }>(`posts/${id}?delay=3`);
 	},
 };
 
 // Reducer
 const initState = {
 	isLoading: false,
-	error: null as string | null,
-	todos: [] as TodoType[],
-	users: [] as UserType[],
+	posts: [] as PostDomainType[],
 };
 
 type InitStateType = typeof initState;
 
-const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
+const postsReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
 	switch (action.type) {
-		case "APP/GET-TODOS":
-			return { ...state, todos: action.todos };
-		case "APP/GET-USERS":
-			return { ...state, users: action.users };
-		case "APP/IS-LOADING":
+		case "POSTS/GET-POSTS":
+			return {
+				...state,
+				posts: action.posts.map((t) => {
+					return { ...t, isDisabled: false };
+				}),
+			};
+
+		case "POSTS/DELETE-POST":
+			return { ...state, posts: state.posts.filter((t) => t.id !== action.id) };
+
+		case "POSTS/IS-LOADING":
 			return { ...state, isLoading: action.isLoading };
-		case "APP/SET-ERROR":
-			return { ...state, error: action.error };
+
+		case "POSTS/IS-DISABLED":
+			return {
+				...state,
+				posts: state.posts.map((t) => {
+					if (t.id === action.id) {
+						return { ...t, isDisabled: action.isDisabled };
+					} else {
+						return t;
+					}
+				}),
+			};
+
 		default:
 			return state;
 	}
 };
 
-const getUsersAC = (users: UserType[]) => ({ type: "APP/GET-USERS", users }) as const;
-const getTodosAC = (todos: TodoType[]) => ({ type: "APP/GET-TODOS", todos }) as const;
-const setLoadingAC = (isLoading: boolean) => ({ type: "APP/IS-LOADING", isLoading }) as const;
-const setError = (error: string | null) => ({ type: "APP/SET-ERROR", error }) as const;
-
+const getPostsAC = (posts: PostType[]) => ({ type: "POSTS/GET-POSTS", posts }) as const;
+const deletePostAC = (id: string) => ({ type: "POSTS/DELETE-POST", id }) as const;
+const setLoadingAC = (isLoading: boolean) => ({ type: "POSTS/IS-LOADING", isLoading }) as const;
+const setIsDisabled = (isDisabled: boolean, id: string) =>
+	({ type: "POSTS/IS-DISABLED", isDisabled, id }) as const;
 type ActionsType =
-	| ReturnType<typeof getUsersAC>
-	| ReturnType<typeof getTodosAC>
+	| ReturnType<typeof getPostsAC>
+	| ReturnType<typeof deletePostAC>
 	| ReturnType<typeof setLoadingAC>
-	| ReturnType<typeof setError>;
-
-// Utils functions
-function baseSuccessHandler<T>(dispatch: Dispatch, actionCreator: Function, data: T) {
-	dispatch(actionCreator(data));
-	dispatch(setLoadingAC(false));
-}
+	| ReturnType<typeof setIsDisabled>;
 
 // Thunk
-const getTodosTC = (): AppThunk => (dispatch) => {
-	dispatch(setLoadingAC(true));
-	api
-		.getTodos()
-		.then((res) => {
-			// ❗❗❗ XXX ❗❗❗
-		})
-		.catch((e: AxiosError) => {
-			dispatch(setError(e.message));
-			dispatch(setLoadingAC(false));
-		});
+const getPostsTC = (): AppThunk => (dispatch) => {
+	postsAPI.getPosts().then((res) => {
+		dispatch(getPostsAC(res.data));
+	});
 };
 
-const getUsersTC = (): AppThunk => (dispatch) => {
-	dispatch(setLoadingAC(true));
-	api
-		.getUsers()
-		.then((res) => {
-			// ❗❗❗ YYY ❗❗❗
-		})
-		.catch((e: AxiosError) => {
-			dispatch(setError(e.message));
-			dispatch(setLoadingAC(false));
-		});
-};
+const deletePostTC =
+	(id: string): AppThunk =>
+		(dispatch) => {
+			dispatch(setIsDisabled(true, id));
+			dispatch(setLoadingAC(true));
+			postsAPI.deletePost(id).then((res) => {
+				dispatch(deletePostAC(id));
+				dispatch(setLoadingAC(false));
+			});
+		};
 
 // Store
 const rootReducer = combineReducers({
-	app: appReducer,
+	posts: postsReducer,
 });
 
 const store = configureStore({ reducer: rootReducer });
@@ -119,71 +111,37 @@ type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, A
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-// COMPONENTS
 // Loader
 export const Loader = () => {
 	return <h1>Loading ...</h1>;
 };
 
+// App
 const App = () => {
-	return (
-		<>
-			<h1>✅Todos & 🙂Users</h1>
-			<div style={{ display: "flex", justifyContent: "space-evenly" }}>
-				<Todos />
-				<Users />
-			</div>
-		</>
-	);
-};
-
-const Todos = () => {
 	const dispatch = useAppDispatch();
-	const todos = useAppSelector((state) => state.app.todos);
-	const error = useAppSelector((state) => state.app.error);
-	const isLoading = useAppSelector((state) => state.app.isLoading);
+	const posts = useAppSelector((state) => state.posts.posts);
+	const isLoading = useAppSelector((state) => state.posts.isLoading);
 
 	useEffect(() => {
-		dispatch(getTodosTC());
+		dispatch(getPostsTC());
 	}, []);
+
+	const deletePostHandler = (id: string) => {
+		dispatch(deletePostTC(id));
+	};
 
 	return (
 		<div>
-			<h2>✅ Список тудулистов</h2>
-			{!!error && <h2 style={{ color: "red" }}>{error}</h2>}
-			{isLoading && <Loader />}
-			{todos.map((t) => {
-				return (
-					<div style={t.completed ? { color: "grey" } : {}} key={t.id}>
-						<input type="checkbox" checked={t.completed} />
-						<b>Описание</b>: {t.title}
-					</div>
-				);
-			})}
-		</div>
-	);
-};
-
-const Users = () => {
-	const dispatch = useAppDispatch();
-	const users = useAppSelector((state) => state.app.users);
-	const error = useAppSelector((state) => state.app.error);
-	const isLoading = useAppSelector((state) => state.app.isLoading);
-
-	useEffect(() => {
-		dispatch(getUsersTC());
-	}, []);
-
-	return (
-		<div>
-			<h2>🙂 Список юзеров</h2>
-			{!!error && <h2 style={{ color: "red" }}>{error}</h2>}
-			{isLoading && <Loader />}
-			<div>
-				{users.map((u) => {
+			<div style={{ position: "absolute", top: "0px" }}>{isLoading && <Loader />}</div>
+			<div style={{ marginTop: "100px" }}>
+				<h1>📜 Список постов</h1>
+				{posts.map((p) => {
 					return (
-						<div key={u.id}>
-							<b>name</b>:{u.name} - <b>age</b>:{u.age}
+						<div key={p.id}>
+							<b>title</b>: {p.title}
+							<button style={{ marginLeft: "15px" }} onClick={() => deletePostHandler(p.id)}>
+								удалить пост
+							</button>
 						</div>
 					);
 				})}
@@ -200,12 +158,16 @@ root.render(
 );
 
 // 📜 Описание:
-// Перед вами список тудулистов и пользователей, которые находятся в постоянной загрузке.
-// Откройте network и вы увидите что запросы на сервер уходят и возвращаются с хорошими данными,
-// но вместо этого пользователь видит на экране Loader.
-// Для обработки успешного результата написана утилитная функция baseSuccessHandler.
-// Ваша задача воспользоваться этой функцией отобразить Todos и Users
-// Что нужно написать вместо XXX и YYY, чтобы реализовать данную задачу?
-// Ответ дайте через пробел.
+// Перед вами список постов.
+// Откройте network и быстро нажмите на кнопку удалить пост несколько раз подряд.
+// Откройте вкладку Preview и проанализируйте ответ с сервера
+// Первое сообщение будет "Post has been successfully deleted",
+// а следующие "Post with id: 63626ac315d01f80765587ee does not exist"
+// Т.е. бэкенд первый раз удаляет, а потом уже не может, т.к. пост удален из базы данных.
 
-// 🖥 Пример ответа: dispatch(baseSuccessHandler(1,2,3))  dispatch(baseSuccessHandler(3,2,1)
+// Ваша задача при первом клике задизаблить кнопку удаления,
+// соответсвенно не давать пользователю возможности слать повторные запросы.
+// ❗ Необходимо задизаблить кнопку именно удаляемого поста, а не все кнопки.
+// Необходимую строку кода для решения этой задачи напишите в качестве ответа.
+
+// 🖥 Пример ответа: style={{marginRight: '20px'}}
