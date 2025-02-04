@@ -1,36 +1,75 @@
-type StateType = {
-	volume: number // in percents
-	trackUrl: string // 'https://blabla.com/track01.mp3',
-	currentPlayPosition: number // milliseconds,
-}
+import {createStore} from 'redux'
+import ReactDOM from 'react-dom'
+import {Provider, useSelector, useDispatch} from 'react-redux'
+import React from 'react'
 
-export const reducer = (state: StateType, action: any) => {
+const students = {
+	students: [
+		{id: 1, name: 'Bob'},
+		{id: 2, name: 'Alex'},
+		{id: 3, name: 'Donald'},
+		{id: 4, name: 'Ann'},
+	]
+}
+type RemoveStudentAT = {
+	type: "REMOVE-STUDENT"
+	id: number
+}
+const RemoveStudentAC = (id: number): RemoveStudentAT => ({
+	type: "REMOVE-STUDENT",
+	id
+})
+
+const studentsReducer = (state = students, action: RemoveStudentAT) => {
 	switch (action.type) {
-		case XXX:
+		case "REMOVE-STUDENT":
 			return {
 				...state,
-				trackUrl: action.url
+				students: state.students.filter(s => s.id !== action.id)
 			}
-		case YYY:
-			return {
-				...state,
-				volume: 0
-			}
-		case ZZZ:
-			return {
-				...state,
-				currentPlayPosition: 0
-			}
-		default:
-			return state
 	}
+	return state
 }
 
-const muteTrackAC = () => ({type: 'TRACK-MUTED'})
-const changeTrackAC = (url: string) => ({type: 'TRACK-URL-CHANGED', url})
-// перемотатьНаНачало:
-const rewindToStart = () => ({type: 'TRACK-REWOUND-TO-START'})
+const store = createStore(studentsReducer)
+type RootStateType = ReturnType<typeof studentsReducer>
 
-// Какие типы должны быть вместо XXX, YYY и ZZZ?
-// Ответ дать через пробел, например:   'BLABLA' 'HEYНЕY' 'HIPHOP'
-вызвана функция alert?
+
+const StudentList = () => {
+	const listItemStyles = {
+		width: "100px",
+		borderBottom: "1px solid gray",
+		cursor: "pointer",
+	}
+	const students = useSelector((state: RootStateType) => state.students)
+	const dispatch = useDispatch()
+	const studentsList = students.map(s => {
+		const removeStudent = () => {
+			XXX(YYY( ZZZ))
+		}
+		return (
+			<li key={s.id}
+			    style={listItemStyles}
+			    onClick={removeStudent}>
+				{s.name}
+			</li>)
+	})
+	return (
+		<ol>
+			{studentsList}
+		</ol>
+
+	)
+}
+
+
+ReactDOM.render(<div>
+		<Provider store={store}>
+			<StudentList/>
+		</Provider>
+	</div>,
+	document.getElementById('root')
+)
+
+// Что нужно написать вместо XXX, YYY и ZZZ, чтобы при клике по имени студент
+// удалялся из списка? Напишите через пробел.
