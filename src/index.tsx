@@ -4,28 +4,28 @@ import { Provider, useDispatch, useSelector } from "react-redux";
 
 // slice
 const slice = createSlice({
-	name: "waterCounter",
+	name: "temperature",
 	initialState: {
-		liters: 10,
+		celsius: 20,
 	},
 	reducers: {
-		count: (state) => {
-			console.log(state);
+		increase: (state) => {
+			return state;
 		},
 	},
 });
 
-const { count } = slice.actions;
+const { increase } = slice.actions;
 
 // App.tsx
 const App = () => {
-	const water = useSelector((state: RootState) => state.waterCounter.liters);
+	const temp = useSelector((state: RootState) => state.temperature.celsius);
 	const dispatch = useDispatch();
 
 	return (
 		<>
-			<button onClick={() => dispatch(count())}>Get Water</button>
-			<span>{water} liters</span>
+			<button onClick={() => dispatch(increase())}>Increase Temp</button>
+			<span>{temp}°C</span>
 		</>
 	);
 };
@@ -33,7 +33,7 @@ const App = () => {
 // store.ts
 export const store = configureStore({
 	reducer: {
-		waterCounter: slice.reducer,
+		temperature: slice.reducer,
 	},
 });
 
@@ -47,10 +47,10 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// Откройте панель разработчика и нажмите на кнопку Get Water
-// В консоли вы увидите такой результат
-// Proxy(Object) {type_: 0, scope_: {…}, modified_: false, finalized_: false, assigned_: {…},
+// При нажатии на кнопку Increase Temp температура не увеличивается 🥲
 
 // 🪛 Задача:
-// Выведите в консоль state таким образом, чтобы получить вот такой результат {liters: 10}
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Increase Temp,
+// температура увеличивалась на 1 градус
 // В качестве ответа укажите исправленную строку кода.
+// ❗Изменение стейта должно быть написано мутабельным образом
