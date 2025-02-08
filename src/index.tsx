@@ -1,41 +1,47 @@
-import { configureStore, createSlice, nanoid } from "@reduxjs/toolkit"
+import { configureStore, createSlice } from "@reduxjs/toolkit"
 import { createRoot } from "react-dom/client"
 import { Provider, useDispatch, useSelector } from "react-redux"
 
 // slice
 const slice = createSlice({
-	name: "fruits",
+	name: "library",
 	initialState: {
-		basket: [
-			{ id: 1, name: "Apple" },
-			{ id: 2, name: "Banana" },
-		],
+		collection: {
+			books: [
+				{ id: 1, title: "1984" },
+				{ id: 2, title: "Brave New World" },
+			],
+		},
 	},
 	reducers: {
-		addFruit: (state, action) => {
-			state.basket.push(action.payload)
+		removeBook: (state, action) => {
+			const index = state.collection.books.findIndex(e=>e.id === action.payload)
+			if(index!==  -1){
+				state.collection.books.splice(index,1)
+			}
 		},
 	},
 })
 
-const { addFruit } = slice.actions
+const { removeBook } = slice.actions
 
 // App.tsx
 const App = () => {
-	const fruits = useSelector((state: RootState) => state.fruits.basket)
+	const books = useSelector((state: RootState) => state.library.collection.books)
 	const dispatch = useDispatch()
 
-	const addNewFruit = () => {
-		const newFruit = { id: nanoid(), name: "Orange" }
-		dispatch(addFruit(newFruit))
+	const removeLastBook = () => {
+		if (books.length > 0) {
+			dispatch(removeBook(books[books.length - 1].id))
+		}
 	}
 
 	return (
 		<>
-			<button onClick={addNewFruit}>Add Fruit</button>
+			<button onClick={removeLastBook}>Remove Last Book</button>
 			<ul>
-				{fruits.map((fruit) => (
-					<li key={fruit.id}>{fruit.name}</li>
+				{books.map((book) => (
+					<li key={book.id}>{book.title}</li>
 				))}
 			</ul>
 		</>
@@ -45,7 +51,7 @@ const App = () => {
 // store.ts
 export const store = configureStore({
 	reducer: {
-		fruits: slice.reducer,
+		library: slice.reducer,
 	},
 })
 
@@ -59,10 +65,10 @@ createRoot(document.getElementById("root")!).render(
 )
 
 // 📜 Описание:
-// При нажатии на кнопку Add Fruit, новый фрукт не добавляется в корзину 🥲
+// При нажатии на кнопку Remove Last Book, последняя книга в коллекции не удаляется 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Add Fruit,
-// новый фрукт добавлялся в корзину
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Remove Last Book,
+// последняя книга удалялась из коллекции.
 // В качестве ответа укажите исправленную строку кода.
-// ❗Изменение стейта должно быть написано мутабельным образом
+// ❗Изменение стейта должно быть написано мутабельным образом.
