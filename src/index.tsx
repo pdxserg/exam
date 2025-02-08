@@ -14,7 +14,10 @@ const slice = createSlice({
 	},
 	reducers: {
 		removeStudent: (state, action) => {
-			return state;
+			const index = state.students.findIndex((t) => t.id === action.payload.id)
+			if (index !== -1) {
+				state.students.splice(index, 1)
+			}
 		},
 	},
 });
