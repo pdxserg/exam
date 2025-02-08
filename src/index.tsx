@@ -1,75 +1,68 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-import { createRoot } from "react-dom/client";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { configureStore, createSlice, nanoid } from "@reduxjs/toolkit"
+import { createRoot } from "react-dom/client"
+import { Provider, useDispatch, useSelector } from "react-redux"
 
 // slice
 const slice = createSlice({
-	name: "tickets",
-	initialState: [
-		{ id: 1, event: "Concert", available: true, price: 100 },
-		{ id: 2, event: "Movie", available: false, price: 50 },
-		{ id: 3, event: "Theater", available: true, price: 75 },
-	],
+	name: "fruits",
+	initialState: {
+		basket: [
+			{ id: 1, name: "Apple" },
+			{ id: 2, name: "Banana" },
+		],
+	},
 	reducers: {
-		applyDiscount: (state, action) => {
-			return state;
+		addFruit: (state, action) => {
+			return state
 		},
 	},
-});
+})
 
-const { applyDiscount } = slice.actions;
+const { addFruit } = slice.actions
 
 // App.tsx
 const App = () => {
-	const tickets = useSelector((state: RootState) => state.tickets);
-	const dispatch = useDispatch();
+	const fruits = useSelector((state: RootState) => state.fruits.basket)
+	const dispatch = useDispatch()
 
-	const handleDiscount = (discount: number) => {
-		dispatch(applyDiscount(discount));
-	};
+	const addNewFruit = () => {
+		const newFruit = { id: nanoid(), name: "Orange" }
+		dispatch(addFruit(newFruit))
+	}
 
 	return (
-		<div>
-			<button onClick={() => handleDiscount(20)}>20% Discount</button>
-			<button onClick={() => handleDiscount(50)}>50% Discount</button>
-			<button onClick={() => handleDiscount(80)}>80% Discount</button>
+		<>
+			<button onClick={addNewFruit}>Add Fruit</button>
 			<ul>
-				{tickets.map((ticket) => (
-					<li key={ticket.id}>
-            <span>
-              {ticket.event} ({ticket.available ? "Available" : "Sold Out"}) - $
-	            {ticket.price.toFixed(2)}
-            </span>
-					</li>
+				{fruits.map((fruit) => (
+					<li key={fruit.id}>{fruit.name}</li>
 				))}
 			</ul>
-		</div>
-	);
-};
+		</>
+	)
+}
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		tickets: slice.reducer,
+		fruits: slice.reducer,
 	},
-});
+})
 
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof store.getState>
 
 // main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-);
+)
 
 // 📜 Описание:
-// При нажатии на кнопки с 20%, 50% или 80% скидками цены всех билетов должны уменьшиться на
-// указанный процент.
+// При нажатии на кнопку Add Fruit, новый фрукт не добавляется в корзину 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта так, чтобы цена каждого билета уменьшалась на указанный процент.
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Add Fruit,
+// новый фрукт добавлялся в корзину
 // В качестве ответа укажите исправленную строку кода.
-// ❗Операция должна быть реализована мутабельным образом.
-// ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
-// ❗Не создавайте переменные из action.payload (const id = action.payload.id)
+// ❗Изменение стейта должно быть написано мутабельным образом
