@@ -1,41 +1,31 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { createRoot } from "react-dom/client";
-import { Provider, useSelector } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 
 // slice
 const slice = createSlice({
-	name: "taskManager",
+	name: "waterCounter",
 	initialState: {
-		tasks: [
-			{ id: 1, title: "Task 1" },
-			{ id: 2, title: "Task 2" },
-			{ id: 3, title: "Task 3" },
-		],
+		liters: 10,
 	},
 	reducers: {
-		addTask: (state, action) => {
-			return state;
+		count: (state) => {
+			console.log(state);
 		},
-	},
-	selectors: {
-		// ❗❗❗XXX ❗❗❗
 	},
 });
 
-const { addTask } = slice.actions;
-const { selectTasks } = slice.selectors;
+const { count } = slice.actions;
 
 // App.tsx
 const App = () => {
-	const tasks = useSelector(selectTasks);
+	const water = useSelector((state: RootState) => state.waterCounter.liters);
+	const dispatch = useDispatch();
 
 	return (
 		<>
-			<ul>
-				{tasks.map((task) => (
-					<li key={task.id}>{task.title}</li>
-				))}
-			</ul>
+			<button onClick={() => dispatch(count())}>Get Water</button>
+			<span>{water} liters</span>
 		</>
 	);
 };
@@ -43,7 +33,7 @@ const App = () => {
 // store.ts
 export const store = configureStore({
 	reducer: {
-		taskManager: slice.reducer,
+		waterCounter: slice.reducer,
 	},
 });
 
@@ -57,7 +47,10 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// Перед вами нерабочий код и его нужно починить, чтобы отобразился массив тасок
+// Откройте панель разработчика и нажмите на кнопку Get Water
+// В консоли вы увидите такой результат
+// Proxy(Object) {type_: 0, scope_: {…}, modified_: false, finalized_: false, assigned_: {…},
 
 // 🪛 Задача:
-// Что нужно написать вместо // ❗❗❗XXX ❗❗❗, чтобы отобразился массив тасок
+// Выведите в консоль state таким образом, чтобы получить вот такой результат {liters: 10}
+// В качестве ответа укажите исправленную строку кода.
