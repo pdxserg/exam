@@ -1,72 +1,84 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-import { createRoot } from "react-dom/client";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { configureStore, createSlice } from "@reduxjs/toolkit"
+import { createRoot } from "react-dom/client"
+import { Provider, useDispatch, useSelector } from "react-redux"
+
+type Note = {
+	id: number
+	content: string
+	important: boolean
+}
 
 // slice
 const slice = createSlice({
-	name: "classroom",
+	name: "notes",
 	initialState: {
-		students: [
-			{ id: 1, name: "Alice" },
-			{ id: 2, name: "Bob" },
-			{ id: 3, name: "Charlie" },
+		items: [
+			{ id: 1, content: "Buy groceries", important: false },
+			{ id: 2, content: "Schedule meeting", important: true },
+			{ id: 3, content: "Call mom", important: false },
 		],
 	},
 	reducers: {
-		removeStudent: (state, action) => {
-			debugger
-			const index = state.students.findIndex((t) => t.id === action.payload)
+		updateNote: (state, action) => {
+			const index = state.items.findIndex((t) => t.id === action.payload.id)
 			if (index !== -1) {
-				state.students.splice(index, 1)
+				state.items[index].important=action.payload.important
 			}
 		},
 	},
-});
+})
 
-const { removeStudent } = slice.actions;
+const { updateNote } = slice.actions
 
 // App.tsx
 const App = () => {
-	const students = useSelector((state: RootState) => state.classroom.students);
-	const dispatch = useDispatch();
+	const notes = useSelector((state: RootState) => state.notes.items)
+	const dispatch = useDispatch()
 
-	const handleRemove = (id: number) => {
-		dispatch(removeStudent(id));
-	};
+	const toggleImportance = (note: Note) => {
+		dispatch(updateNote({ id: note.id, important: !note.important }))
+	}
 
 	return (
 		<ul>
-			{students.map((student) => (
-				<li key={student.id}>
-					{student.name}
-					<button onClick={() => handleRemove(student.id)}>✖</button>
+			{notes.map((note) => (
+				<li key={note.id}>
+          <span
+	          style={{
+		          fontWeight: note.important ? "bold" : "normal",
+	          }}
+          >
+            {note.content}
+          </span>
+					<button onClick={() => toggleImportance(note)}>{note.important ? "Unmark" : "Mark Important"}</button>
 				</li>
 			))}
 		</ul>
-	);
-};
+	)
+}
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		classroom: slice.reducer,
+		notes: slice.reducer,
 	},
-});
+})
 
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof store.getState>
 
 // main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-);
+)
 
 // 📜 Описание:
-// При нажатии на кнопку ✖ рядом с именем студента, студент не удаляется из списка 🥲
+// При нажатии на кнопку Mark Important или Unmark рядом с заметкой, важность заметки не обновляется 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку ✖, студент удалялся из списка.
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Mark Important или Unmark,
+// состояние важности заметки обновлялось.
 // В качестве ответа укажите исправленную строку кода.
 // ❗Изменение стейта должно быть написано мутабельным образом
 // ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
