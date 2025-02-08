@@ -1,92 +1,73 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit"
-import { createRoot } from "react-dom/client"
-import { Provider, useDispatch, useSelector } from "react-redux"
-
-type Product = {
-	id: number
-	name: string
-	inStock: boolean
-}
+import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { createRoot } from "react-dom/client";
+import { Provider, useDispatch, useSelector } from "react-redux";
 
 // slice
 const slice = createSlice({
-	name: "products",
-	initialState: [
-		{ id: 1, name: "Laptop", inStock: true },
-		{ id: 2, name: "Headphones", inStock: false },
-		{ id: 3, name: "Smartphone", inStock: true },
-	] as Product[],
+	name: "classroom",
+	initialState: {
+		students: [
+			{ id: 1, name: "Alice" },
+			{ id: 2, name: "Bob" },
+			{ id: 3, name: "Charlie" },
+		],
+	},
 	reducers: {
-		toggleInStock: (state, action) => {
-			const product = state.find((product) => product.id === action.payload.id)
-			if (product) {
-				product.inStock = action.payload.inStock
+		removeStudent: (state, action) => {
+			debugger
+			const index = state.students.findIndex((t) => t.id === action.payload)
+			if (index !== -1) {
+				state.students.splice(index, 1)
 			}
 		},
-		clearStock: (state) => {
-			return state
-		},
 	},
-})
+});
 
-const { toggleInStock, clearStock } = slice.actions
+const { removeStudent } = slice.actions;
 
 // App.tsx
 const App = () => {
-	const products = useSelector((state: RootState) => state.products)
-	const dispatch = useDispatch()
+	const students = useSelector((state: RootState) => state.classroom.students);
+	const dispatch = useDispatch();
 
-	const handleLogout = () => {
-		dispatch(clearStock())
-	}
-
-	const toggleProductStock = (product: Product) => {
-		dispatch(toggleInStock({ id: product.id, inStock: !product.inStock }))
-	}
+	const handleRemove = (id: number) => {
+		dispatch(removeStudent(id));
+	};
 
 	return (
-		<div>
-			<button onClick={handleLogout}>Logout</button>
-			<ul>
-				{products.map((product) => (
-					<li key={product.id}>
-            <span
-	            style={{
-		            color: product.inStock ? "green" : "red",
-	            }}
-            >
-              {product.name} ({product.inStock ? "In Stock" : "Out of Stock"})
-            </span>
-						<button onClick={() => toggleProductStock(product)}>
-							{product.inStock ? "Mark Out of Stock" : "Mark In Stock"}
-						</button>
-					</li>
-				))}
-			</ul>
-		</div>
-	)
-}
+		<ul>
+			{students.map((student) => (
+				<li key={student.id}>
+					{student.name}
+					<button onClick={() => handleRemove(student.id)}>✖</button>
+				</li>
+			))}
+		</ul>
+	);
+};
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		products: slice.reducer,
+		classroom: slice.reducer,
 	},
-})
+});
 
-export type RootState = ReturnType<typeof store.getState>
+export type RootState = ReturnType<typeof store.getState>;
 
 // main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-)
+);
 
 // 📜 Описание:
-// При нажатии на кнопку Logout массив товаров не очищается 🥲
+// При нажатии на кнопку ✖ рядом с именем студента, студент не удаляется из списка 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Logout,
-// массив товаров полностью очищался.
-// В качестве ответа укажите исправленную строку кода
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку ✖, студент удалялся из списка.
+// В качестве ответа укажите исправленную строку кода.
+// ❗Изменение стейта должно быть написано мутабельным образом
+// ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
+// ❗Не создавайте переменные из action.payload (const id = action.payload.id)
