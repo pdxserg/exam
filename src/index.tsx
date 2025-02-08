@@ -1,85 +1,75 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit"
-import { createRoot } from "react-dom/client"
-import { Provider, useDispatch, useSelector } from "react-redux"
-
-type Note = {
-	id: number
-	content: string
-	important: boolean
-}
+import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { createRoot } from "react-dom/client";
+import { Provider, useDispatch, useSelector } from "react-redux";
 
 // slice
 const slice = createSlice({
-	name: "notes",
-	initialState: {
-		items: [
-			{ id: 1, content: "Buy groceries", important: false },
-			{ id: 2, content: "Schedule meeting", important: true },
-			{ id: 3, content: "Call mom", important: false },
-		],
-	},
+	name: "tickets",
+	initialState: [
+		{ id: 1, event: "Concert", available: true, price: 100 },
+		{ id: 2, event: "Movie", available: false, price: 50 },
+		{ id: 3, event: "Theater", available: true, price: 75 },
+	],
 	reducers: {
-		updateNote: (state, action) => {
-			const index = state.items.findIndex((t) => t.id === action.payload.id)
-			if (index !== -1) {
-				state.items[index].important=action.payload.important
-			}
+		applyDiscount: (state, action) => {
+			state.forEach(e=>e.price=e.price+(e.price*action.payload)/100)
 		},
 	},
-})
+});
 
-const { updateNote } = slice.actions
+const { applyDiscount } = slice.actions;
 
 // App.tsx
 const App = () => {
-	const notes = useSelector((state: RootState) => state.notes.items)
-	const dispatch = useDispatch()
+	const tickets = useSelector((state: RootState) => state.tickets);
+	const dispatch = useDispatch();
 
-	const toggleImportance = (note: Note) => {
-		dispatch(updateNote({ id: note.id, important: !note.important }))
-	}
+	const handleDiscount = (discount: number) => {
+		dispatch(applyDiscount(discount));
+	};
 
 	return (
-		<ul>
-			{notes.map((note) => (
-				<li key={note.id}>
-          <span
-	          style={{
-		          fontWeight: note.important ? "bold" : "normal",
-	          }}
-          >
-            {note.content}
-          </span>
-					<button onClick={() => toggleImportance(note)}>{note.important ? "Unmark" : "Mark Important"}</button>
-				</li>
-			))}
-		</ul>
-	)
-}
+		<div>
+			<button onClick={() => handleDiscount(20)}>20% Discount</button>
+			<button onClick={() => handleDiscount(50)}>50% Discount</button>
+			<button onClick={() => handleDiscount(80)}>80% Discount</button>
+			<ul>
+				{tickets.map((ticket) => (
+					<li key={ticket.id}>
+            <span>
+              {ticket.event} ({ticket.available ? "Available" : "Sold Out"}) - $
+	            {ticket.price.toFixed(2)}
+            </span>
+					</li>
+				))}
+			</ul>
+		</div>
+	);
+};
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		notes: slice.reducer,
+		tickets: slice.reducer,
 	},
-})
+});
 
-export type RootState = ReturnType<typeof store.getState>
+export type RootState = ReturnType<typeof store.getState>;
 
 // main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-)
+);
 
 // 📜 Описание:
-// При нажатии на кнопку Mark Important или Unmark рядом с заметкой, важность заметки не обновляется 🥲
+// При нажатии на кнопки с 20%, 50% или 80% скидками цены всех билетов должны уменьшиться на
+// указанный процент.
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Mark Important или Unmark,
-// состояние важности заметки обновлялось.
+// Перепишите изменение стейта так, чтобы цена каждого билета уменьшалась на указанный процент.
 // В качестве ответа укажите исправленную строку кода.
-// ❗Изменение стейта должно быть написано мутабельным образом
+// ❗Операция должна быть реализована мутабельным образом.
 // ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
 // ❗Не создавайте переменные из action.payload (const id = action.payload.id)
