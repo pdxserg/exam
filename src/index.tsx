@@ -1,80 +1,92 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-import { createRoot } from "react-dom/client";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { configureStore, createSlice } from "@reduxjs/toolkit"
+import { createRoot } from "react-dom/client"
+import { Provider, useDispatch, useSelector } from "react-redux"
 
-// waterCounter slice
-const waterSlice = createSlice({
-	name: "waterCounter",
-	initialState: {
-		liters: 10,
-	},
+type Product = {
+	id: number
+	name: string
+	inStock: boolean
+}
+
+// slice
+const slice = createSlice({
+	name: "products",
+	initialState: [
+		{ id: 1, name: "Laptop", inStock: true },
+		{ id: 2, name: "Headphones", inStock: false },
+		{ id: 3, name: "Smartphone", inStock: true },
+	] as Product[],
 	reducers: {
-		increase: (state) => {
-			state.liters += 1;
+		toggleInStock: (state, action) => {
+			const product = state.find((product) => product.id === action.payload.id)
+			if (product) {
+				product.inStock = action.payload.inStock
+			}
+		},
+		clearStock: (state) => {
+			return state
 		},
 	},
-});
-const { increase } = waterSlice.actions;
+})
 
-// energy slice
-const energySlice = createSlice({
-	name: "energyCounter",
-	initialState: {
-		joules: 5000,
-	},
-	reducers: {
-		decrease: (state) => {
-			state.joules -= 100;
-		},
-	},
-});
-
-const { decrease } = energySlice.actions;
+const { toggleInStock, clearStock } = slice.actions
 
 // App.tsx
 const App = () => {
-	const water = useSelector((state: RootState) => state.waterCounter.liters);
-	const energy = useSelector((state: RootState) => state.energyCounter.joules);
-	const dispatch = useDispatch();
+	const products = useSelector((state: RootState) => state.products)
+	const dispatch = useDispatch()
+
+	const handleLogout = () => {
+		dispatch(clearStock())
+	}
+
+	const toggleProductStock = (product: Product) => {
+		dispatch(toggleInStock({ id: product.id, inStock: !product.inStock }))
+	}
 
 	return (
-		<>
-			<button onClick={() => dispatch(increase())}>Add Water</button>
-			<span>Water: {water} liters</span>
-
-			<button onClick={() => dispatch(decrease())}>Use Energy</button>
-			<span>Energy: {energy} joules</span>
-		</>
-	);
-};
+		<div>
+			<button onClick={handleLogout}>Logout</button>
+			<ul>
+				{products.map((product) => (
+					<li key={product.id}>
+            <span
+	            style={{
+		            color: product.inStock ? "green" : "red",
+	            }}
+            >
+              {product.name} ({product.inStock ? "In Stock" : "Out of Stock"})
+            </span>
+						<button onClick={() => toggleProductStock(product)}>
+							{product.inStock ? "Mark Out of Stock" : "Mark In Stock"}
+						</button>
+					</li>
+				))}
+			</ul>
+		</div>
+	)
+}
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		waterCounter: waterSlice.reducer,
-		energyCounter: energySlice.reducer,
+		products: slice.reducer,
 	},
-});
+})
 
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof store.getState>
 
 // main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-);
+)
 
 // 📜 Описание:
-// У вас есть два счетчика: для воды (литры) и энергии (джоули).
-// При нажатии на кнопку **Add Water** увеличивается количество воды.
-// При нажатии на кнопку **Use Energy** энергия уменьшается на 100 джоулей.
+// При нажатии на кнопку Logout массив товаров не очищается 🥲
 
 // 🪛 Задача:
-// Реализуйте следующую задачу:
-// При нажатии на кнопку **Add Water** помимо увеличения количества воды
-// реализуйте увеличении энергии на 200 джоулей.
-
-// В качестве ответа укажите добавленный вами код
-// ❗Операция должна быть реализована мутабельным образом.
-// 💡Подсказка. Используйте extraReducers
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Logout,
+// массив товаров полностью очищался.
+// В качестве ответа укажите исправленную строку кода
