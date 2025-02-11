@@ -3,11 +3,11 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 
-type Post = {
-	body: string;
+type Photo = {
+	albumId: string;
 	id: string;
 	title: string;
-	userId: string;
+	url: string;
 };
 
 // Api
@@ -16,39 +16,40 @@ const api = createApi({
 	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
 	endpoints: (builder) => {
 		return {
-			getPosts: builder.query<Post[], void>({
-				query: () => "posts",
+			getPhotos: builder.query<Photo[], void>({
+				query: () => "photos",
 			}),
-			// ❗❗❗XXX❗❗❗
+			updatePhoto: builder.mutation<Photo, { id: string; title: string }>({
+				query: ({ id, title }) => {
+					return {
+						method: "PUT",
+						url: `photos/${id}`,
+						body: { title },
+					};
+				},
+			}),
 		};
 	},
 });
 
-const { useGetPostsQuery, useRemovePostMutation } = api;
+const { useGetPhotosQuery, useUpdatePhotoMutation } = api;
 
 // App.tsx
 const App = () => {
-	const { data } = useGetPostsQuery();
-	const [removePost] = useRemovePostMutation();
+	const { data } = useGetPhotosQuery();
+	const [trigger] = useUpdatePhotoMutation();
 
-	const removePostHandler = (id: string) => {
-		removePost(id);
+	const updatePhotoTitleHandler = (id: string) => {
+		trigger({ id, title: "Тестовое сообщение" });
 	};
 
 	return (
 		<>
 			{data?.map((el) => {
 				return (
-					<div style={{ display: "flex", alignItems: "center" }}>
-						<div
-							key={el.id}
-							style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}
-						>
-							<p>
-								<b>title</b> - {el.title}
-							</p>
-						</div>
-						<button onClick={() => removePostHandler(el.id)}>x</button>
+					<div key={el.id} style={{ margin: "15px" }}>
+						<b>title</b> - {el.title}
+						<button onClick={() => updatePhotoTitleHandler(el.id)}>Update title</button>
 					</div>
 				);
 			})}
@@ -69,10 +70,15 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// Приложение падает с ошибкой.
+// Нажмите на кнопку Update title и обновите страницу. После обновления страницы title
+// изменится, но хотелось бы не перегружать страницу
 
 // 🪛 Задача:
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` чтобы на при нажатии на кнопку `x` пост удалился.
-// В качестве ответа укажите написанный вами код
-// ❗Автоматическое получение данных реализовывать не надо
-// ❗Типизацию указывать обязательно
+// Реализуйте автоматический re-fetching используя теги. Т.е. чтобы после нажатия на кнопку Update title, title обновился без ручной перезагрузки страницы
+// обновился без ручной перезагрузки страницы
+
+// 💡 Подсказка: необходимо дописать 3 строки кода
+// В ответе укажите добавленные строки кода через пробел
+// ❗Запятую в конце строки указывать обязательно
+
+// 🖥 Пример ответа: xxx: {id: 1}, yyy: {id: 2}, zzz: {id: 3}
