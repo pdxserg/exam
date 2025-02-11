@@ -1,23 +1,64 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client';
+import { configureStore } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
 
-export const App = () => {
+type Comment = {
+	postId: string;
+	id: string;
+	name: string;
+	email: string;
+	body: string;
+};
+
+// Api
+const api = createApi({
+	reducerPath: "commentsApi",
+	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+	endpoints: (builder) => {
+		return {
+			// ❗❗❗XXX❗❗❗
+		};
+	},
+});
+
+const { useGetCommentsQuery } = api;
+
+// App.tsx
+const App = () => {
+	const { data } = useGetCommentsQuery();
+
 	return (
-		<div>
-			<h2>Какая команда позволяет на время «сдать в архив» (или отложить) изменения, сделанные в рабочей
-				копии, чтобы вы могли применить их позже? Откладывание изменений полезно, если вам необходимо переключить
-				контекст и вы пока не готовы к созданию коммита.</h2>
-		</div>
-	)
-}
+		<>
+			{data?.map((el) => {
+				return (
+					<div key={el.id} style={{ border: "1px solid", margin: "5px", padding: "5px" }}>
+						<p>body - {el.body}</p>
+					</div>
+				);
+			})}
+		</>
+	);
+};
 
+// store.ts
+const store = configureStore({
+	reducer: {
+		[api.reducerPath]: api.reducer,
+	},
+	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
+});
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(<App/>);
+createRoot(document.getElementById("root")!).render(
+	<Provider store={store}>
+		<App />
+	</Provider>,
+);
 
 // 📜 Описание:
-// Какая команда позволяет на время «сдать в архив» (или отложить) изменения, сделанные в рабочей
-// копии, чтобы вы могли применить их позже? Откладывание изменений полезно, если вам необходимо переключить
-// контекст и вы пока не готовы к созданию коммита.
+// Белый экран. Откройте панель разработчика и проанализируйте в чем ошибка
 
-// 🖥 Пример ответа: git init
+// 🪛 Задача:
+// Что нужно написать вместо  `// ❗❗❗XXX❗❗❗` чтобы на экране отобразились комментарии
+// В качестве ответа укажите написанный вами код
+// ❗Типизацию указывать обязательно
