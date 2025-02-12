@@ -18,7 +18,10 @@ const api = createApi({
 	endpoints: (builder) => {
 		return {
 			getComments: builder.query<Comment[], void>({
-				query: () => `comments`,
+				query: () => ({
+					url: `comments`,
+					method: "GET",
+				}),
 
 			}),
 		};
