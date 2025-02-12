@@ -3,54 +3,40 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 
-type Product = {
+type Comment = {
+	postId: string;
 	id: string;
-	title: string;
-	description: string;
-	price: number;
-};
-
-export type Response = {
-	total: number;
-	messages: string[];
-	page: number;
-	pageCount: number;
-	data: Product[];
+	name: string;
+	email: string;
+	body: string;
 };
 
 // Api
-const productsApi = createApi({
-	reducerPath: "productsApi",
+const api = createApi({
+	reducerPath: "commentsApi",
 	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
 	endpoints: (builder) => {
 		return {
-			getProducts: builder.query<Product[], void>({
-				query: () => {
-					return {
-						method: "GET",
-						url: "products",
-					};
-				},
-				transformResponse: (response: Response) => response.data,
-				// ❗❗❗XXX❗❗❗
+			getComments: builder.query<Comment[], void>({
+				query: () => `comments`,
+
 			}),
 		};
 	},
 });
 
-const { useGetProductsQuery } = productsApi;
+const { useGetCommentsQuery } = api;
 
 // App.tsx
 const App = () => {
-	const { data: products } = useGetProductsQuery();
+	const { data } = useGetCommentsQuery();
 
 	return (
 		<>
-			{products?.map((el) => {
+			{data?.map((el) => {
 				return (
 					<div key={el.id} style={{ border: "1px solid", margin: "5px", padding: "5px" }}>
-						<p>title - {el.title}</p>
-						<p>description - {el.description}</p>
+						<p>body - {el.body}</p>
 					</div>
 				);
 			})}
@@ -61,9 +47,9 @@ const App = () => {
 // store.ts
 const store = configureStore({
 	reducer: {
-		[productsApi.reducerPath]: productsApi.reducer,
+		[api.reducerPath]: api.reducer,
 	},
-	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(productsApi.middleware),
+	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
 createRoot(document.getElementById("root")!).render(
@@ -76,7 +62,6 @@ createRoot(document.getElementById("root")!).render(
 // Белый экран. Откройте панель разработчика и проанализируйте в чем ошибка
 
 // 🪛 Задача:
-// Что нужно написать вместо  `// ❗❗❗XXX❗❗❗` чтобы на экране отобразились продукты
+// Что нужно написать вместо  `// ❗❗❗XXX❗❗❗` чтобы на экране отобразились комментарии
 // В качестве ответа укажите написанный вами код
 // ❗Типизацию указывать обязательно
-// ❗Ответ принимает синтаксис стрелочной функции
