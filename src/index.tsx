@@ -3,24 +3,26 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 
-type Comment = {
-	postId: string;
-	id: string;
-	name: string;
-	email: string;
+type Post = {
 	body: string;
+	id: string;
+	title: string;
+	userId: string;
 };
 
 // Api
 const api = createApi({
-	reducerPath: "commentsApi",
+	reducerPath: "api",
 	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
 	endpoints: (builder) => {
 		return {
-			getComments: builder.query<Comment[], void>({
-				query: () => ({
-					url: `comments`,
-					method: "GET",
+			getPosts: builder.query<Post[], void>({
+				query: () => "posts",
+			}),
+			removePost: builder.mutation<{ message: string }, string>({
+				query: (id) => ({
+					url: `posts/${id}`,
+					method: "DELETE",
 				}),
 
 			}),
@@ -28,18 +30,31 @@ const api = createApi({
 	},
 });
 
-const { useGetCommentsQuery } = api;
+const { useGetPostsQuery, useRemovePostMutation } = api;
 
 // App.tsx
 const App = () => {
-	const { data } = useGetCommentsQuery();
+	const { data } = useGetPostsQuery();
+	const [removePost] = useRemovePostMutation();
+
+	const removePostHandler = (id: string) => {
+		removePost(id);
+	};
 
 	return (
 		<>
 			{data?.map((el) => {
 				return (
-					<div key={el.id} style={{ border: "1px solid", margin: "5px", padding: "5px" }}>
-						<p>body - {el.body}</p>
+					<div style={{ display: "flex", alignItems: "center" }}>
+						<div
+							key={el.id}
+							style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}
+						>
+							<p>
+								<b>title</b> - {el.title}
+							</p>
+						</div>
+						<button onClick={() => removePostHandler(el.id)}>x</button>
 					</div>
 				);
 			})}
@@ -49,9 +64,7 @@ const App = () => {
 
 // store.ts
 const store = configureStore({
-	reducer: {
-		[api.reducerPath]: api.reducer,
-	},
+	reducer: { [api.reducerPath]: api.reducer },
 	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
@@ -62,9 +75,10 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// Белый экран. Откройте панель разработчика и проанализируйте в чем ошибка
+// Приложение падает с ошибкой.
 
 // 🪛 Задача:
-// Что нужно написать вместо  `// ❗❗❗XXX❗❗❗` чтобы на экране отобразились комментарии
+// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` чтобы на при нажатии на кнопку `x` пост удалился.
 // В качестве ответа укажите написанный вами код
+// ❗Автоматическое получение данных реализовывать не надо
 // ❗Типизацию указывать обязательно
