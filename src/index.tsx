@@ -2,30 +2,48 @@ import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { createRoot } from "react-dom/client";
 import { Provider, useDispatch, useSelector } from "react-redux";
 
-// slice
-const slice = createSlice({
+// waterCounter slice
+const waterSlice = createSlice({
 	name: "waterCounter",
 	initialState: {
 		liters: 10,
 	},
 	reducers: {
-		count: (state) => {
-			console.log(state);
+		increase: (state) => {
+			state.liters += 1;
+		},
+	},
+});
+const { increase } = waterSlice.actions;
+
+// energy slice
+const energySlice = createSlice({
+	name: "energyCounter",
+	initialState: {
+		joules: 5000,
+	},
+	reducers: {
+		decrease: (state) => {
+			state.joules -= 100;
 		},
 	},
 });
 
-const { count } = slice.actions;
+const { decrease } = energySlice.actions;
 
 // App.tsx
 const App = () => {
 	const water = useSelector((state: RootState) => state.waterCounter.liters);
+	const energy = useSelector((state: RootState) => state.energyCounter.joules);
 	const dispatch = useDispatch();
 
 	return (
 		<>
-			<button onClick={() => dispatch(count())}>Get Water</button>
-			<span>{water} liters</span>
+			<button onClick={() => dispatch(increase())}>Add Water</button>
+			<span>Water: {water} liters</span>
+
+			<button onClick={() => dispatch(decrease())}>Use Energy</button>
+			<span>Energy: {energy} joules</span>
 		</>
 	);
 };
@@ -33,7 +51,8 @@ const App = () => {
 // store.ts
 export const store = configureStore({
 	reducer: {
-		waterCounter: slice.reducer,
+		waterCounter: waterSlice.reducer,
+		energyCounter: energySlice.reducer,
 	},
 });
 
@@ -47,10 +66,15 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// Откройте панель разработчика и нажмите на кнопку Get Water
-// В консоли вы увидите такой результат
-// Proxy(Object) {type_: 0, scope_: {…}, modified_: false, finalized_: false, assigned_: {…},
+// У вас есть два счетчика: для воды (литры) и энергии (джоули).
+// При нажатии на кнопку **Add Water** увеличивается количество воды.
+// При нажатии на кнопку **Use Energy** энергия уменьшается на 100 джоулей.
 
 // 🪛 Задача:
-// Выведите в консоль state таким образом, чтобы получить вот такой результат {liters: 10}
-// В качестве ответа укажите исправленную строку кода.
+// Реализуйте следующую задачу:
+// При нажатии на кнопку **Add Water** помимо увеличения количества воды
+// реализуйте увеличении энергии на 200 джоулей.
+
+// В качестве ответа укажите добавленный вами код
+// ❗Операция должна быть реализована мутабельным образом.
+// 💡Подсказка. Используйте extraReducers
