@@ -1,68 +1,63 @@
-import { configureStore, createSlice, nanoid } from "@reduxjs/toolkit"
-import { createRoot } from "react-dom/client"
-import { Provider, useDispatch, useSelector } from "react-redux"
+import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { createRoot } from "react-dom/client";
+import { Provider, useSelector } from "react-redux";
 
 // slice
 const slice = createSlice({
-	name: "fruits",
+	name: "taskManager",
 	initialState: {
-		basket: [
-			{ id: 1, name: "Apple" },
-			{ id: 2, name: "Banana" },
+		tasks: [
+			{ id: 1, title: "Task 1" },
+			{ id: 2, title: "Task 2" },
+			{ id: 3, title: "Task 3" },
 		],
 	},
 	reducers: {
-		addFruit: (state, action) => {
-			return state
+		addTask: (state, action) => {
+			return state;
 		},
 	},
-})
+	selectors: {
+		// ❗❗❗XXX ❗❗❗
+	},
+});
 
-const { addFruit } = slice.actions
+const { addTask } = slice.actions;
+const { selectTasks } = slice.selectors;
 
 // App.tsx
 const App = () => {
-	const fruits = useSelector((state: RootState) => state.fruits.basket)
-	const dispatch = useDispatch()
-
-	const addNewFruit = () => {
-		const newFruit = { id: nanoid(), name: "Orange" }
-		dispatch(addFruit(newFruit))
-	}
+	const tasks = useSelector(selectTasks);
 
 	return (
 		<>
-			<button onClick={addNewFruit}>Add Fruit</button>
 			<ul>
-				{fruits.map((fruit) => (
-					<li key={fruit.id}>{fruit.name}</li>
+				{tasks.map((task) => (
+					<li key={task.id}>{task.title}</li>
 				))}
 			</ul>
 		</>
-	)
-}
+	);
+};
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		fruits: slice.reducer,
+		taskManager: slice.reducer,
 	},
-})
+});
 
-export type RootState = ReturnType<typeof store.getState>
+export type RootState = ReturnType<typeof store.getState>;
 
 // main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-)
+);
 
 // 📜 Описание:
-// При нажатии на кнопку Add Fruit, новый фрукт не добавляется в корзину 🥲
+// Перед вами нерабочий код и его нужно починить, чтобы отобразился массив тасок
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Add Fruit,
-// новый фрукт добавлялся в корзину
-// В качестве ответа укажите исправленную строку кода.
-// ❗Изменение стейта должно быть написано мутабельным образом
+// Что нужно написать вместо // ❗❗❗XXX ❗❗❗, чтобы отобразился массив тасок
