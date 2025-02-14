@@ -1,84 +1,71 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
+import { configureStore, createSlice } from "@reduxjs/toolkit"
+import { createRoot } from "react-dom/client"
+import { Provider, useDispatch, useSelector } from "react-redux"
 
-type Post = {
-	body: string;
-	id: string;
-	title: string;
-	userId: string;
-};
-
-// Api
-const api = createApi({
-	reducerPath: "api",
-	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-	endpoints: (builder) => {
-		return {
-			getPosts: builder.query<Post[], void>({
-				query: () => "posts",
-			}),
-			removePost: builder.mutation<{ message: string }, string>({
-				query: (id) => ({
-					url: `posts/${id}`,
-					method: "DELETE",
-				}),
-
-			}),
-		};
+// slice
+const slice = createSlice({
+	name: "library",
+	initialState: {
+		collection: {
+			books: [
+				{ id: 1, title: "1984" },
+				{ id: 2, title: "Brave New World" },
+			],
+		},
 	},
-});
+	reducers: {
+		removeBook: (state, action) => {
+			return state
+		},
+	},
+})
 
-const { useGetPostsQuery, useRemovePostMutation } = api;
+const { removeBook } = slice.actions
 
 // App.tsx
 const App = () => {
-	const { data } = useGetPostsQuery();
-	const [removePost] = useRemovePostMutation();
+	const books = useSelector((state: RootState) => state.library.collection.books)
+	const dispatch = useDispatch()
 
-	const removePostHandler = (id: string) => {
-		removePost(id);
-	};
+	const removeLastBook = () => {
+		if (books.length > 0) {
+			dispatch(removeBook(books[books.length - 1].id))
+		}
+	}
 
 	return (
 		<>
-			{data?.map((el) => {
-				return (
-					<div style={{ display: "flex", alignItems: "center" }}>
-						<div
-							key={el.id}
-							style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}
-						>
-							<p>
-								<b>title</b> - {el.title}
-							</p>
-						</div>
-						<button onClick={() => removePostHandler(el.id)}>x</button>
-					</div>
-				);
-			})}
+			<button onClick={removeLastBook}>Remove Last Book</button>
+			<ul>
+				{books.map((book) => (
+					<li key={book.id}>{book.title}</li>
+				))}
+			</ul>
 		</>
-	);
-};
+	)
+}
 
 // store.ts
-const store = configureStore({
-	reducer: { [api.reducerPath]: api.reducer },
-	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
-});
+export const store = configureStore({
+	reducer: {
+		library: slice.reducer,
+	},
+})
 
+export type RootState = ReturnType<typeof store.getState>
+
+// main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-);
+)
 
 // 📜 Описание:
-// Приложение падает с ошибкой.
+// При нажатии на кнопку Remove Last Book, последняя книга в коллекции не удаляется 🥲
 
 // 🪛 Задача:
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` чтобы на при нажатии на кнопку `x` пост удалился.
-// В качестве ответа укажите написанный вами код
-// ❗Автоматическое получение данных реализовывать не надо
-// ❗Типизацию указывать обязательно
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Remove Last Book,
+// последняя книга удалялась из коллекции.
+// В качестве ответа укажите исправленную строку кода.
+// ❗Изменение стейта должно быть написано мутабельным образом.
