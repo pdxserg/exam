@@ -2,48 +2,30 @@ import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { createRoot } from "react-dom/client";
 import { Provider, useDispatch, useSelector } from "react-redux";
 
-// waterCounter slice
-const waterSlice = createSlice({
-	name: "waterCounter",
+// slice
+const slice = createSlice({
+	name: "temperature",
 	initialState: {
-		liters: 10,
+		celsius: 20,
 	},
 	reducers: {
 		increase: (state) => {
-			state.liters += 1;
-		},
-	},
-});
-const { increase } = waterSlice.actions;
-
-// energy slice
-const energySlice = createSlice({
-	name: "energyCounter",
-	initialState: {
-		joules: 5000,
-	},
-	reducers: {
-		decrease: (state) => {
-			state.joules -= 100;
+			state.celsius=state.celsius+1
 		},
 	},
 });
 
-const { decrease } = energySlice.actions;
+const { increase } = slice.actions;
 
 // App.tsx
 const App = () => {
-	const water = useSelector((state: RootState) => state.waterCounter.liters);
-	const energy = useSelector((state: RootState) => state.energyCounter.joules);
+	const temp = useSelector((state: RootState) => state.temperature.celsius);
 	const dispatch = useDispatch();
 
 	return (
 		<>
-			<button onClick={() => dispatch(increase())}>Add Water</button>
-			<span>Water: {water} liters</span>
-
-			<button onClick={() => dispatch(decrease())}>Use Energy</button>
-			<span>Energy: {energy} joules</span>
+			<button onClick={() => dispatch(increase())}>Increase Temp</button>
+			<span>{temp}°C</span>
 		</>
 	);
 };
@@ -51,8 +33,7 @@ const App = () => {
 // store.ts
 export const store = configureStore({
 	reducer: {
-		waterCounter: waterSlice.reducer,
-		energyCounter: energySlice.reducer,
+		temperature: slice.reducer,
 	},
 });
 
@@ -66,15 +47,10 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// У вас есть два счетчика: для воды (литры) и энергии (джоули).
-// При нажатии на кнопку **Add Water** увеличивается количество воды.
-// При нажатии на кнопку **Use Energy** энергия уменьшается на 100 джоулей.
+// При нажатии на кнопку Increase Temp температура не увеличивается 🥲
 
 // 🪛 Задача:
-// Реализуйте следующую задачу:
-// При нажатии на кнопку **Add Water** помимо увеличения количества воды
-// реализуйте увеличении энергии на 200 джоулей.
-
-// В качестве ответа укажите добавленный вами код
-// ❗Операция должна быть реализована мутабельным образом.
-// 💡Подсказка. Используйте extraReducers
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Increase Temp,
+// температура увеличивалась на 1 градус
+// В качестве ответа укажите исправленную строку кода.
+// ❗Изменение стейта должно быть написано мутабельным образом
