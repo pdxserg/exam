@@ -4,53 +4,48 @@ import { Provider, useDispatch, useSelector } from "react-redux";
 
 // slice
 const slice = createSlice({
-	name: "tickets",
-	initialState: [
-		{ id: 1, event: "Concert", available: true, price: 100 },
-		{ id: 2, event: "Movie", available: false, price: 50 },
-		{ id: 3, event: "Theater", available: true, price: 75 },
-	],
+	name: "classroom",
+	initialState: {
+		students: [
+			{ id: 1, name: "Alice" },
+			{ id: 2, name: "Bob" },
+			{ id: 3, name: "Charlie" },
+		],
+	},
 	reducers: {
-		applyDiscount: (state, action) => {
+		removeStudent: (state, action) => {
 			return state;
 		},
 	},
 });
 
-const { applyDiscount } = slice.actions;
+const { removeStudent } = slice.actions;
 
 // App.tsx
 const App = () => {
-	const tickets = useSelector((state: RootState) => state.tickets);
+	const students = useSelector((state: RootState) => state.classroom.students);
 	const dispatch = useDispatch();
 
-	const handleDiscount = (discount: number) => {
-		dispatch(applyDiscount(discount));
+	const handleRemove = (id: number) => {
+		dispatch(removeStudent(id));
 	};
 
 	return (
-		<div>
-			<button onClick={() => handleDiscount(20)}>20% Discount</button>
-			<button onClick={() => handleDiscount(50)}>50% Discount</button>
-			<button onClick={() => handleDiscount(80)}>80% Discount</button>
-			<ul>
-				{tickets.map((ticket) => (
-					<li key={ticket.id}>
-            <span>
-              {ticket.event} ({ticket.available ? "Available" : "Sold Out"}) - $
-	            {ticket.price.toFixed(2)}
-            </span>
-					</li>
-				))}
-			</ul>
-		</div>
+		<ul>
+			{students.map((student) => (
+				<li key={student.id}>
+					{student.name}
+					<button onClick={() => handleRemove(student.id)}>✖</button>
+				</li>
+			))}
+		</ul>
 	);
 };
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		tickets: slice.reducer,
+		classroom: slice.reducer,
 	},
 });
 
@@ -64,12 +59,11 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// При нажатии на кнопки с 20%, 50% или 80% скидками цены всех билетов должны уменьшиться на
-// указанный процент.
+// При нажатии на кнопку ✖ рядом с именем студента, студент не удаляется из списка 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта так, чтобы цена каждого билета уменьшалась на указанный процент.
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку ✖, студент удалялся из списка.
 // В качестве ответа укажите исправленную строку кода.
-// ❗Операция должна быть реализована мутабельным образом.
+// ❗Изменение стейта должно быть написано мутабельным образом
 // ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
 // ❗Не создавайте переменные из action.payload (const id = action.payload.id)
