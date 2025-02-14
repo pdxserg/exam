@@ -2,53 +2,75 @@ import { configureStore, createSlice } from "@reduxjs/toolkit"
 import { createRoot } from "react-dom/client"
 import { Provider, useDispatch, useSelector } from "react-redux"
 
+type Product = {
+	id: number
+	name: string
+	inStock: boolean
+}
+
 // slice
 const slice = createSlice({
-	name: "library",
-	initialState: {
-		collection: {
-			books: [
-				{ id: 1, title: "1984" },
-				{ id: 2, title: "Brave New World" },
-			],
-		},
-	},
+	name: "products",
+	initialState: [
+		{ id: 1, name: "Laptop", inStock: true },
+		{ id: 2, name: "Headphones", inStock: false },
+		{ id: 3, name: "Smartphone", inStock: true },
+	] as Product[],
 	reducers: {
-		removeBook: (state, action) => {
+		toggleInStock: (state, action) => {
+			const product = state.find((product) => product.id === action.payload.id)
+			if (product) {
+				product.inStock = action.payload.inStock
+			}
+		},
+		clearStock: (state) => {
 			return state
 		},
 	},
 })
 
-const { removeBook } = slice.actions
+const { toggleInStock, clearStock } = slice.actions
 
 // App.tsx
 const App = () => {
-	const books = useSelector((state: RootState) => state.library.collection.books)
+	const products = useSelector((state: RootState) => state.products)
 	const dispatch = useDispatch()
 
-	const removeLastBook = () => {
-		if (books.length > 0) {
-			dispatch(removeBook(books[books.length - 1].id))
-		}
+	const handleLogout = () => {
+		dispatch(clearStock())
+	}
+
+	const toggleProductStock = (product: Product) => {
+		dispatch(toggleInStock({ id: product.id, inStock: !product.inStock }))
 	}
 
 	return (
-		<>
-			<button onClick={removeLastBook}>Remove Last Book</button>
+		<div>
+			<button onClick={handleLogout}>Logout</button>
 			<ul>
-				{books.map((book) => (
-					<li key={book.id}>{book.title}</li>
+				{products.map((product) => (
+					<li key={product.id}>
+            <span
+	            style={{
+		            color: product.inStock ? "green" : "red",
+	            }}
+            >
+              {product.name} ({product.inStock ? "In Stock" : "Out of Stock"})
+            </span>
+						<button onClick={() => toggleProductStock(product)}>
+							{product.inStock ? "Mark Out of Stock" : "Mark In Stock"}
+						</button>
+					</li>
 				))}
 			</ul>
-		</>
+		</div>
 	)
 }
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		library: slice.reducer,
+		products: slice.reducer,
 	},
 })
 
@@ -62,10 +84,9 @@ createRoot(document.getElementById("root")!).render(
 )
 
 // 📜 Описание:
-// При нажатии на кнопку Remove Last Book, последняя книга в коллекции не удаляется 🥲
+// При нажатии на кнопку Logout массив товаров не очищается 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Remove Last Book,
-// последняя книга удалялась из коллекции.
-// В качестве ответа укажите исправленную строку кода.
-// ❗Изменение стейта должно быть написано мутабельным образом.
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Logout,
+// массив товаров полностью очищался.
+// В качестве ответа укажите исправленную строку кода
