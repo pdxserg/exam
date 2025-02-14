@@ -4,36 +4,53 @@ import { Provider, useDispatch, useSelector } from "react-redux";
 
 // slice
 const slice = createSlice({
-	name: "temperature",
-	initialState: {
-		celsius: 20,
-	},
+	name: "tickets",
+	initialState: [
+		{ id: 1, event: "Concert", available: true, price: 100 },
+		{ id: 2, event: "Movie", available: false, price: 50 },
+		{ id: 3, event: "Theater", available: true, price: 75 },
+	],
 	reducers: {
-		increase: (state) => {
+		applyDiscount: (state, action) => {
 			return state;
 		},
 	},
 });
 
-const { increase } = slice.actions;
+const { applyDiscount } = slice.actions;
 
 // App.tsx
 const App = () => {
-	const temp = useSelector((state: RootState) => state.temperature.celsius);
+	const tickets = useSelector((state: RootState) => state.tickets);
 	const dispatch = useDispatch();
 
+	const handleDiscount = (discount: number) => {
+		dispatch(applyDiscount(discount));
+	};
+
 	return (
-		<>
-			<button onClick={() => dispatch(increase())}>Increase Temp</button>
-			<span>{temp}°C</span>
-		</>
+		<div>
+			<button onClick={() => handleDiscount(20)}>20% Discount</button>
+			<button onClick={() => handleDiscount(50)}>50% Discount</button>
+			<button onClick={() => handleDiscount(80)}>80% Discount</button>
+			<ul>
+				{tickets.map((ticket) => (
+					<li key={ticket.id}>
+            <span>
+              {ticket.event} ({ticket.available ? "Available" : "Sold Out"}) - $
+	            {ticket.price.toFixed(2)}
+            </span>
+					</li>
+				))}
+			</ul>
+		</div>
 	);
 };
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		temperature: slice.reducer,
+		tickets: slice.reducer,
 	},
 });
 
@@ -47,10 +64,12 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// При нажатии на кнопку Increase Temp температура не увеличивается 🥲
+// При нажатии на кнопки с 20%, 50% или 80% скидками цены всех билетов должны уменьшиться на
+// указанный процент.
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Increase Temp,
-// температура увеличивалась на 1 градус
+// Перепишите изменение стейта так, чтобы цена каждого билета уменьшалась на указанный процент.
 // В качестве ответа укажите исправленную строку кода.
-// ❗Изменение стейта должно быть написано мутабельным образом
+// ❗Операция должна быть реализована мутабельным образом.
+// ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
+// ❗Не создавайте переменные из action.payload (const id = action.payload.id)
