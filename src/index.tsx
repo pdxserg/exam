@@ -1,69 +1,68 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-import { createRoot } from "react-dom/client";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { configureStore, createSlice, nanoid } from "@reduxjs/toolkit"
+import { createRoot } from "react-dom/client"
+import { Provider, useDispatch, useSelector } from "react-redux"
 
 // slice
 const slice = createSlice({
-	name: "classroom",
+	name: "fruits",
 	initialState: {
-		students: [
-			{ id: 1, name: "Alice" },
-			{ id: 2, name: "Bob" },
-			{ id: 3, name: "Charlie" },
+		basket: [
+			{ id: 1, name: "Apple" },
+			{ id: 2, name: "Banana" },
 		],
 	},
 	reducers: {
-		removeStudent: (state, action) => {
-			return state;
+		addFruit: (state, action) => {
+			return state
 		},
 	},
-});
+})
 
-const { removeStudent } = slice.actions;
+const { addFruit } = slice.actions
 
 // App.tsx
 const App = () => {
-	const students = useSelector((state: RootState) => state.classroom.students);
-	const dispatch = useDispatch();
+	const fruits = useSelector((state: RootState) => state.fruits.basket)
+	const dispatch = useDispatch()
 
-	const handleRemove = (id: number) => {
-		dispatch(removeStudent(id));
-	};
+	const addNewFruit = () => {
+		const newFruit = { id: nanoid(), name: "Orange" }
+		dispatch(addFruit(newFruit))
+	}
 
 	return (
-		<ul>
-			{students.map((student) => (
-				<li key={student.id}>
-					{student.name}
-					<button onClick={() => handleRemove(student.id)}>✖</button>
-				</li>
-			))}
-		</ul>
-	);
-};
+		<>
+			<button onClick={addNewFruit}>Add Fruit</button>
+			<ul>
+				{fruits.map((fruit) => (
+					<li key={fruit.id}>{fruit.name}</li>
+				))}
+			</ul>
+		</>
+	)
+}
 
 // store.ts
 export const store = configureStore({
 	reducer: {
-		classroom: slice.reducer,
+		fruits: slice.reducer,
 	},
-});
+})
 
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof store.getState>
 
 // main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
-);
+)
 
 // 📜 Описание:
-// При нажатии на кнопку ✖ рядом с именем студента, студент не удаляется из списка 🥲
+// При нажатии на кнопку Add Fruit, новый фрукт не добавляется в корзину 🥲
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку ✖, студент удалялся из списка.
+// Перепишите изменение стейта таким образом, чтобы при нажатии на кнопку Add Fruit,
+// новый фрукт добавлялся в корзину
 // В качестве ответа укажите исправленную строку кода.
 // ❗Изменение стейта должно быть написано мутабельным образом
-// ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
-// ❗Не создавайте переменные из action.payload (const id = action.payload.id)
