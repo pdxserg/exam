@@ -12,7 +12,7 @@ const slice = createSlice({
 	],
 	reducers: {
 		applyDiscount: (state, action) => {
-			return state;
+			 state.forEach((el)=>el.price=el.price-(el.price*action.payload/100))
 		},
 	},
 });
