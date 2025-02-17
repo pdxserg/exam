@@ -1,29 +1,71 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client';
+import { configureStore } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
 
-export const App = () => {
+type Photo = {
+	albumId: string;
+	id: string;
+	title: string;
+	url: string;
+};
+
+// Api
+const api = createApi({
+	reducerPath: "api",
+	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+	endpoints: (builder) => {
+		return {
+			getPhotos: builder.query<Photo[], void>({
+				query: () => "photos",
+			}),
+		};
+	},
+});
+
+const { useGetPhotosQuery, useLazyGetPhotosQuery } = api;
+
+// App.tsx
+const App = () => {
+	// ❗❗❗XXX❗❗❗
+
+	const getPhotosHandler = () => {
+		trigger();
+	};
+
 	return (
-		<div>
-			<h2>Чем отличается master от origin master ?</h2>
-			<ul>
-				<li>1 - Это просто 2 ветки с разными названиями. Их ничего не связывает</li>
-				<li>2 - master принадлежит локальному репозиторию, origin master - удаленному</li>
-				<li>3 - Это 2 названия одной и той же ветки. Приставка origin не несет никакого смысла.</li>
-				<li>4 - Ветки origin master не существует</li>
-				<li>5 - Нет правильного ответа</li>
-			</ul>
-		</div>
-	)
-}
+		<>
+			<button onClick={getPhotosHandler}>Get photos</button>
+			{data?.map((el) => {
+				return (
+					<div key={el.id} style={{ border: "1px solid", margin: "5px", padding: "5px" }}>
+						<div>
+							<b>title</b> - {el.title}
+						</div>
+					</div>
+				);
+			})}
+		</>
+	);
+};
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(<App/>);
+// store.ts
+const store = configureStore({
+	reducer: { [api.reducerPath]: api.reducer },
+	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
+});
+
+createRoot(document.getElementById("root")!).render(
+	<Provider store={store}>
+		<App />
+	</Provider>,
+);
 
 // 📜 Описание:
-// Чем отличается master от origin master ?
-// Может быть несколько вариантов ответа (ответ дайте через пробел).
-// ❗ Ответ будет засчитан как верный, только при полном правильном совпадении.
-// Если указали правильно один вариант (1),
-// а нужно было указать два варианта (1 и 2), то ответ в данном случае будет засчитан как неправильный
+// Приложение падает с ошибкой
 
-// 🖥 Пример ответа: 1
+// 🪛 Задача:
+// Почините приложение.
+// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` чтобы при нажатии на кнопку `Get photos`
+// отобразились данные пришедшие с сервера
+// В качестве ответа укажите написанный вами код
