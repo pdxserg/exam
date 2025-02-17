@@ -1,84 +1,29 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
+import React from 'react'
+import ReactDOM from 'react-dom/client';
 
-type Photo = {
-	albumId: string;
-	id: string;
-	title: string;
-	url: string;
-};
-
-// Api
-const api = createApi({
-	reducerPath: "api",
-	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-	endpoints: (builder) => {
-		return {
-			getPhotos: builder.query<Photo[], void>({
-				query: () => "photos",
-			}),
-			updatePhoto: builder.mutation<Photo, { id: string; title: string }>({
-				query: ({ id, title }) => {
-					return {
-						method: "PUT",
-						url: `photos/${id}`,
-						body: { title },
-					};
-				},
-			}),
-		};
-	},
-});
-
-const { useGetPhotosQuery, useUpdatePhotoMutation } = api;
-
-// App.tsx
-const App = () => {
-	const { data } = useGetPhotosQuery();
-	const [trigger] = useUpdatePhotoMutation();
-
-	const updatePhotoTitleHandler = (id: string) => {
-		trigger({ id, title: "Тестовое сообщение" });
-	};
-
+export const App = () => {
 	return (
-		<>
-			{data?.map((el) => {
-				return (
-					<div key={el.id} style={{ margin: "15px" }}>
-						<b>title</b> - {el.title}
-						<button onClick={() => updatePhotoTitleHandler(el.id)}>Update title</button>
-					</div>
-				);
-			})}
-		</>
-	);
-};
+		<div>
+			<h2>Чем отличается master от origin master ?</h2>
+			<ul>
+				<li>1 - Это просто 2 ветки с разными названиями. Их ничего не связывает</li>
+				<li>2 - master принадлежит локальному репозиторию, origin master - удаленному</li>
+				<li>3 - Это 2 названия одной и той же ветки. Приставка origin не несет никакого смысла.</li>
+				<li>4 - Ветки origin master не существует</li>
+				<li>5 - Нет правильного ответа</li>
+			</ul>
+		</div>
+	)
+}
 
-// store.ts
-const store = configureStore({
-	reducer: { [api.reducerPath]: api.reducer },
-	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
-});
-
-createRoot(document.getElementById("root")!).render(
-	<Provider store={store}>
-		<App />
-	</Provider>,
-);
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(<App/>);
 
 // 📜 Описание:
-// Нажмите на кнопку Update title и обновите страницу. После обновления страницы title
-// изменится, но хотелось бы не перегружать страницу
+// Чем отличается master от origin master ?
+// Может быть несколько вариантов ответа (ответ дайте через пробел).
+// ❗ Ответ будет засчитан как верный, только при полном правильном совпадении.
+// Если указали правильно один вариант (1),
+// а нужно было указать два варианта (1 и 2), то ответ в данном случае будет засчитан как неправильный
 
-// 🪛 Задача:
-// Реализуйте автоматический re-fetching используя теги. Т.е. чтобы после нажатия на кнопку Update title, title обновился без ручной перезагрузки страницы
-// обновился без ручной перезагрузки страницы
-
-// 💡 Подсказка: необходимо дописать 3 строки кода
-// В ответе укажите добавленные строки кода через пробел
-// ❗Запятую в конце строки указывать обязательно
-
-// 🖥 Пример ответа: xxx: {id: 1}, yyy: {id: 2}, zzz: {id: 3}
+// 🖥 Пример ответа: 1
