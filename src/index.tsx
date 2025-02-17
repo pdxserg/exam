@@ -1,71 +1,23 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
+import React from 'react'
+import ReactDOM from 'react-dom/client';
 
-type Photo = {
-	albumId: string;
-	id: string;
-	title: string;
-	url: string;
-};
-
-// Api
-const api = createApi({
-	reducerPath: "api",
-	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-	endpoints: (builder) => {
-		return {
-			getPhotos: builder.query<Photo[], void>({
-				query: () => "photos",
-			}),
-		};
-	},
-});
-
-const { useGetPhotosQuery, useLazyGetPhotosQuery } = api;
-
-// App.tsx
-const App = () => {
-	// ❗❗❗XXX❗❗❗
-
-	const getPhotosHandler = () => {
-		trigger();
-	};
-
+export const App = () => {
 	return (
-		<>
-			<button onClick={getPhotosHandler}>Get photos</button>
-			{data?.map((el) => {
-				return (
-					<div key={el.id} style={{ border: "1px solid", margin: "5px", padding: "5px" }}>
-						<div>
-							<b>title</b> - {el.title}
-						</div>
-					</div>
-				);
-			})}
-		</>
-	);
-};
+		<div>
+			<h2>Какая команда позволяет на время «сдать в архив» (или отложить) изменения, сделанные в рабочей
+				копии, чтобы вы могли применить их позже? Откладывание изменений полезно, если вам необходимо переключить
+				контекст и вы пока не готовы к созданию коммита.</h2>
+		</div>
+	)
+}
 
-// store.ts
-const store = configureStore({
-	reducer: { [api.reducerPath]: api.reducer },
-	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
-});
 
-createRoot(document.getElementById("root")!).render(
-	<Provider store={store}>
-		<App />
-	</Provider>,
-);
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(<App/>);
 
 // 📜 Описание:
-// Приложение падает с ошибкой
+// Какая команда позволяет на время «сдать в архив» (или отложить) изменения, сделанные в рабочей
+// копии, чтобы вы могли применить их позже? Откладывание изменений полезно, если вам необходимо переключить
+// контекст и вы пока не готовы к созданию коммита.
 
-// 🪛 Задача:
-// Почините приложение.
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` чтобы при нажатии на кнопку `Get photos`
-// отобразились данные пришедшие с сервера
-// В качестве ответа укажите написанный вами код
+// 🖥 Пример ответа: git init
