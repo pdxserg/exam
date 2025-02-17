@@ -1,62 +1,63 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createRoot } from "react-dom/client";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { Provider } from "react-redux";
 
-// slice
-const slice = createSlice({
-	name: "tickets",
-	initialState: [
-		{ id: 1, event: "Concert", available: true, price: 100 },
-		{ id: 2, event: "Movie", available: false, price: 50 },
-		{ id: 3, event: "Theater", available: true, price: 75 },
-	],
-	reducers: {
-		applyDiscount: (state, action) => {
-			 state.forEach((el)=>el.price=el.price-(el.price*action.payload/100))
-		},
+type Comment = {
+	postId: string;
+	id: string;
+	name: string;
+	email: string;
+	body: string;
+};
+
+// Api
+const api = createApi({
+	reducerPath: "commentsApi",
+	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+	endpoints: (builder) => {
+		return {
+			getComments: builder.query<Comment[], void>({
+				query: () => "comments",
+			}),
+			// ❗❗❗XXX❗❗❗
+		};
 	},
 });
 
-const { applyDiscount } = slice.actions;
+const { useGetCommentsQuery, useAddCommentMutation } = api;
 
 // App.tsx
 const App = () => {
-	const tickets = useSelector((state: RootState) => state.tickets);
-	const dispatch = useDispatch();
+	const { data } = useGetCommentsQuery();
+	const [addComment] = useAddCommentMutation();
 
-	const handleDiscount = (discount: number) => {
-		dispatch(applyDiscount(discount));
+	const addCommentHandler = () => {
+		addComment("Тестовая строка. Ее менять не нужно");
 	};
 
 	return (
-		<div>
-			<button onClick={() => handleDiscount(20)}>20% Discount</button>
-			<button onClick={() => handleDiscount(50)}>50% Discount</button>
-			<button onClick={() => handleDiscount(80)}>80% Discount</button>
-			<ul>
-				{tickets.map((ticket) => (
-					<li key={ticket.id}>
-            <span>
-              {ticket.event} ({ticket.available ? "Available" : "Sold Out"}) - $
-	            {ticket.price.toFixed(2)}
-            </span>
-					</li>
-				))}
-			</ul>
-		</div>
+		<>
+			<button onClick={addCommentHandler}>Add comment</button>
+			{data?.map((el) => {
+				return (
+					<div key={el.id} style={{ border: "1px solid", margin: "5px", padding: "5px" }}>
+						<p>body - {el.body}</p>
+					</div>
+				);
+			})}
+		</>
 	);
 };
 
 // store.ts
-export const store = configureStore({
+const store = configureStore({
 	reducer: {
-		tickets: slice.reducer,
+		[api.reducerPath]: api.reducer,
 	},
+	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
-export type RootState = ReturnType<typeof store.getState>;
-
-// main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
@@ -64,12 +65,11 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// При нажатии на кнопки с 20%, 50% или 80% скидками цены всех билетов должны уменьшиться на
-// указанный процент.
+// Белый экран. Откройте панель разработчика и проанализируйте в чем ошибка
 
 // 🪛 Задача:
-// Перепишите изменение стейта так, чтобы цена каждого билета уменьшалась на указанный процент.
-// В качестве ответа укажите исправленную строку кода.
-// ❗Операция должна быть реализована мутабельным образом.
-// ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
-// ❗Не создавайте переменные из action.payload (const id = action.payload.id)
+// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` чтобы при нажатии на кнопку `Add comment`
+// новый комментарий добавлялся и был виден в конце массива после перезагрузки страница
+// ❗ Автоматическое получение данных реализовывать не надо
+// В качестве ответа укажите написанный вами код
+// ❗Типизацию указывать обязательно
