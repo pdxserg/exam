@@ -1,34 +1,94 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client';
+import { configureStore, nanoid } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
 
-export const App = () => {
+type Post = {
+	body: string;
+	id: string;
+	title: string;
+	userId: string;
+};
+
+const api = createApi({
+	reducerPath: "api",
+	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+	tagTypes: ["Post"],
+	endpoints: (builder) => {
+		return {
+			getPosts: builder.query<Post[], void>({
+				query: () => "posts",
+				providesTags: ["Post"],
+			}),
+			removePost: builder.mutation<{ message: string }, string>({
+				query: (id) => ({
+					method: "DELETE",
+					url: `posts/${id}`,
+				}),
+				invalidatesTags: ["Post"],
+			}),
+		};
+	},
+});
+
+const { useGetPostsQuery, useRemovePostMutation } = api;
+
+// App.tsx
+const App = () => {
+	const { data: posts } = useGetPostsQuery();
+	const [removePost] = useRemovePostMutation();
+
+	const removePostHandler = (id: string) => {
+		removePost(nanoid())
+			.then(() => {
+				alert(`✅ The post was successfully deleted`);
+			})
+			.catch((err) => {
+				alert(`❌ The post was not deleted: ${err.data.errors}`);
+			});
+	};
+
 	return (
-		<div>
-			<h2>Какое из приведенных ниже определений верно?</h2>
-			<ol>
-				<li>1 - Команда git push используется для выгрузки содержимого локального репозитория в удаленный репозиторий.
-					Она позволяет передать коммиты из локального репозитория в удаленный.
-				</li>
-				<li>2 - Команда git pull используется для обновления локальной версии репозитория, синхронизируя её с содержимым удалённого репозитория
-				</li>
-				<li>3 - Команда git fetch загружает коммиты, файлы и ссылки из удаленного репозитория в ваш локальный
-					репозиторий. Извлеките данные с помощью команды fetch, если хотите увидеть, над чем работают остальные.
-				</li>
-				<li>4 - Ни одно из вышеперечисленных определений не верно</li>
-			</ol>
-		</div>
-	)
-}
+		<>
+			{posts?.map((el) => {
+				return (
+					<div style={{ display: "flex", alignItems: "center" }}>
+						<div
+							key={el.id}
+							style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}
+						>
+							<p>
+								<b>title</b> - {el.title}
+							</p>
+						</div>
+						<button onClick={() => removePostHandler(el.id)}>x</button>
+					</div>
+				);
+			})}
+		</>
+	);
+};
 
+// store.ts
+const store = configureStore({
+	reducer: { [api.reducerPath]: api.reducer },
+	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
+});
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(<App/>);
+createRoot(document.getElementById("root")!).render(
+	<Provider store={store}>
+		<App />
+	</Provider>,
+);
 
 // 📜 Описание:
-// Какое из приведенных ниже определений верно?
-// Может быть несколько вариантов ответа (ответ дайте через пробел).
-// ❗ Ответ будет засчитан как верный, только при полном правильном совпадении.
-// Если указали правильно один вариант (1),
-// а нужно было указать два варианта (1 и 2), то ответ в данном случае будет засчитан как неправильный
+// При нажатии на кнопку удаления поста (х), вы увидите alert с сообщением о том, что пост успешно
+// удален.
+// Но на самом деле падает ошибка. Откройте панель разработчика и посмотрите network.
+// Запрос падает с 400 ошибкой
 
-// 🖥 Пример ответа: 1
+// 🪛 Задача:
+// Что нужно дописать в коде, чтобы в случае ошибки отработал catch и пользователь увидел
+// сообщение об ошибке.
+// В качестве ответа укажите добавленный вами код
+// ❗Чинить удаление поста не нужно
