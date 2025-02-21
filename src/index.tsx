@@ -1,234 +1,34 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import React from "react";
-import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
+import React from 'react'
+import ReactDOM from 'react-dom/client';
 
-// Types
-type Todolist = {
-	id: string;
-	title: string;
-	order: number;
-	createdAt: string;
-	updatedAt: string;
-	completed: boolean;
-};
-
-const api = createApi({
-	reducerPath: "api",
-	baseQuery: async (args, api, extraOptions) => {
-		await new Promise((resolve) => setTimeout(resolve, 1000)); // Эмуляция задержки
-
-		return fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" })(
-			args,
-			api,
-			extraOptions,
-		);
-	},
-	endpoints: (builder) => {
-		const url = Math.random() < 0.5 ? "todos" : "todos👺";
-		return {
-			todolists: builder.query<Todolist[], void>({
-				query: () => url,
-			}),
-		};
-	},
-});
-
-const { useTodolistsQuery } = api;
-
-// Component
-const App = () => {
-	// ❗Использовать деструктуризацию запрещено
-	const {data, isLoading, isError, isFetching} = useTodolistsQuery();
-
-
+export const App = () => {
 	return (
-		<>
-			{
-				<>
-					{data?.map((t) => {
-						return (import { configureStore } from "@reduxjs/toolkit";
-						import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-						import React from "react";
-						import { createRoot } from "react-dom/client";
-						import { Provider, useDispatch } from "react-redux";
-						import { BrowserRouter, NavLink, Route, Routes, useNavigate } from "react-router";
+		<div>
+			<h2>Какое из приведенных ниже определений верно?</h2>
+			<ol>
+				<li>1 - Команда git push используется для выгрузки содержимого локального репозитория в удаленный репозиторий.
+					Она позволяет передать коммиты из локального репозитория в удаленный.
+				</li>
+				<li>2 - Команда git pull используется для обновления локальной версии репозитория, синхронизируя её с содержимым удалённого репозитория
+				</li>
+				<li>3 - Команда git fetch загружает коммиты, файлы и ссылки из удаленного репозитория в ваш локальный
+					репозиторий. Извлеките данные с помощью команды fetch, если хотите увидеть, над чем работают остальные.
+				</li>
+				<li>4 - Ни одно из вышеперечисленных определений не верно</li>
+			</ol>
+		</div>
+	)
+}
 
-						type Product = {
-							id: string;
-							title: string;
-							description: string;
-							price: number;
-						};
 
-						type ProductsResponse = {
-							total: number;
-							messages: string[];
-							page: number;
-							pageCount: number;
-							data: Product[];
-						};
-
-						type Film = {
-							id: number;
-							nameOriginal: string;
-							description: string;
-							ratingImdb: number;
-						};
-
-						type FilmsResponse = {
-							total: number;
-							messages: string[];
-							page: number;
-							pageCount: number;
-							data: Film[];
-						};
-
-// Api
-						const api = createApi({
-							reducerPath: "api",
-							baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-							endpoints: (builder) => {
-								return {
-									getFilms: builder.query<FilmsResponse, void>({
-										query: () => "films",
-									}),
-									getProducts: builder.query<ProductsResponse, void>({
-										query: () => "products",
-									}),
-								};
-							},
-						});
-
-						const { useGetFilmsQuery, useGetProductsQuery } = api;
-
-// Films.tsx
-						const Films = () => {
-							const { data } = useGetFilmsQuery();
-
-							return (
-								<>
-									<h1>Films</h1>
-									{data?.data.map((el) => (
-										<div key={el.id} style={{ margin: "15px" }}>
-											movie title - <b>{el.nameOriginal}</b>
-										</div>
-									))}
-								</>
-							);
-						};
-
-						const Products = () => {
-							const { data } = useGetProductsQuery();
-
-							return (
-								<>
-									<h1>Products</h1>
-									{data?.data.map((el) => (
-										<div key={el.id} style={{ margin: "15px" }}>
-											title - <b>{el.title}</b>
-										</div>
-									))}
-								</>
-							);
-						};
-
-						export const App = () => {
-							const navigate = useNavigate();
-
-							const dispatch = useDispatch();
-
-							const leaveSiteHandler = () => {
-								navigate("/");
-								// ❗❗❗XXX❗❗❗
-							};
-
-							return (
-								<>
-									<header style={{ display: "flex", alignItems: "center", gap: "10px", border: "1px solid" }}>
-										<ul>
-											Menu:
-											<li>
-												<NavLink to={"films"}>Films</NavLink>
-											</li>
-											<li>
-												<NavLink to={"products"}>Products</NavLink>
-											</li>
-										</ul>
-										<button onClick={leaveSiteHandler}>Leave the site</button>
-									</header>
-
-									<Routes>
-										<Route path={"/"} element={<h1>Home page</h1>} />
-										<Route path={"/films"} element={<Films />} />
-										<Route path={"/products"} element={<Products />} />
-									</Routes>
-								</>
-							);
-						};
-
-// store.ts
-						const store = configureStore({
-							reducer: { [api.reducerPath]: api.reducer },
-							middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
-						});
-
-						createRoot(document.getElementById("root")!).render(
-							<BrowserRouter>
-								<Provider store={store}>
-									<App />
-								</Provider>
-							</BrowserRouter>,
-						);
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(<App/>);
 
 // 📜 Описание:
-// Перейди на страницу фильмов и убедись, что фильмы подгрузились
-// Перейди на страницу продуктов и убедись, что продукты подгрузились
-// Открой redux devtools и убедись, что фильмы и продукты сохранились в кеше
+// Какое из приведенных ниже определений верно?
+// Может быть несколько вариантов ответа (ответ дайте через пробел).
+// ❗ Ответ будет засчитан как верный, только при полном правильном совпадении.
+// Если указали правильно один вариант (1),
+// а нужно было указать два варианта (1 и 2), то ответ в данном случае будет засчитан как неправильный
 
-// 🪛 Задача:
-// При нажатии на кнопку `Leave the site` необходимо очисть весь RTK query кеш
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗`, чтобы реализовать данную задачу
-
-						<div style={t.completed ? { color: "grey" } : {}} key={t.id}>
-								<input type="checkbox" checked={t.completed} />
-								<b>Описание</b>: {t.title}
-							</div>
-						);
-					})}
-				</>
-			}
-			{isLoading && <h2>Загрузка...</h2>}
-			{isFetching && <h2>👩‍💻 Секретный код: BHOlh#</h2>}
-			{isError&& <h2> Error: 👺👺👺</h2>}
-		</>
-	);
-};
-
-// Store
-const store = configureStore({
-	reducer: {
-		[api.reducerPath]: api.reducer,
-	},
-	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
-});
-
-createRoot(document.getElementById("root")!).render(
-	<Provider store={store}>
-		<App />
-	</Provider>,
-);
-
-// 📜 Описание:
-// Тудулисты с вероятностью в 50% подгружаюся успешно или падают с ошибкой.
-// Но изначально на экране мы видим: Загрузку, секретный код и сообщение об ошибке
-
-// 🪛 Задача:
-// Что нужно написать вместо "❗X","❗Y" и "❗Z" для того, чтобы:
-// 1. Загрузка показывалась только во время загрузки
-// 2. Секретный код показывалась только если запрос прошел успешно
-// 3. Ошибка показывалась только в случае ошибки
-
-// ❗ Ответ дайте через пробел
-// 🖥 Пример ответа: one two three
+// 🖥 Пример ответа: 1
