@@ -1,121 +1,71 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, nanoid } from "@reduxjs/toolkit";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import React from "react";
 import { createRoot } from "react-dom/client";
-import { Provider, useDispatch } from "react-redux";
-import { BrowserRouter, NavLink, Route, Routes, useNavigate } from "react-router";
+import { Provider } from "react-redux";
 
-type Product = {
+type Post = {
+	body: string;
 	id: string;
 	title: string;
-	description: string;
-	price: number;
+	userId: string;
 };
 
-type ProductsResponse = {
-	total: number;
-	messages: string[];
-	page: number;
-	pageCount: number;
-	data: Product[];
-};
-
-type Film = {
-	id: number;
-	nameOriginal: string;
-	description: string;
-	ratingImdb: number;
-};
-
-type FilmsResponse = {
-	total: number;
-	messages: string[];
-	page: number;
-	pageCount: number;
-	data: Film[];
-};
-
-// Api
 const api = createApi({
 	reducerPath: "api",
 	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+	tagTypes: ["Post"],
 	endpoints: (builder) => {
 		return {
-			getFilms: builder.query<FilmsResponse, void>({
-				query: () => "films",
+			getPosts: builder.query<Post[], void>({
+				query: () => "posts",
+				providesTags: ["Post"],
 			}),
-			getProducts: builder.query<ProductsResponse, void>({
-				query: () => "products",
+			removePost: builder.mutation<{ message: string }, string>({
+				query: (id) => ({
+					method: "DELETE",
+					url: `posts/${id}`,
+				}),
+				invalidatesTags: ["Post"],
 			}),
 		};
 	},
 });
 
-const { useGetFilmsQuery, useGetProductsQuery } = api;
+const { useGetPostsQuery, useRemovePostMutation } = api;
 
-// Films.tsx
-const Films = () => {
-	const { data } = useGetFilmsQuery();
+// App.tsx
+const App = () => {
+	const { data: posts } = useGetPostsQuery();
+	const [removePost] = useRemovePostMutation();
 
-	return (
-		<>
-			<h1>Films</h1>
-			{data?.data.map((el) => (
-				<div key={el.id} style={{ margin: "15px" }}>
-					movie title - <b>{el.nameOriginal}</b>
-				</div>
-			))}
-		</>
-	);
-};
-
-const Products = () => {
-	const { data } = useGetProductsQuery();
-
-	return (
-		<>
-			<h1>Products</h1>
-			{data?.data.map((el) => (
-				<div key={el.id} style={{ margin: "15px" }}>
-					title - <b>{el.title}</b>
-				</div>
-			))}
-		</>
-	);
-};
-
-export const App = () => {
-	const navigate = useNavigate();
-
-	const dispatch = useDispatch();
-
-	const leaveSiteHandler = () => {
-		navigate("/");
-		// ❗❗❗XXX❗❗❗
-		//✅✅✅
-		dispatch(api.util.resetApiState())
+	const removePostHandler = (id: string) => {
+		removePost(nanoid())
+			.unwrap()//✅✅✅
+			.then(() => {
+				alert(`✅ The post was successfully deleted`);
+			})
+			.catch((err) => {
+				alert(`❌ The post was not deleted: ${err.data.errors}`);
+			});
 	};
 
 	return (
 		<>
-			<header style={{ display: "flex", alignItems: "center", gap: "10px", border: "1px solid" }}>
-				<ul>
-					Menu:
-					<li>
-						<NavLink to={"films"}>Films</NavLink>
-					</li>
-					<li>
-						<NavLink to={"products"}>Products</NavLink>
-					</li>
-				</ul>
-				<button onClick={leaveSiteHandler}>Leave the site</button>
-			</header>
-
-			<Routes>
-				<Route path={"/"} element={<h1>Home page</h1>} />
-				<Route path={"/films"} element={<Films />} />
-				<Route path={"/products"} element={<Products />} />
-			</Routes>
+			{posts?.map((el) => {
+				return (
+					<div style={{ display: "flex", alignItems: "center" }}>
+						<div
+							key={el.id}
+							style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}
+						>
+							<p>
+								<b>title</b> - {el.title}
+							</p>
+						</div>
+						<button onClick={() => removePostHandler(el.id)}>x</button>
+					</div>
+				);
+			})}
 		</>
 	);
 };
@@ -127,18 +77,19 @@ const store = configureStore({
 });
 
 createRoot(document.getElementById("root")!).render(
-	<BrowserRouter>
-		<Provider store={store}>
-			<App />
-		</Provider>
-	</BrowserRouter>,
+	<Provider store={store}>
+		<App />
+	</Provider>,
 );
 
 // 📜 Описание:
-// Перейди на страницу фильмов и убедись, что фильмы подгрузились
-// Перейди на страницу продуктов и убедись, что продукты подгрузились
-// Открой redux devtools и убедись, что фильмы и продукты сохранились в кеше
+// При нажатии на кнопку удаления поста (х), вы увидите alert с сообщением о том, что пост успешно
+// удален.
+// Но на самом деле падает ошибка. Откройте панель разработчика и посмотрите network.
+// Запрос падает с 400 ошибкой
 
 // 🪛 Задача:
-// При нажатии на кнопку `Leave the site` необходимо очисть весь RTK query кеш
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗`, чтобы реализовать данную задачу
+// Что нужно дописать в коде, чтобы в случае ошибки отработал catch и пользователь увидел
+// сообщение об ошибке.
+// В качестве ответа укажите добавленный вами код
+// ❗Чинить удаление поста не нужно
