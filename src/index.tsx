@@ -1,94 +1,29 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { createRoot } from "react-dom/client";
-import { Provider, useSelector } from "react-redux";
+import React from 'react'
+import ReactDOM from 'react-dom/client';
 
-// App slice
-type NotificationLevel = "loading" | "none" | "success" | "error";
-
-const appSlice = createSlice({
-	name: "app",
-	initialState: {
-		notification: "none" as NotificationLevel,
-	},
-	reducers: {},
-	extraReducers: (builder) => {
-		// ❗❗❗XXX❗❗❗
-	},
-	selectors: {
-		selectNotification: (slice) => slice.notification,
-	},
-});
-
-const { selectNotification } = appSlice.selectors;
-
-// Api
-type Photo = {
-	albumId: string;
-	id: string;
-	title: string;
-	url: string;
-};
-
-const api = createApi({
-	reducerPath: "api",
-	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-	endpoints: (builder) => ({
-		getPhotos: builder.query<Photo[], void>({
-			query: () => "photos?delay=2",
-		}),
-	}),
-});
-
-const { useGetPhotosQuery } = api;
-
-// App.tsx
-const App = () => {
-	const notification = useAppSelector(selectNotification);
-
-	const { data } = useGetPhotosQuery();
-
+export const App = () => {
 	return (
-		<>
-			{notification === "loading" && <b style={{ fontSize: "36px" }}>🕝Загрузка...</b>}
-			{notification === "success" && <b style={{ fontSize: "36px" }}>✅ Успех</b>}
-			{notification === "error" && <b style={{ fontSize: "36px" }}>❌ Ошибка</b>}
-			{data?.map((el) => {
-				return (
-					<div key={el.id} style={{ margin: "5px", padding: "5px", width: "200px" }}>
-						<b>title</b> - {el.title}
-						<img src={el.url} alt={`${el.title} image`} />
-					</div>
-				);
-			})}
-		</>
-	);
-};
+		<div>
+			<h2>Сколько всего веток может быть в репозитории ?</h2>
+			<ul>
+				<li>1 - 2 ветки. master(main) и develop</li>
+				<li>2 - Число веток согласовывается в команде разработчиков и устанавливается в git config</li>
+				<li>3 - Всегда есть ветка master (main), develop может быть по соглашения команды разработчиков. Под каждую фичу
+					создается новая ветка. При этом от ветки с фичей запрещено создавать новые ветки</li>
+				<li>4 - Нет правильного ответа</li>
+			</ul>
+		</div>
+	)
+}
 
-// store.ts
-const store = configureStore({
-	reducer: {
-		[appSlice.name]: appSlice.reducer,
-		[api.reducerPath]: api.reducer,
-	},
-	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
-});
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(<App/>);
 
-type RootState = ReturnType<typeof store.getState>;
-const useAppSelector = useSelector.withTypes<RootState>();
-
-createRoot(document.getElementById("root")!).render(
-	<Provider store={store}>
-		<App />
-	</Provider>,
-);
 // 📜 Описание:
-// При загрузке приложения пользователь видит пустой экран и только спустя 2 секунды видит информацию.
+// Сколько всего веток может быть в репозитории ?
+// Может быть несколько вариантов ответа (ответ дайте через пробел).
+// ❗ Ответ будет засчитан как верный, только при полном правильном совпадении.
+// Если указали правильно один вариант (1),
+// а нужно было указать два варианта (1 и 2), то ответ в данном случае будет засчитан как неправильный
 
-// 🪛 Задача:
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` для того, чтобы при загрузке приложения
-// пользователь увидел `🕝Загрузка...`, в случае успешной загрузки увидел `✅ Успех`, а в случае
-// ошибки `❌ Ошибка`
-
-// 💡 Подсказка: для решения задачи используйте addMatcher
-// // ❗Порядок обработки нотификаций: загрука, успех, ошибка
+// 🖥 Пример ответа: 1
