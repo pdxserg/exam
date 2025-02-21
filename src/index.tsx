@@ -2,80 +2,90 @@ import { configureStore } from "@reduxjs/toolkit";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { Provider, useDispatch } from "react-redux";
+import { Provider } from "react-redux";
 
-type User = {
+// Types
+type Todolist = {
 	id: string;
-	name: string;
-	age: number;
+	title: string;
+	order: number;
+	createdAt: string;
+	updatedAt: string;
+	completed: boolean;
 };
 
-type UsersResponse = {
-	items: User[];
-	totalCount: number;
-};
-
-// Api
 const api = createApi({
 	reducerPath: "api",
-	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+	baseQuery: async (args, api, extraOptions) => {
+		await new Promise((resolve) => setTimeout(resolve, 1000)); // Эмуляция задержки
+
+		return fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" })(
+			args,
+			api,
+			extraOptions,
+		);
+	},
 	endpoints: (builder) => {
+		const url = Math.random() < 0.5 ? "todos" : "todos👺";
 		return {
-			getUsers: builder.query<UsersResponse, void>({
-				query: () => "users",
+			todolists: builder.query<Todolist[], void>({
+				query: () => url,
 			}),
 		};
 	},
 });
 
-const { useGetUsersQuery } = api;
+const { useTodolistsQuery } = api;
 
-// Users.tsx
-const Users = () => {
-	const { data } = useGetUsersQuery();
-
-	const dispatch = useAppDispatch();
-
-	const addSmileHandler = (id: string) => {
-		const smile = "😁";
-		// ❗❗❗XXX❗❗❗
-	};
+// Component
+const App = () => {
+	// ❗Использовать деструктуризацию запрещено
+	const data = useTodolistsQuery();
 
 	return (
 		<>
-			<h1>Users</h1>
-			{data?.items.map((el) => (
-				<div key={el.id}>
-					name - <b>{el.name}</b>
-					<button onClick={() => addSmileHandler(el.id)}>Add smile</button>
-				</div>
-			))}
+			{
+				<>
+					{data.data?.map((t) => {
+						return (
+							<div style={t.completed ? { color: "grey" } : {}} key={t.id}>
+								<input type="checkbox" checked={t.completed} />
+								<b>Описание</b>: {t.title}
+							</div>
+						);
+					})}
+				</>
+			}
+			{"❗X" && <h2>Загрузка...</h2>}
+			{"❗Y" && <h2>👩‍💻 Секретный код: BHOlh#</h2>}
+			{"❗Z" && <h2> Error: 👺👺👺</h2>}
 		</>
 	);
 };
 
-// store.ts
+// Store
 const store = configureStore({
-	reducer: { [api.reducerPath]: api.reducer },
+	reducer: {
+		[api.reducerPath]: api.reducer,
+	},
 	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
-type AppDispatch = typeof store.dispatch;
-const useAppDispatch = useDispatch.withTypes<AppDispatch>();
-
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
-		<Users />
+		<App />
 	</Provider>,
 );
 
 // 📜 Описание:
-// Откройте redux devtools и убедитесь, что данные из запроса хранятся в кеше
-// http://surl.li/veofpd
+// Тудулисты с вероятностью в 50% подгружаюся успешно или падают с ошибкой.
+// Но изначально на экране мы видим: Загрузку, секретный код и сообщение об ошибке
+
 // 🪛 Задача:
-// При нажатии на кнопку `Add smile` необходимо изменить данные в кеше и добавить к имени переменную
-// smile
-// Результат: http://surl.li/kgmhtn
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗`, чтобы реализовать данную задачу
-// ❗Изменение стейта должно быть написано мутабельным образом
-// ❗updateRecipe коллбек в качетстве аргумента принимает стейт. Назовите эту переменную state
+// Что нужно написать вместо "❗X","❗Y" и "❗Z" для того, чтобы:
+// 1. Загрузка показывалась только во время загрузки
+// 2. Секретный код показывалась только если запрос прошел успешно
+// 3. Ошибка показывалась только в случае ошибки
+
+// ❗ Ответ дайте через пробел
+// 🖥 Пример ответа: one two three
