@@ -1,44 +1,29 @@
-import { configureStore, createSlice, isFulfilled, isPending, isRejected } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { createRoot } from "react-dom/client";
-import { Provider, useSelector } from "react-redux";
+import {configureStore, createSlice} from "@reduxjs/toolkit";
+import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
+import {useEffect} from "react";
+import {createRoot} from "react-dom/client";
+import {Provider, useDispatch, useSelector} from "react-redux";
 
 // Slice
-type RequestStatus = "idle" | "loading" | "succeeded" | "failed";
-
 const appSlice = createSlice({
 	name: "app",
 	initialState: {
-		status: "idle" as RequestStatus,
+		error: null as string | null,
 	},
-	reducers: {},
-	extraReducers: (builder) => {
-		builder
-			.addMatcher(isPending, (state, action) => {
-				//✅✅✅
-				if (api.endpoints.getPosts.matchPending(action)) {
-					return
-				} else {
-					state.status = "loading"
-				}
-				//✅✅✅
-				// "❗X"
-				// state.status = "loading";
-			})
-			.addMatcher(isFulfilled, (state) => {
-				state.status = "succeeded";
-			})
-			.addMatcher(isRejected, (state) => {
-				state.status = "failed";
-			});
-	},
+	reducers: (create) => ({
+		setError: create.reducer<{ error: string | null }>((state, action) => {
+			state.error = action.payload.error;
+		}),
+	}),
 	selectors: {
-		selectStatus: (state) => state.status,
+		selectError: (state) => state.error,
 	},
 });
 
-const { selectStatus } = appSlice.selectors;
+const {selectError} = appSlice.selectors;
+const {setError} = appSlice.actions;
 
+// Api
 type Post = {
 	body: string;
 	id: string;
@@ -46,49 +31,48 @@ type Post = {
 	userId: string;
 };
 
-// Api
+type Error = {
+	errors: { field: string; message: string }[];
+};
+
 const api = createApi({
 	reducerPath: "api",
 	baseQuery: async (args, api, extraOptions) => {
-		await new Promise((resolve) => setTimeout(resolve, 2000)); // Эмуляция задержки
+		const result = await fetchBaseQuery({
+			baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/",
+		})(args, api, extraOptions);
 
-		return fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" })(
-			args,
-			api,
-			extraOptions,
-		);
+		if (result.error) {
+			// "❗X"
+			console.log(result.error)
+			if (result.error.status === 400) {
+				// ✅ 1 var: Type Assertions
+				api.dispatch(setError({error: (result.error.data as Error).errors[0].message}))
+			}
+		}
+		return result;
 	},
 	tagTypes: ["Post"],
-	endpoints: (builder) => {
-		return {
-			getPosts: builder.query<Post[], void>({
-				query: () => "posts",
-				providesTags: ["Post"],
+	endpoints: (builder) => ({
+		getPosts: builder.query<Post[], void>({
+			query: () => "posts",
+			providesTags: ["Post"],
+		}),
+		removePost: builder.mutation<{ message: string }, string>({
+			query: (id) => ({
+				method: "DELETE",
+				url: `posts/${id}?delay=20`,
 			}),
-			updatePost: builder.mutation<Post, { id: string; payload: { title: string; body: string } }>({
-				query: ({ id, payload }) => ({
-					method: "PUT",
-					url: `posts/${id}`,
-					body: payload,
-				}),
-				invalidatesTags: ["Post"],
-			}),
-			removePost: builder.mutation<{ message: string }, string>({
-				query: (id) => ({
-					method: "DELETE",
-					url: `posts/${id}`,
-				}),
-				invalidatesTags: ["Post"],
-			}),
-		};
-	},
+			invalidatesTags: ["Post"],
+		}),
+	}),
 });
 
-const { useGetPostsQuery, useUpdatePostMutation, useRemovePostMutation } = api;
+const {useGetPostsQuery, useRemovePostMutation} = api;
 
-// Components
+// UI
 const Header = () => (
-	<div style={{ width: "100%", background: "gray", border: "none", height: "50px" }}>header</div>
+	<div style={{width: "100%", background: "gray", border: "none", height: "50px"}}>header</div>
 );
 
 const LinearProgress = () => (
@@ -107,55 +91,57 @@ const LinearProgress = () => (
 );
 
 const App = () => {
-	const status = useSelector(selectStatus);
+	const error = useSelector(selectError);
+
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		setTimeout(() => {
+			dispatch(setError({error: null}));
+		}, 4000);
+	}, [error]);
 
 	return (
-		<div>
-			<Header />
-			{status === "loading" && <LinearProgress />}
-			<Posts />
-		</div>
+		<>
+			<Header/>
+			{error && <h1 style={{color: "red"}}>{error}</h1>}
+			<Posts/>
+		</>
 	);
 };
 
 const Posts = () => {
-	const { data, isSuccess, isLoading } = useGetPostsQuery();
-	const [updatePost] = useUpdatePostMutation();
-	const [removePost] = useRemovePostMutation();
-
-	const updatePostHandler = (id: string) => {
-		updatePost({ id, payload: { title: "Тестовый title", body: "Тестовое body сообщение" } });
-	};
+	const {data, isSuccess, isLoading: isPostsLoading} = useGetPostsQuery();
+	const [removePost, {isLoading: isRemovePostLoading}] = useRemovePostMutation();
 
 	const deletePostHandler = (id: string) => {
 		removePost(id);
 	};
 
-	if (isLoading) {
-		return <h2>Posts loading...</h2>;
+	if (isPostsLoading || isRemovePostLoading) {
+		return <LinearProgress/>;
 	}
 
 	return (
-		<div>
+		<>
 			{isSuccess && (
-				<div>
+				<>
 					<h2>Posts</h2>
 					{data?.map((el) => {
 						return (
-							<div key={el.id} style={{ display: "flex", alignItems: "center" }}>
-								<div style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}>
+							<div key={el.id} style={{display: "flex", alignItems: "center"}}>
+								<div style={{border: "1px solid", margin: "5px", padding: "5px", width: "200px"}}>
 									<p>
 										<b>title</b> - {el.title}
 									</p>
 								</div>
-								<button onClick={() => updatePostHandler(el.id)}>Update post</button>
 								<button onClick={() => deletePostHandler(el.id)}>Delete post</button>
 							</div>
 						);
 					})}
-				</div>
+				</>
 			)}
-		</div>
+		</>
 	);
 };
 
@@ -170,17 +156,15 @@ const store = configureStore({
 
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
-		<App />
+		<App/>
 	</Provider>,
 );
 
 // 📜 Описание:
-// Обновите страницу и обратите внимание, что при загрузке постов отрабатывает для загрузчика:
-// 1. LinearProgress (голубая полоска под хедером)
-// 2. Posts loading...
-// А при обновлении или удалении поста только LinearProgress
+// Нажмите на кнопку удаления поста. Пост не удалится.
 
 // 🪛 Задача:
-// Что нужно написать вместо "❗X" для того, чтобы при загрузке постов осталась надпись только
-// Posts loading..., а LinearProgress не отображался. Но при этом для обновления или обновления
-// поста как и прежде LinearProgress должен отрабатывать
+// Ваша задача состоит в том, что разобраться почему пост не удаляется и вывести сообщение
+// об ошибке на экран.
+// Что нужно написать вместо "❗X" для того, чтобы при удалении поста он увидел ошибку
+// ❗ Для типизации ошибки используйте type assertion с типом Error
