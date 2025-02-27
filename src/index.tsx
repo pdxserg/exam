@@ -46,7 +46,7 @@ const api = createApi({
 			// "❗X"
 			console.log(result.error)
             if (result.error.status === 400) {
-	            api.dispatch(setError({ error: (result.error.data as { message: string }).message }))
+	            api.dispatch(setError({ error: (result.error.data as Error).errors[0].message }))
             }
 		}
 		return result;
