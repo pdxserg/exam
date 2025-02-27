@@ -1,89 +1,150 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { createRoot } from "react-dom/client";
-import { Provider, useSelector } from "react-redux";
+import {configureStore, createSlice} from "@reduxjs/toolkit";
+import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
+import {useEffect} from "react";
+import {createRoot} from "react-dom/client";
+import {Provider, useDispatch, useSelector} from "react-redux";
 
-// App slice
-type NotificationLevel = "loading" | "none" | "success" | "error";
-
+// Slice
 const appSlice = createSlice({
 	name: "app",
 	initialState: {
-		notification: "none" as NotificationLevel,
+		error: null as string | null,
 	},
-	reducers: {},
-	extraReducers: (builder) => {
-		builder
-			.addMatcher<NotificationLevel>(
-				(action) => action.type.endsWith("/pending"),
-				(state) => {
-					state.notification = "loading"
-				},
-			)
-			.addMatcher<NotificationLevel>(
-				(action) => action.type.endsWith("/fulfilled"),
-				(state) => {
-					state.notification = "success"
-				},
-			)
-			.addMatcher<NotificationLevel>(
-				(action) => action.type.endsWith("/rejected"),
-				(state) => {
-					state.notification = "error"
-				},
-			)
-	},
+	reducers: (create) => ({
+		setError: create.reducer<{ error: string | null }>((state, action) => {
+			state.error = action.payload.error;
+		}),
+	}),
 	selectors: {
-		selectNotification: (slice) => slice.notification,
+		selectError: (state) => state.error,
 	},
 });
 
-const { selectNotification } = appSlice.selectors;
+const {selectError} = appSlice.selectors;
+const {setError} = appSlice.actions;
 
 // Api
-type Photo = {
-	albumId: string;
+type Post = {
+	body: string;
 	id: string;
 	title: string;
-	url: string;
+	userId: string;
+};
+
+type Error = {
+	errors: { field: string; message: string }[];
 };
 
 const api = createApi({
 	reducerPath: "api",
-	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+	baseQuery: async (args, api, extraOptions) => {
+		const result = await fetchBaseQuery({
+			baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/",
+		})(args, api, extraOptions);
+
+		if (result.error) {
+			// "❗X"
+			console.log(result.error)
+            if (result.error.status === 400) {
+	            api.dispatch(setError({ error: (result.error.data as { message: string }).message }))
+            }
+		}
+		return result;
+	},
+	tagTypes: ["Post"],
 	endpoints: (builder) => ({
-		getPhotos: builder.query<Photo[], void>({
-			query: () => "photos?delay=2",
+		getPosts: builder.query<Post[], void>({
+			query: () => "posts",
+			providesTags: ["Post"],
+		}),
+		removePost: builder.mutation<{ message: string }, string>({
+			query: (id) => ({
+				method: "DELETE",
+				url: `posts/${id}?delay=20`,
+			}),
+			invalidatesTags: ["Post"],
 		}),
 	}),
 });
 
-const { useGetPhotosQuery } = api;
+const {useGetPostsQuery, useRemovePostMutation} = api;
 
-// App.tsx
+// UI
+const Header = () => (
+	<div style={{width: "100%", background: "gray", border: "none", height: "50px"}}>header</div>
+);
+
+const LinearProgress = () => (
+	<hr
+		style={{
+			height: "10px",
+			width: "100%",
+			background: "lightblue",
+			border: "none",
+			position: "absolute",
+			left: "0px",
+			top: "50px",
+			right: "0px",
+		}}
+	/>
+);
+
 const App = () => {
-	const notification = useAppSelector(selectNotification);
+	const error = useSelector(selectError);
 
-	const { data } = useGetPhotosQuery();
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		setTimeout(() => {
+			dispatch(setError({error: null}));
+		}, 4000);
+	}, [error]);
 
 	return (
 		<>
-			{notification === "loading" && <b style={{ fontSize: "36px" }}>🕝Загрузка...</b>}
-			{notification === "success" && <b style={{ fontSize: "36px" }}>✅ Успех</b>}
-			{notification === "error" && <b style={{ fontSize: "36px" }}>❌ Ошибка</b>}
-			{data?.map((el) => {
-				return (
-					<div key={el.id} style={{ margin: "5px", padding: "5px", width: "200px" }}>
-						<b>title</b> - {el.title}
-						<img src={el.url} alt={`${el.title} image`} />
-					</div>
-				);
-			})}
+			<Header/>
+			{error && <h1 style={{color: "red"}}>{error}</h1>}
+			<Posts/>
 		</>
 	);
 };
 
-// store.ts
+const Posts = () => {
+	const {data, isSuccess, isLoading: isPostsLoading} = useGetPostsQuery();
+	const [removePost, {isLoading: isRemovePostLoading}] = useRemovePostMutation();
+
+	const deletePostHandler = (id: string) => {
+		removePost(id);
+	};
+
+	if (isPostsLoading || isRemovePostLoading) {
+		return <LinearProgress/>;
+	}
+
+	return (
+		<>
+			{isSuccess && (
+				<>
+					<h2>Posts</h2>
+					{data?.map((el) => {
+						return (
+							<div key={el.id} style={{display: "flex", alignItems: "center"}}>
+								<div style={{border: "1px solid", margin: "5px", padding: "5px", width: "200px"}}>
+									<p>
+										<b>title</b> - {el.title}
+									</p>
+								</div>
+								<button onClick={() => deletePostHandler(el.id)}>Delete post</button>
+							</div>
+						);
+					})}
+				</>
+			)}
+		</>
+	);
+};
+
+// Store
 const store = configureStore({
 	reducer: {
 		[appSlice.name]: appSlice.reducer,
@@ -92,21 +153,23 @@ const store = configureStore({
 	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
-type RootState = ReturnType<typeof store.getState>;
-const useAppSelector = useSelector.withTypes<RootState>();
-
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
-		<App />
+		<App/>
 	</Provider>,
 );
+
 // 📜 Описание:
-// При загрузке приложения пользователь видит пустой экран и только спустя 2 секунды видит информацию.
+// Нажмите на кнопку удаления поста. Пост не удалится.
 
 // 🪛 Задача:
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` для того, чтобы при загрузке приложения
-// пользователь увидел `🕝Загрузка...`, в случае успешной загрузки увидел `✅ Успех`, а в случае
-// ошибки `❌ Ошибка`
+// Ваша задача состоит в том, что разобраться почему пост не удаляется и вывести сообщение
+// об ошибке на экран.
+// Что нужно написать вместо "❗X" для того, чтобы при удалении поста он увидел ошибку
+// ❗ Для типизации ошибки используйте type assertion с типом Error
 
-// 💡 Подсказка: для решения задачи используйте addMatcher
-// // ❗Порядок обработки нотификаций: загрука, успех, ошибка
+// console.log(result.error)
+// if (result.error.status === 400) {
+// 	// ✅ 1 var: Type Assertions
+// 	api.dispatch(setError({error: (result.error.data as Error).errors[0].message}))
+// }
