@@ -1,71 +1,55 @@
-import { configureStore, nanoid } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import React from "react";
 import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 
-type Post = {
-	body: string;
+type User = {
 	id: string;
-	title: string;
-	userId: string;
+	name: string;
+	age: number;
 };
 
+type UsersResponse = {
+	items: User[];
+	totalCount: number;
+};
+
+// Api
 const api = createApi({
 	reducerPath: "api",
 	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-	tagTypes: ["Post"],
 	endpoints: (builder) => {
 		return {
-			getPosts: builder.query<Post[], void>({
-				query: () => "posts",
-				providesTags: ["Post"],
-			}),
-			removePost: builder.mutation<{ message: string }, string>({
-				query: (id) => ({
-					method: "DELETE",
-					url: `posts/${id}`,
-				}),
-				invalidatesTags: ["Post"],
+			getUsers: builder.query<UsersResponse, void>({
+				query: () => "users",
 			}),
 		};
 	},
 });
 
-const { useGetPostsQuery, useRemovePostMutation } = api;
+const { useGetUsersQuery } = api;
 
-// App.tsx
-const App = () => {
-	const { data: posts } = useGetPostsQuery();
-	const [removePost] = useRemovePostMutation();
+// Users.tsx
+const Users = () => {
+	const { data } = useGetUsersQuery();
 
-	const removePostHandler = (id: string) => {
-		removePost(nanoid())
-			.unwrap()//✅✅✅
-			.then(() => {
-				alert(`✅ The post was successfully deleted`);
-			})
-			.catch((err) => {
-				alert(`❌ The post was not deleted: ${err.data.errors}`);
-			});
+	const dispatch = useAppDispatch();
+
+	const addSmileHandler = (id: string) => {
+		const smile = "😁";
+		// ❗❗❗XXX❗❗❗
 	};
 
 	return (
 		<>
-			{posts?.map((el) => {
-				return (
-					<div style={{ display: "flex", alignItems: "center" }}>
-						<div
-							key={el.id}
-							style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}
-						>
-							<p>
-								<b>title</b> - {el.title}
-							</p>
-						</div>
-						<button onClick={() => removePostHandler(el.id)}>x</button>
-					</div>
-				);
-			})}
+			<h1>Users</h1>
+			{data?.items.map((el) => (
+				<div key={el.id}>
+					name - <b>{el.name}</b>
+					<button onClick={() => addSmileHandler(el.id)}>Add smile</button>
+				</div>
+			))}
 		</>
 	);
 };
@@ -76,20 +60,22 @@ const store = configureStore({
 	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
+type AppDispatch = typeof store.dispatch;
+const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
-		<App />
+		<Users />
 	</Provider>,
 );
 
 // 📜 Описание:
-// При нажатии на кнопку удаления поста (х), вы увидите alert с сообщением о том, что пост успешно
-// удален.
-// Но на самом деле падает ошибка. Откройте панель разработчика и посмотрите network.
-// Запрос падает с 400 ошибкой
-
+// Откройте redux devtools и убедитесь, что данные из запроса хранятся в кеше
+// http://surl.li/veofpd
 // 🪛 Задача:
-// Что нужно дописать в коде, чтобы в случае ошибки отработал catch и пользователь увидел
-// сообщение об ошибке.
-// В качестве ответа укажите добавленный вами код
-// ❗Чинить удаление поста не нужно
+// При нажатии на кнопку `Add smile` необходимо изменить данные в кеше и добавить к имени переменную
+// smile
+// Результат: http://surl.li/kgmhtn
+// Что нужно написать вместо `// ❗❗❗XXX❗❗❗`, чтобы реализовать данную задачу
+// ❗Изменение стейта должно быть написано мутабельным образом
+// ❗updateRecipe коллбек в качетстве аргумента принимает стейт. Назовите эту переменную state
