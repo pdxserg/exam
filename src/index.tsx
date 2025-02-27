@@ -1,67 +1,63 @@
-import { configureStore, nanoid } from "@reduxjs/toolkit";
+import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 
-type Post = {
-	body: string;
+// App slice
+type NotificationLevel = "loading" | "none" | "success" | "error";
+
+const appSlice = createSlice({
+	name: "app",
+	initialState: {
+		notification: "none" as NotificationLevel,
+	},
+	reducers: {},
+	extraReducers: (builder) => {
+		// ❗❗❗XXX❗❗❗
+	},
+	selectors: {
+		selectNotification: (slice) => slice.notification,
+	},
+});
+
+const { selectNotification } = appSlice.selectors;
+
+// Api
+type Photo = {
+	albumId: string;
 	id: string;
 	title: string;
-	userId: string;
+	url: string;
 };
 
 const api = createApi({
 	reducerPath: "api",
 	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-	tagTypes: ["Post"],
-	endpoints: (builder) => {
-		return {
-			getPosts: builder.query<Post[], void>({
-				query: () => "posts",
-				providesTags: ["Post"],
-			}),
-			removePost: builder.mutation<{ message: string }, string>({
-				query: (id) => ({
-					method: "DELETE",
-					url: `posts/${id}`,
-				}),
-				invalidatesTags: ["Post"],
-			}),
-		};
-	},
+	endpoints: (builder) => ({
+		getPhotos: builder.query<Photo[], void>({
+			query: () => "photos?delay=2",
+		}),
+	}),
 });
 
-const { useGetPostsQuery, useRemovePostMutation } = api;
+const { useGetPhotosQuery } = api;
 
 // App.tsx
 const App = () => {
-	const { data: posts } = useGetPostsQuery();
-	const [removePost] = useRemovePostMutation();
+	const notification = useAppSelector(selectNotification);
 
-	const removePostHandler = (id: string) => {
-		removePost(nanoid())
-			.then(() => {
-				alert(`✅ The post was successfully deleted`);
-			})
-			.catch((err) => {
-				alert(`❌ The post was not deleted: ${err.data.errors}`);
-			});
-	};
+	const { data } = useGetPhotosQuery();
 
 	return (
 		<>
-			{posts?.map((el) => {
+			{notification === "loading" && <b style={{ fontSize: "36px" }}>🕝Загрузка...</b>}
+			{notification === "success" && <b style={{ fontSize: "36px" }}>✅ Успех</b>}
+			{notification === "error" && <b style={{ fontSize: "36px" }}>❌ Ошибка</b>}
+			{data?.map((el) => {
 				return (
-					<div style={{ display: "flex", alignItems: "center" }}>
-						<div
-							key={el.id}
-							style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}
-						>
-							<p>
-								<b>title</b> - {el.title}
-							</p>
-						</div>
-						<button onClick={() => removePostHandler(el.id)}>x</button>
+					<div key={el.id} style={{ margin: "5px", padding: "5px", width: "200px" }}>
+						<b>title</b> - {el.title}
+						<img src={el.url} alt={`${el.title} image`} />
 					</div>
 				);
 			})}
@@ -71,24 +67,28 @@ const App = () => {
 
 // store.ts
 const store = configureStore({
-	reducer: { [api.reducerPath]: api.reducer },
+	reducer: {
+		[appSlice.name]: appSlice.reducer,
+		[api.reducerPath]: api.reducer,
+	},
 	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
+
+type RootState = ReturnType<typeof store.getState>;
+const useAppSelector = useSelector.withTypes<RootState>();
 
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
 );
-
 // 📜 Описание:
-// При нажатии на кнопку удаления поста (х), вы увидите alert с сообщением о том, что пост успешно
-// удален.
-// Но на самом деле падает ошибка. Откройте панель разработчика и посмотрите network.
-// Запрос падает с 400 ошибкой
+// При загрузке приложения пользователь видит пустой экран и только спустя 2 секунды видит информацию.
 
 // 🪛 Задача:
-// Что нужно дописать в коде, чтобы в случае ошибки отработал catch и пользователь увидел
-// сообщение об ошибке.
-// В качестве ответа укажите добавленный вами код
-// ❗Чинить удаление поста не нужно
+// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` для того, чтобы при загрузке приложения
+// пользователь увидел `🕝Загрузка...`, в случае успешной загрузки увидел `✅ Успех`, а в случае
+// ошибки `❌ Ошибка`
+
+// 💡 Подсказка: для решения задачи используйте addMatcher
+// // ❗Порядок обработки нотификаций: загрука, успех, ошибка
