@@ -1,71 +1,45 @@
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import React, { useEffect } from "react";
-import axios from "axios";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 // Styles
-const table: React.CSSProperties = {
-	borderCollapse: "collapse",
+const modal: React.CSSProperties = {
+	position: "fixed",
+	zIndex: 1,
+	left: 0,
+	top: 0,
 	width: "100%",
-	tableLayout: "fixed",
+	height: "100%",
+	overflow: "auto",
+	backgroundColor: "rgba(23,26,38,0.26)",
 };
 
-const th: React.CSSProperties = {
-	padding: "10px",
-	border: "1px solid black",
-	background: "lightgray",
-	cursor: "pointer",
-};
-
-const td: React.CSSProperties = {
-	padding: "10px",
-	border: "1px solid black",
-};
-
-// Types
-type UserType = {
-	id: string;
-	name: string;
-	age: number;
-};
-
-type UsersResponseType = {
-	items: UserType[];
-	totalCount: number;
-};
-
-type ParamsType = {
-	sortBy: string | null;
-	sortDirection: "asc" | "desc" | null;
-};
-
-// API
-const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
-
-const api = {
-	getUsers(params?: ParamsType) {
-		return instance.get<UsersResponseType>("users", { params });
-	},
+const modalContent: React.CSSProperties = {
+	backgroundColor: "#fefefe",
+	margin: "15% auto",
+	padding: "20px",
+	border: "1px solid #888",
+	width: "80%",
 };
 
 // Reducer
-const initState = {
-	users: [] as UserType[],
-	params: {
-		sortBy: null,
-		sortDirection: "asc",
-	} as ParamsType,
-};
+const initState = { tasks: [] as any[] };
 type InitStateType = typeof initState;
 
 const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
 	switch (action.type) {
-		case "SET_USERS":
-			return { ...state, users: action.users };
-		case "SET_PARAMS":
-			return { ...state, params: { ...state.params, ...action.payload } };
+		case "ADD_TASK":
+			return {
+				...state,
+				tasks: [action.task, ...state.tasks],
+			};
+		case "CHANGE_TASK":
+			return {
+				...state,
+				tasks: [action.task, ...state.tasks.filter((t: any) => t.id !== action.task.id)],
+			};
 		default:
 			return state;
 	}
@@ -81,58 +55,71 @@ type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, A
 const useAppDispatch = () => useDispatch<AppDispatch>();
 const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-const setUsersAC = (users: UserType[]) => ({ type: "SET_USERS", users }) as const;
-const setParamsAC = (payload: ParamsType) => ({ type: "SET_PARAMS", payload }) as const;
-type ActionsType = ReturnType<typeof setUsersAC> | ReturnType<typeof setParamsAC>;
+const addTask = (task: any) => ({ type: "ADD_TASK", task }) as const;
+const changeTask = (task: any) => ({ type: "CHANGE_TASK", task }) as const;
+type ActionsType = ReturnType<typeof addTask> | ReturnType<typeof changeTask>;
 
-// Thunk
-const getUsersTC = (): AppThunk => (dispatch, getState) => {
-	const params = getState().app.params;
-	api
-		.getUsers(params.sortBy ? params : undefined)
-		.then((res) => dispatch(setUsersAC(res.data.items)));
+// Components
+const Modal = (props: any) => {
+	const [value, setValue] = useState(props.task?.name || "");
+
+	return (
+		<div style={modalContent}>
+			modal:
+			<input value={value} onChange={(e) => setValue(e.target.value)} />
+			<button onClick={() => props.callback(value)}>{props.title}</button>
+		</div>
+	);
 };
 
-export const Users = () => {
-	const users = useAppSelector((state) => state.app.users);
-	const sortBy = useAppSelector((state) => state.app.params.sortBy);
-	const sortDirection = useAppSelector((state) => state.app.params.sortDirection);
-	console.log(users, sortBy, sortDirection);
-
-	const dispatch = useAppDispatch();
-
-	// ❗❗❗ XXX ❗❗❗
-
-	const sortHandler = (name: string) => {
-		const direction = sortDirection === "asc" ? "desc" : "asc";
-		dispatch(setParamsAC({ sortBy: name, sortDirection: direction }));
-	};
+const Task = (props: any) => {
+	const [show, setShow] = useState(false);
 
 	return (
 		<div>
-			<h1>👪 Список пользователей</h1>
-			<table style={table}>
-				<thead>
-				<tr>
-					<th style={th} onClick={() => sortHandler("name")}>
-						Name
-					</th>
-					<th style={th} onClick={() => sortHandler("age")}>
-						Age
-					</th>
-				</tr>
-				</thead>
-				<tbody>
-				{users.map((u) => {
-					return (
-						<tr key={u.id}>
-							<td style={td}>{u.name}</td>
-							<td style={td}>{u.age}</td>
-						</tr>
-					);
-				})}
-				</tbody>
-			</table>
+			{props.task.name}
+			<button onClick={() => setShow(true)}>change</button>
+			{show && (
+				<Modal
+					callback={(value: string) => {
+						props.change(value);
+						setShow(false);
+					}}
+					title={"change"}
+				/>
+			)}
+		</div>
+	);
+};
+
+export const Todolist = () => {
+	const tasks = useAppSelector((state) => state.app.tasks);
+	const dispatch = useAppDispatch();
+	const [show, setShow] = useState(false);
+
+	const getId = () => tasks.reduce((acc: number, t: any) => (acc > t.id ? acc : t.id), 0) + 1;
+
+	const mapped = tasks.map((t: any) => (
+		<Task
+			key={t.id}
+			task={t}
+			change={(value: string) => dispatch(changeTask({ id: t.id, name: value }))}
+		/>
+	));
+
+	return (
+		<div style={modal}>
+			<button onClick={() => setShow(true)}>open modal</button>
+			{show && (
+				<Modal
+					callback={(value: string) => {
+						dispatch(addTask({ id: getId(), name: value }));
+						setShow(false);
+					}}
+					title={"add"}
+				/>
+			)}
+			{mapped}
 		</div>
 	);
 };
@@ -140,15 +127,17 @@ export const Users = () => {
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
 	<Provider store={store}>
-		<Users />
+		<Todolist />
 	</Provider>,
 );
 
-// 📜 Описание:
-// Перед вами таблица с пользователями. Но данные не подгружаются
-// Что нужно написать вместо XXX, чтобы:
-// 1) Пользователи подгрузились
-// 2) Чтобы работала сортировка по имени и возрасту
-// 3) Направление сортировки тоже должно работать (проверить можно нажав на одно и тоже поле 2 раза)
-
-// 🖥 Пример ответа: console.log(users, sortBy, sortDirection)
+// 📜Описание:
+// Откройте модалку и добавьте какой-нибудь текст.
+// Теперь попробуйте изменить этот текст.
+// При изменении существующей таски в инпуте не отображается старые данные.
+// Ваша задача починить это поведение.
+//
+// В качестве ответа укажите строку кода, которую нужно изменить или добавить,
+// чтобы реализовать данную задачу
+//
+// 🖥 Пример ответа: defaultValue={value}
