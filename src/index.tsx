@@ -1,127 +1,25 @@
-import ReactDOM from "react-dom/client";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
-import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import React, { useEffect } from "react";
-import axios from "axios";
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
-
-// Styles
-const table: React.CSSProperties = {
-	borderCollapse: "collapse",
-	width: "100%",
-	tableLayout: "fixed",
-};
-
-const th: React.CSSProperties = {
-	padding: "10px",
-	border: "1px solid black",
-	background: "lightgray",
-	cursor: "pointer",
-};
-
-const td: React.CSSProperties = {
-	padding: "10px",
-	border: "1px solid black",
-};
-
-// Types
-type UserType = {
-	id: string;
-	name: string;
-	age: number;
-};
-
-type UsersResponseType = {
-	items: UserType[];
-	totalCount: number;
-};
-
-// API
-const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
-
-const api = {
-	getUsers() {
-		return instance.get<UsersResponseType>("users");
-	},
-};
-
-// Reducer
-const initState = {
-	users: [] as UserType[],
-};
-type InitStateType = typeof initState;
-
-const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
-	switch (action.type) {
-		case "SET_USERS":
-			return { ...state, users: action.users };
-		default:
-			return state;
-	}
-};
-
-// Store
-const rootReducer = combineReducers({ app: appReducer });
-
-const store = configureStore({ reducer: rootReducer });
-type RootState = ReturnType<typeof store.getState>;
-type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
-type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, ActionsType>;
-const useAppDispatch = () => useDispatch<AppDispatch>();
-const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-
-const setUsersAC = (users: UserType[]) => ({ type: "SET-USERS", users });
-type ActionsType = ReturnType<typeof setUsersAC>;
-
-// Thunk
-const getUsersTC = (): AppThunk => (dispatch, getState) => {
-	api.getUsers().then((res) => dispatch(setUsersAC(res.data.items)));
-};
-
-// Components
-export const Users = () => {
-	const users = useAppSelector((state) => state.app.users);
-
-	const dispatch = useAppDispatch();
-
-	useEffect(() => {
-		dispatch(getUsersTC());
-	}, []);
-
+export const App = () => {
 	return (
 		<div>
-			<h1>👪 Список пользователей</h1>
-			<table style={table}>
-				<thead>
-				<tr>
-					<th style={th}> Name</th>
-					<th style={th}> Age</th>
-				</tr>
-				</thead>
-				<tbody>
-				{users.map((u) => (
-					<tr key={u.id}>
-						<td style={td}>{u.name}</td>
-						<td style={td}>{u.age}</td>
-					</tr>
-				))}
-				</tbody>
-			</table>
+			<h2>В каком случае возникают конфликты при слиянии веток ?</h2>
+			<ul>
+				<li>1 - В случае, когда в обеих ветках есть изменения одних и тех же строк</li>
+				<li>2 - В случае когда ветки были созданы от разных коммитов</li>
+				<li>3 - В случае когда ветки были созданы в разное время</li>
+				<li>4 - Конфликты не возникают, это устаревшая проблема. Сегодня git под капотом все сам может разрулить</li>
+				<li>5 - Нет правильного ответа</li>
+			</ul>
 		</div>
-	);
-};
+	)
+}
 
-const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
-root.render(
-	<Provider store={store}>
-		<Users />
-	</Provider>,
-);
-
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+root.render(<App/>);
 // 📜 Описание:
-// Перед вами пустая таблица. Пользователи не подгрузились, т.к. в коде допущена ошибка
-// Ваша задача найти багу, чтобы таблица с пользователями подгрузилась.
-// В качестве укажите исправленную строку кода
-// ❗ Есть несколько вариантов решения данной задачи, в ответах учтены различные варианты
+// В каком случае возникают конфликты при слиянии веток ?
+// Может быть несколько вариантов ответа (ответ дайте через пробел).
+// ❗ Ответ будет засчитан как верный, только при полном правильном совпадении.
+// Если указали правильно один вариант (1),
+// а нужно было указать два варианта (1 и 2), то ответ в данном случае будет засчитан как неправильный
 
-// 🖥 Пример ответа: {users.map(u)=> таблица отрисуйся ВЖУХ ВЖУХ}
+// 🖥 Пример ответа: 1
