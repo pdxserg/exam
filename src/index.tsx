@@ -1,74 +1,105 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
+import React, { useEffect } from "react";
+import ReactDOM from "react-dom/client";
+import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
-// API
-type Photo = {
-	albumId: string;
+type UserType = {
 	id: string;
-	title: string;
-	url: string;
+	name: string;
+	age: number;
 };
 
-const api = createApi({
-	reducerPath: "api",
-	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-	endpoints: (builder) => ({
-		getPhotos: builder.query<Photo[], void>({
-			query: () => "photos?delay=1",
-		}),
-	}),
-});
+// API
+const instance = axios.create({ baseURL: "https://exams-frontend.kimitsu.it-incubator.io/api/" });
 
-const { useGetPhotosQuery } = api;
+const api = {
+	getUsers(pageNumber: number) {
+		return instance.get(`users?pageSize=${3}&pageNumber=${pageNumber}`);
+	},
+};
 
-// App.tsx
-const App = () => {
-	const { data, isSuccess, isLoading } = useGetPhotosQuery();
-	const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+// Reducer
+const initState = { page: 1, users: [] as UserType[] };
+type InitStateType = typeof initState;
+
+const appReducer = (state: InitStateType = initState, action: ActionsType): InitStateType => {
+	switch (action.type) {
+		case "SET_PAGE":
+			return { ...state, page: action.page };
+		case "SET_USERS":
+			return { ...state, users: action.users };
+		default:
+			return state;
+	}
+};
+
+// Store
+const rootReducer = combineReducers({ app: appReducer });
+
+const store = configureStore({ reducer: rootReducer });
+type RootState = ReturnType<typeof store.getState>;
+type AppDispatch = ThunkDispatch<RootState, unknown, ActionsType>;
+type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, ActionsType>;
+const useAppDispatch = () => useDispatch<AppDispatch>();
+const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+const setPageAC = (page: number) => ({ type: "SET_PAGE", page }) as const;
+const setUsersAC = (users: UserType[]) => ({ type: "SET_USERS", users }) as const;
+type ActionsType = ReturnType<typeof setPageAC> | ReturnType<typeof setUsersAC>;
+
+const getUsers = (): AppThunk => (dispatch, getState) => {
+	const page = 1;
+	api.getUsers(page).then((res) => dispatch(setUsersAC(res.data.items)));
+};
+
+// Components
+export const App = () => {
+	const page = useAppSelector((state) => state.app.page);
+	const users = useAppSelector((state) => state.app.users);
+
+	const dispatch = useAppDispatch();
 
 	useEffect(() => {
-		// ❗X
-	}, [isSuccess]);
+		dispatch(getUsers());
+	}, [page]);
+
+	const pages = new Array(4).fill(1).map((p, i) => (
+		<button key={i} onClick={() => dispatch(setPageAC(i + 1))} disabled={page === i + 1}>
+			{i + 1}
+		</button>
+	));
 
 	return (
-		<>
-			{isLoading && <b style={{ fontSize: "36px" }}>🕝Загрузка...</b>}
-			{showSuccessMessage && <b style={{ fontSize: "36px" }}>✅ Успех</b>}
-			{data?.map((el) => {
+		<div>
+			{users.map((u) => {
 				return (
-					<div key={el.id} style={{ margin: "5px", padding: "5px", width: "200px" }}>
-						<b>title</b> - {el.title}
-						<img src={el.url} alt={`${el.title} image`} />
+					<div style={{ marginBottom: "25px" }} key={u.id}>
+						<p>
+							<b>name</b>: {u.name}
+						</p>
+						<p>
+							<b>age</b>: {u.age}
+						</p>
 					</div>
 				);
 			})}
-		</>
+			{pages}
+		</div>
 	);
 };
 
-// store.ts
-const store = configureStore({
-	reducer: {
-		[api.reducerPath]: api.reducer,
-	},
-	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
-});
-
-createRoot(document.getElementById("root")!).render(
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+root.render(
 	<Provider store={store}>
 		<App />
 	</Provider>,
 );
 
 // 📜 Описание:
-// На экране мы видим загрузку и затенм результат от сервера (photos).
+// При переходе по страницам должны подгружаться новые пользователи.
+// Однако в коде допущена ошибка и всегда подгружаются одни и теже пользователи.
+// Задача: найти эту ошибку, и исправленную версию строки написать в качестве ответа.
 
-// 🪛 Задача:
-// Что нужно написать вместо `// ❗X` для того, чтобы в случае успешного завершения запроса
-// пользователь увидел сообщение `✅ Успех` и через 2 секунды это сообщение должно исчезнуть
-
-// После загрузки приложения подгружается информация о photos и если запрос прошел успешно мы видим об этом информацию (✅ Успех) и через 2 секунды это сообщение исчезает http://surl.li/mhseut
-// ❗Ответ будет принят только в том случае если вы отработаете утечку памяти
+// 🖥 Пример ответа: {pages.next()}
