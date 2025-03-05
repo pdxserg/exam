@@ -1,10 +1,7 @@
 <script>
-	let user = {
-	name: 'samurai',
-	age: 18
+	function removeWhitespaces(string) {
+	string.split(' ').filter(s => s !== '').join('_')
 }
 
-	let user2 = user;
-
-	user2.name = 'ninja';
+	console.log(removeWhitespaces('you are JS developer'))
 </script>
