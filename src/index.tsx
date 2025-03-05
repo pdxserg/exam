@@ -1,19 +1,9 @@
-<input id="search"/>
-<button id="find">find</button>
+<input id="tuvalu" value="it-incubator"/>
 
 <script>
-	const searchInputElement = document.getElementById('search')
-	const huntButtonElement = document.getElementById('find')
+	const inputElement = document.XXX('tuvalu');
+	inputElement.value = '';
 
-	XXX.addEventListener(YYY, () => {
-	console.log(searchInputElement.value)
-})
-
-	/*
-	Что нужно написать внутри скобок вместо XXX и YYY, чтобы при нажатии на кнопку увидеть текст, введённый в input?
-	Ответ дайте через пробел.
-	Пример ответа: firstword secondword
-	*/
-
+	/* Что нужно написать вместо XXX, чтобы значение в поле ввода зачищалось?
+	❗В качестве ответа укажите строчку целиком. */
 </script>
-
