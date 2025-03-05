@@ -1,10 +1,22 @@
-<input id="ball" value="it-incubator"/>
-
 <script>
-	const searchInputElement = document.querySelector(XXX);
-	searchInputElement.value = '';
+	let users = ['dimych', 'valera', 'artem', 'katya']
 
-	/*
-	Что нужно написать внутри скобок вместо XXX, чтобы значение в поле ввода зачищалось?
-	*/
+	yo();
+
+	if (users.length > 4) {
+	yo();
+} else {
+
+}
+
+	if (users.length < 2 || window !== null) {
+	yo()
+}
+
+	for (let i=0;i<1;i++) {
+	yo()
+}
+
+	function yo(){}
+
 </script>
