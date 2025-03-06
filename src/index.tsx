@@ -1,73 +1,174 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import React from "react";
 import { createRoot } from "react-dom/client";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
+import { BrowserRouter, NavLink, Route, Routes } from "react-router";
 
-// slice
-const slice = createSlice({
-	name: "products",
-	initialState: [
-		{ id: 1, name: "Laptop", inStock: true, price: 1500 },
-		{ id: 2, name: "Smartphone", inStock: false, price: 800 },
-		{ id: 3, name: "Tablet", inStock: true, price: 600 },
-	],
-	reducers: {
-		applyDiscount: (state, action) => {
-			return state;
-		},
+type Product = {
+	id: string;
+	title: string;
+	description: string;
+	price: number;
+};
+
+type ProductsResponse = {
+	total: number;
+	messages: string[];
+	page: number;
+	pageCount: number;
+	data: Product[];
+};
+
+type Film = {
+	id: number;
+	nameOriginal: string;
+	description: string;
+	ratingImdb: number;
+};
+
+type FilmsResponse = {
+	total: number;
+	messages: string[];
+	page: number;
+	pageCount: number;
+	data: Film[];
+};
+
+type Post = {
+	body: string;
+	id: string;
+	title: string;
+	userId: string;
+};
+
+// Api
+const api = createApi({
+	reducerPath: "api",
+	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+	tagTypes: ["Film", "Product", "Post"],
+	endpoints: (builder) => {
+		return {
+			getFilms: builder.query<FilmsResponse, void>({
+				query: () => "films",
+				providesTags: ["Film"],
+			}),
+			getProducts: builder.query<ProductsResponse, void>({
+				query: () => "products",
+				providesTags: ["Product"],
+			}),
+			getPosts: builder.query<Post[], void>({
+				query: () => "posts",
+				providesTags: ["Post"],
+			}),
+		};
 	},
 });
 
-const { applyDiscount } = slice.actions;
+const { useGetFilmsQuery, useGetProductsQuery, useGetPostsQuery } = api;
 
-// App.tsx
-const App = () => {
-	const products = useSelector((state: RootState) => state.products);
+// Films.tsx
+const Films = () => {
+	const { data } = useGetFilmsQuery();
+
+	return (
+		<>
+			<h1>Films</h1>
+			{data?.data.map((el) => (
+				<div key={el.id} style={{ margin: "15px" }}>
+					movie title - <b>{el.nameOriginal}</b>
+				</div>
+			))}
+		</>
+	);
+};
+
+const Products = () => {
+	const { data } = useGetProductsQuery();
+
+	return (
+		<>
+			<h1>Products</h1>
+			{data?.data.map((el) => (
+				<div key={el.id} style={{ margin: "15px" }}>
+					title - <b>{el.title}</b>
+				</div>
+			))}
+		</>
+	);
+};
+
+const Posts = () => {
+	const { data } = useGetPostsQuery();
+
 	const dispatch = useDispatch();
 
-	const handleDiscount = (discount: number) => {
-		dispatch(applyDiscount(discount));
+	const clearCacheHandler = () => {
+		// ❗❗❗XXX❗❗❗
 	};
 
 	return (
-		<div>
-			<button onClick={() => handleDiscount(10)}>10% Discount</button>
-			<button onClick={() => handleDiscount(30)}>30% Discount</button>
-			<button onClick={() => handleDiscount(50)}>50% Discount</button>
-			<ul>
-				{products.map((product) => (
-					<li key={product.id}>
-            <span>
-              {product.name} ({product.inStock ? "In Stock" : "Out of Stock"}) - $
-	            {product.price.toFixed(2)}
-            </span>
+		<>
+			<h1>Posts</h1>
+			<button onClick={clearCacheHandler}>I clear cache. Mu-ha-ha 👺</button>
+			{data?.map((el) => (
+				<div key={el.id} style={{ margin: "15px" }}>
+					title - <b>{el.title}</b>
+				</div>
+			))}
+		</>
+	);
+};
+
+export const App = () => {
+	return (
+		<>
+			<header style={{ display: "flex", alignItems: "center", gap: "10px", border: "1px solid" }}>
+				<ul>
+					Menu:
+					<li>
+						<NavLink to={"films"}>Films</NavLink>
 					</li>
-				))}
-			</ul>
-		</div>
+					<li>
+						<NavLink to={"products"}>Products</NavLink>
+					</li>
+					<li>
+						<NavLink to={"posts"}>Posts</NavLink>
+					</li>
+				</ul>
+			</header>
+
+			<Routes>
+				<Route path={"/"} element={<h1>Home page</h1>} />
+				<Route path={"/films"} element={<Films />} />
+				<Route path={"/products"} element={<Products />} />
+				<Route path={"/posts"} element={<Posts />} />
+			</Routes>
+		</>
 	);
 };
 
 // store.ts
-export const store = configureStore({
-	reducer: {
-		products: slice.reducer,
-	},
+const store = configureStore({
+	reducer: { [api.reducerPath]: api.reducer },
+	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
-export type RootState = ReturnType<typeof store.getState>;
-
-// main.ts
 createRoot(document.getElementById("root")!).render(
-	<Provider store={store}>
-		<App />
-	</Provider>,
+	<BrowserRouter>
+		<Provider store={store}>
+			<App />
+		</Provider>
+	</BrowserRouter>,
 );
 
 // 📜 Описание:
-// При нажатии на кнопки с 10%, 30% или 50% скидками цены всех продуктов должны уменьшиться на
-// указанный процент.
+// Перейди на страницу фильмов и убедись, что фильмы подгрузились
+// Перейди на страницу продуктов и убедись, что продукты подгрузились
+// Перейди на страницу постов и убедись, что посты подгрузились
+// Открой redux devtools и убедись, что фильмы, продукты и посты сохранились в кеше
 
 // 🪛 Задача:
-// Перепишите изменение стейта так, чтобы цена каждого продукта уменьшалась на указанный процент.
-// В качестве ответа укажите исправленный код написанный вместо return state.
-// ❗Операция должна быть реализована мутабельным образом.
+// На странице постов есть кнопка `I clear cache. Mu-ha-ha 👺`. При нажатии на эту кнопку
+// необходимо зачистить кеш фильмов и продуктов
+// Что нужно написать вместо `// ❗❗❗XXX❗❗❗`, чтобы реализовать данную задачу
