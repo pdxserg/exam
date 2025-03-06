@@ -1,75 +1,68 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createRoot } from "react-dom/client";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { Provider } from "react-redux";
 
-// slice
-const slice = createSlice({
-	name: "playlist",
-	initialState: {
-		albums: [
-			{
-				id: 1,
-				title: "Album 1",
-				songs: [
-					{ id: 1, title: "Song 1-1" },
-					{ id: 2, title: "Song 1-2" },
-				],
-			},
-			{
-				id: 2,
-				title: "Album 2",
-				songs: [
-					{ id: 3, title: "Song 2-1" },
-					{ id: 4, title: "Song 2-2" },
-				],
-			},
-		],
-	},
-	reducers: {
-		removeLastSongFromAlbum: (state, action) => {
-			return state;
-		},
+type Post = {
+	body: string;
+	id: string;
+	title: string;
+	userId: string;
+};
+
+// Api
+const api = createApi({
+	reducerPath: "api",
+	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
+	endpoints: (builder) => {
+		return {
+			getPosts: builder.query<Post[], void>({
+				query: () => "posts",
+			}),
+			//❗При написании типизации соблюдайте порядок аргументов как и при вызове функции updatePost
+			// ❗❗❗XXX❗❗❗
+		};
 	},
 });
 
-const { removeLastSongFromAlbum } = slice.actions;
+const { useGetPostsQuery, useUpdatePostMutation } = api;
 
 // App.tsx
 const App = () => {
-	const albums = useSelector((state: RootState) => state.playlist.albums);
-	const dispatch = useDispatch();
+	const { data } = useGetPostsQuery();
+	const [updatePost] = useUpdatePostMutation();
 
-	const removeLastSong = (albumId: number) => {
-		dispatch(removeLastSongFromAlbum(albumId));
+	const updatePostHandler = (id: string) => {
+		updatePost({ id, payload: { title: "Тестовый title", body: "Тестовое body сообщение" } });
 	};
 
 	return (
 		<>
-			{albums.map((album) => (
-				<div key={album.id}>
-					<h3>{album.title}</h3>
-					<button onClick={() => removeLastSong(album.id)}>Remove Last Song</button>
-					<ul>
-						{album.songs.map((song) => (
-							<li key={song.id}>{song.title}</li>
-						))}
-					</ul>
-				</div>
-			))}
+			{data?.map((el) => {
+				return (
+					<div style={{ display: "flex", alignItems: "center" }}>
+						<div
+							key={el.id}
+							style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}
+						>
+							<p>
+								<b>title</b> - {el.title}
+							</p>
+						</div>
+						<button onClick={() => updatePostHandler(el.id)}>Update post</button>
+					</div>
+				);
+			})}
 		</>
 	);
 };
 
 // store.ts
-export const store = configureStore({
-	reducer: {
-		playlist: slice.reducer,
-	},
+const store = configureStore({
+	reducer: { [api.reducerPath]: api.reducer },
+	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
-export type RootState = ReturnType<typeof store.getState>;
-
-// main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
@@ -77,11 +70,10 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// Плейлист разделён на альбомы, и каждая кнопка Remove Last Song должна удалять последнюю песню из соответствующего альбома.
+// Приложение падает с ошибкой.
 
 // 🪛 Задача:
-// Перепишите изменение стейта таким образом, чтобы описание выше выполнялось
-// В качестве ответа укажите исправленный код написанный вместо return state.
-// ❗Изменение стейта должно быть написано мутабельным образом.
-// ❗Не используйте деструктуризацию action.payload (const {id} = action.payload)
-// ❗Не создавайте переменные из action.payload (const id = action.payload.id)
+// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` для реализации обновления поста
+// В качестве ответа укажите написанный вами код
+// ❗Автоматическое получение данных реализовывать не надо
+// ❗Типизацию указывать обязательно
