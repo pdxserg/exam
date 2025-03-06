@@ -1,68 +1,62 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 
-type Post = {
-	body: string;
-	id: string;
-	title: string;
-	userId: string;
-};
-
-// Api
-const api = createApi({
-	reducerPath: "api",
-	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-	endpoints: (builder) => {
-		return {
-			getPosts: builder.query<Post[], void>({
-				query: () => "posts",
-			}),
-			//❗При написании типизации соблюдайте порядок аргументов как и при вызове функции updatePost
-			// ❗❗❗XXX❗❗❗
-		};
+// slice
+const slice = createSlice({
+	name: "products",
+	initialState: [
+		{ id: 1, name: "Laptop", inStock: true, price: 1500 },
+		{ id: 2, name: "Smartphone", inStock: false, price: 800 },
+		{ id: 3, name: "Tablet", inStock: true, price: 600 },
+	],
+	reducers: {
+		applyDiscount: (state, action) => {
+			return state;
+		},
 	},
 });
 
-const { useGetPostsQuery, useUpdatePostMutation } = api;
+const { applyDiscount } = slice.actions;
 
 // App.tsx
 const App = () => {
-	const { data } = useGetPostsQuery();
-	const [updatePost] = useUpdatePostMutation();
+	const products = useSelector((state: RootState) => state.products);
+	const dispatch = useDispatch();
 
-	const updatePostHandler = (id: string) => {
-		updatePost({ id, payload: { title: "Тестовый title", body: "Тестовое body сообщение" } });
+	const handleDiscount = (discount: number) => {
+		dispatch(applyDiscount(discount));
 	};
 
 	return (
-		<>
-			{data?.map((el) => {
-				return (
-					<div style={{ display: "flex", alignItems: "center" }}>
-						<div
-							key={el.id}
-							style={{ border: "1px solid", margin: "5px", padding: "5px", width: "200px" }}
-						>
-							<p>
-								<b>title</b> - {el.title}
-							</p>
-						</div>
-						<button onClick={() => updatePostHandler(el.id)}>Update post</button>
-					</div>
-				);
-			})}
-		</>
+		<div>
+			<button onClick={() => handleDiscount(10)}>10% Discount</button>
+			<button onClick={() => handleDiscount(30)}>30% Discount</button>
+			<button onClick={() => handleDiscount(50)}>50% Discount</button>
+			<ul>
+				{products.map((product) => (
+					<li key={product.id}>
+            <span>
+              {product.name} ({product.inStock ? "In Stock" : "Out of Stock"}) - $
+	            {product.price.toFixed(2)}
+            </span>
+					</li>
+				))}
+			</ul>
+		</div>
 	);
 };
 
 // store.ts
-const store = configureStore({
-	reducer: { [api.reducerPath]: api.reducer },
-	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
+export const store = configureStore({
+	reducer: {
+		products: slice.reducer,
+	},
 });
 
+export type RootState = ReturnType<typeof store.getState>;
+
+// main.ts
 createRoot(document.getElementById("root")!).render(
 	<Provider store={store}>
 		<App />
@@ -70,10 +64,10 @@ createRoot(document.getElementById("root")!).render(
 );
 
 // 📜 Описание:
-// Приложение падает с ошибкой.
+// При нажатии на кнопки с 10%, 30% или 50% скидками цены всех продуктов должны уменьшиться на
+// указанный процент.
 
 // 🪛 Задача:
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗` для реализации обновления поста
-// В качестве ответа укажите написанный вами код
-// ❗Автоматическое получение данных реализовывать не надо
-// ❗Типизацию указывать обязательно
+// Перепишите изменение стейта так, чтобы цена каждого продукта уменьшалась на указанный процент.
+// В качестве ответа укажите исправленный код написанный вместо return state.
+// ❗Операция должна быть реализована мутабельным образом.
