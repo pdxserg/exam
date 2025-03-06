@@ -1,174 +1,72 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import React from "react";
+import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { createRoot } from "react-dom/client";
-import { Provider, useDispatch } from "react-redux";
-import { BrowserRouter, NavLink, Route, Routes } from "react-router";
+import { Provider, useDispatch, useSelector } from "react-redux";
 
-type Product = {
-	id: string;
-	title: string;
-	description: string;
-	price: number;
-};
-
-type ProductsResponse = {
-	total: number;
-	messages: string[];
-	page: number;
-	pageCount: number;
-	data: Product[];
-};
-
-type Film = {
-	id: number;
-	nameOriginal: string;
-	description: string;
-	ratingImdb: number;
-};
-
-type FilmsResponse = {
-	total: number;
-	messages: string[];
-	page: number;
-	pageCount: number;
-	data: Film[];
-};
-
-type Post = {
-	body: string;
-	id: string;
-	title: string;
-	userId: string;
-};
-
-// Api
-const api = createApi({
-	reducerPath: "api",
-	baseQuery: fetchBaseQuery({ baseUrl: "https://exams-frontend.kimitsu.it-incubator.io/api/" }),
-	tagTypes: ["Film", "Product", "Post"],
-	endpoints: (builder) => {
-		return {
-			getFilms: builder.query<FilmsResponse, void>({
-				query: () => "films",
-				providesTags: ["Film"],
-			}),
-			getProducts: builder.query<ProductsResponse, void>({
-				query: () => "products",
-				providesTags: ["Product"],
-			}),
-			getPosts: builder.query<Post[], void>({
-				query: () => "posts",
-				providesTags: ["Post"],
-			}),
-		};
+// oxygenCounter slice
+const oxygenSlice = createSlice({
+	name: "oxygenCounter",
+	initialState: {
+		percent: 21,
+	},
+	reducers: {
+		increase: (state) => {
+			state.percent += 1;
+		},
 	},
 });
+const { increase } = oxygenSlice.actions;
 
-const { useGetFilmsQuery, useGetProductsQuery, useGetPostsQuery } = api;
+// temperature slice
+const temperatureSlice = createSlice({
+	name: "temperatureCounter",
+	initialState: {
+		celsius: 20,
+	},
+	reducers: {},
+});
 
-// Films.tsx
-const Films = () => {
-	const { data } = useGetFilmsQuery();
-
-	return (
-		<>
-			<h1>Films</h1>
-			{data?.data.map((el) => (
-				<div key={el.id} style={{ margin: "15px" }}>
-					movie title - <b>{el.nameOriginal}</b>
-				</div>
-			))}
-		</>
-	);
-};
-
-const Products = () => {
-	const { data } = useGetProductsQuery();
-
-	return (
-		<>
-			<h1>Products</h1>
-			{data?.data.map((el) => (
-				<div key={el.id} style={{ margin: "15px" }}>
-					title - <b>{el.title}</b>
-				</div>
-			))}
-		</>
-	);
-};
-
-const Posts = () => {
-	const { data } = useGetPostsQuery();
-
+// App.tsx
+const App = () => {
+	const oxygen = useSelector((state: RootState) => state.oxygenCounter.percent);
+	const temperature = useSelector((state: RootState) => state.temperatureCounter.celsius);
 	const dispatch = useDispatch();
 
-	const clearCacheHandler = () => {
-		// ❗❗❗XXX❗❗❗
-	};
-
 	return (
 		<>
-			<h1>Posts</h1>
-			<button onClick={clearCacheHandler}>I clear cache. Mu-ha-ha 👺</button>
-			{data?.map((el) => (
-				<div key={el.id} style={{ margin: "15px" }}>
-					title - <b>{el.title}</b>
-				</div>
-			))}
-		</>
-	);
-};
-
-export const App = () => {
-	return (
-		<>
-			<header style={{ display: "flex", alignItems: "center", gap: "10px", border: "1px solid" }}>
-				<ul>
-					Menu:
-					<li>
-						<NavLink to={"films"}>Films</NavLink>
-					</li>
-					<li>
-						<NavLink to={"products"}>Products</NavLink>
-					</li>
-					<li>
-						<NavLink to={"posts"}>Posts</NavLink>
-					</li>
-				</ul>
-			</header>
-
-			<Routes>
-				<Route path={"/"} element={<h1>Home page</h1>} />
-				<Route path={"/films"} element={<Films />} />
-				<Route path={"/products"} element={<Products />} />
-				<Route path={"/posts"} element={<Posts />} />
-			</Routes>
+			<button onClick={() => dispatch(increase())}>Add Oxygen</button>
+			<div>Oxygen: {oxygen}%</div>
+			<hr />
+			<div>Temperature: {temperature}°C</div>
 		</>
 	);
 };
 
 // store.ts
-const store = configureStore({
-	reducer: { [api.reducerPath]: api.reducer },
-	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
+export const store = configureStore({
+	reducer: {
+		oxygenCounter: oxygenSlice.reducer,
+		temperatureCounter: temperatureSlice.reducer,
+	},
 });
 
+export type RootState = ReturnType<typeof store.getState>;
+
+// main.ts
 createRoot(document.getElementById("root")!).render(
-	<BrowserRouter>
-		<Provider store={store}>
-			<App />
-		</Provider>
-	</BrowserRouter>,
+	<Provider store={store}>
+		<App />
+	</Provider>,
 );
 
 // 📜 Описание:
-// Перейди на страницу фильмов и убедись, что фильмы подгрузились
-// Перейди на страницу продуктов и убедись, что продукты подгрузились
-// Перейди на страницу постов и убедись, что посты подгрузились
-// Открой redux devtools и убедись, что фильмы, продукты и посты сохранились в кеше
+// У вас есть два счетчика: для уровня кислорода (%) и температуры (°C).
+// При нажатии на кнопку Add Oxygen увеличивается уровень кислорода.
 
 // 🪛 Задача:
-// На странице постов есть кнопка `I clear cache. Mu-ha-ha 👺`. При нажатии на эту кнопку
-// необходимо зачистить кеш фильмов и продуктов
-// Что нужно написать вместо `// ❗❗❗XXX❗❗❗`, чтобы реализовать данную задачу
+// Реализуйте следующую задачу:
+// При нажатии на кнопку Add Oxygen помимо увеличения уровня кислорода
+// реализуйте увеличении температуры на 2°C
+
+// В качестве ответа укажите добавленный вами код
+// ❗Операция должна быть реализована мутабельным образом
+// 💡Подсказка. Используйте extraReducers
